@@ -21,6 +21,7 @@ undirected graphs, and electrical circuits.
 * Create an integration with markdown converters, where the visualized
   models can be used in Latex environments and on static web pages.
 
+
 ## MIT License
 
 Copyright (c) 2020 David Broman
