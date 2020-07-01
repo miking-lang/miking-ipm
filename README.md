@@ -26,8 +26,18 @@ undirected graphs, and electrical circuits.
 Before you can start visualizing your models inside a web browser, you need to 
 install the following Node packages using NPM (Node Package Manager): http-server
 
-	npm install http-server
+	npm install -g browser-sync
 
+
+### Flow plan:
+
+1. The server listens to changes in the file called **miking-ipm/src/server/model.mc** and will call the parser that transforms the MCore project into an AST and generates a JSON. 
+
+2. The program that reads the JSON and visualizes the state machine is then invoked and that should update the **miking-ipm/src/visual/index.html** file. The browser automatically updates then.
+
+##### Following steps:
+
+Re-create this whole scenario in OCaml in order to decrease dependancies.
 
 ## MIT License
 

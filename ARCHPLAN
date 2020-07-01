@@ -1,5 +1,0 @@
-This is how I imagine the current architecture of the IPM:
-
-1) The AST is printed to a JSON file
-2) JS reads from that file and visualizes
-3) A server listens to changes on the JSON file and runs the JS if needed
