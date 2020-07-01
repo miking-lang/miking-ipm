@@ -21,6 +21,14 @@ undirected graphs, and electrical circuits.
 * Create an integration with markdown converters, where the visualized
   models can be used in Latex environments and on static web pages.
 
+### Getting Started
+
+Before you can start visualizing your models inside a web browser, you need to 
+install the following Node packages using NPM (Node Package Manager): http-server
+
+	npm install http-server
+
+
 ## MIT License
 
 Copyright (c) 2020 David Broman
