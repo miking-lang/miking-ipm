@@ -27,6 +27,14 @@ Before you can start visualizing your models inside a web browser, you need to
 install the following Node packages using NPM (Node Package Manager): http-server
 
 	npm install -g browser-sync
+	
+Write your **hello.mc** file and then run either of these commands for your OS:
+
+	build/boot-linux hello.mc
+	
+	build/boot-macos hello.mc
+	
+This will create a folder called **webpage** and a file inside it called **index.html**. Your **hello.mc** file is now watched for updates.
 
 
 ### Flow plan:
