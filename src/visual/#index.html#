@@ -1,0 +1,15 @@
+ <!DOCTYPE html>
+<html>
+  
+<body>
+
+<h1>Miking</h1>
+<p id="demo"></p>
+
+
+<script>
+document.getElementById("demo").innerHTML = "This is just the beginning";
+</script>
+
+</body>
+</html> 
