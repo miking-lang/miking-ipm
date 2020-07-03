@@ -1,17 +1,17 @@
-var fs = require('fs');
+let fs = require('fs');
 
 //Get the file that is being edited
-var myArgs = process.argv.slice(2);
+let myArgs = process.argv.slice(2);
 console.log('myArgs: ', myArgs);
 if(myArgs.length > 1 || myArgs.length == 0){
     throw Error ('One file needs to be specified');
 }
-var sourceFile = myArgs[0];
+let sourceFile = myArgs[0];
 
 
 //Create a folder in which the webpage is created and watched
 
-var dir = './webpage';
+let dir = './webpage';
 
 if (!fs.existsSync(dir)){
     fs.mkdirSync(dir);
@@ -31,7 +31,7 @@ fs.watchFile(sourceFile, { interval: 1000 }, (curr, prev) => {
 
 
 //This is being displayed on the browser: use index.html for the moment
-var bs = require('browser-sync').create();
+let bs = require('browser-sync').create();
 
 bs.init({
     open: false,
