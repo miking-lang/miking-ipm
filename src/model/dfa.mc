@@ -1,4 +1,4 @@
-include "../miking/stdlib/digraph.mc"
+include "../../stdlib/digraph.mc"
 
 type DFA = { 
              states : [a],
