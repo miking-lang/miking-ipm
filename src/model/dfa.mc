@@ -1,4 +1,4 @@
-include "../../miking/stdlib/digraph.mc"
+include "../../stdlib/digraph.mc"
 
 -- according to the defenition of a DFA
 type DFA = { 
@@ -9,7 +9,7 @@ type DFA = {
              acceptStates: [a]
             }
 
--- check that all labels for transitions are in the alfabeth
+-- check that all labels for transitions are in the alfabet<h
 let dfaCheckLabels = lam trans. lam alf. lam eq.
     all (lam x. (any (lam y. eq x.2 y) alf)) trans
 
