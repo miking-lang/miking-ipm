@@ -80,3 +80,17 @@ utest dfaCheckLabels transitions alfabeth eqs with true in
 utest dfaCheckLabels [(1,2,l1),(1,2,l2)] alfabeth eqs with false in
 ()
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+

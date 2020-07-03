@@ -27,6 +27,12 @@ Before you can start visualizing your models inside a web browser, you need to
 install the following Node packages using NPM (Node Package Manager): http-server
 
 	npm install -g browser-sync
+	
+Write your **hello.mc** file and then run this command from inside the main project folder:
+
+	node src/visual/boot.js hello.mc
+	
+This will create a folder called **webpage** and a file inside it called **index.html**. Your **hello.mc** file is now watched for updates.
 
 **!!! There is one important thing to keep in mind: this project folder should be in the same folder as the __miking__ folder** in order to atuomatically run the **mi** command (run). That is, if you do **ls** you should see both folder
 
@@ -56,7 +62,7 @@ Accepted States:
 
 	let acceptStates = [X_i,X_j,...]
 	
-De
+
 ### Example
 
 There is a **test.mc** in the root folder of the project which already contains a DFA as a starting point. If you want to write your own, make sure to source the **gen.mc** properly:
