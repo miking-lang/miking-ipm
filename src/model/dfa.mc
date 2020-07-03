@@ -57,6 +57,8 @@ let dfaConstr = lam s. lam trans. lam eqv. lam eql. lam alf. lam startS. lam acc
         }
     else {}
 
+
+
 mexpr
 let l1 = gensym() in
 let l2 = gensym() in
@@ -76,3 +78,4 @@ utest (digraphHasEdges transitions newDfa.transitions) with true in
 utest dfaCheckLabels transitions alfabeth eqs with true in
 utest dfaCheckLabels [(1,2,l1),(1,2,l2)] alfabeth eqs with false in
 ()
+
