@@ -56,7 +56,7 @@ Accepted States:
 
 	let acceptStates = [X_i,X_j,...]
 	
-De
+
 ### Example
 
 There is a **test.mc** in the root folder of the project which already contains a DFA as a starting point. If you want to write your own, make sure to source the **gen.mc** properly:
