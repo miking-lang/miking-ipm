@@ -1,4 +1,4 @@
-include "../../stdlib/digraph.mc"
+include "../../../miking/stdlib/digraph.mc"
 
 -- according to the defenition of a DFA
 type DFA = { 
