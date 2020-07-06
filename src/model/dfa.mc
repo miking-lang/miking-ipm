@@ -1,8 +1,5 @@
-<<<<<<< HEAD
 include "../../../miking/stdlib/digraph.mc"
-=======
-include "../../stdlib/digraph.mc"
-include "../../stdlib/char.mc"
+include "../../../miking/stdlib/char.mc"
 
 -- Represents a deterministic finite automaton.
 
@@ -11,7 +8,6 @@ include "../../stdlib/char.mc"
 
 -- transitions are represented as edges in a directed graph (digraph), where the vertices are states
 -- All labels for the transitions are chars. All labels between two states also has to be unique. 
->>>>>>> 973d7e97a6aa4d17749e9b5b3da80434637a30ec
 
 type DFA = { 
             -- TODO remove state list, they are in the transition graph
@@ -85,8 +81,6 @@ let dfaConstr = lam s. lam trans. lam alf. lam startS. lam accS.
         dfaAddAllTransitions trans (dfaAddAllStates s initDfa)
     else {}
 
-<<<<<<< HEAD
-=======
 -- returns true if state s is a accapted state in the dfa
 let isAcceptedState = lam s. lam dfa. 
     setMem dfa.graph.eqv s dfa.acceptStates
@@ -119,7 +113,6 @@ let checkAcceptedInput = lam inpt. lam dfa. lam currentState.
         checkAcceptedInput rest dfa (nextState currentState graph first)
     else false
 end
->>>>>>> 973d7e97a6aa4d17749e9b5b3da80434637a30ec
 
 
 mexpr
@@ -132,14 +125,6 @@ let newDfa = dfaConstr states transitions alfabeth startState acceptStates in
 utest setEqual eqchar alfabeth newDfa.alfabeth with true in
 utest eqi startState newDfa.startState with true in
 utest setEqual eqi acceptStates newDfa.acceptStates with true in
-<<<<<<< HEAD
-utest (digraphHasVertices states newDfa.transitions) with true in
-utest (digraphHasEdges transitions newDfa.transitions) with true in
-utest dfaCheckLabels transitions alfabeth eqs with true in
-utest dfaCheckLabels [(1,2,l1),(1,2,l2)] alfabeth eqs with false in
-()
-
-=======
 utest (digraphHasVertices states newDfa.graph) with true in
 utest (digraphHasEdges transitions newDfa.graph) with true in
 utest dfaCheckLabels transitions alfabeth with true in
@@ -155,4 +140,3 @@ utest checkAcceptedInput "010" newDfa newDfa.startState with false in
 utest checkAcceptedInput "10" newDfa newDfa.startState with true in
 utest checkAcceptedInput "00000000111111110000" newDfa newDfa.startState with false in
 ()
->>>>>>> 973d7e97a6aa4d17749e9b5b3da80434637a30ec
