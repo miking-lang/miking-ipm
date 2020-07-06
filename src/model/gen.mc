@@ -21,7 +21,7 @@ let parseAllEndStates = lam states. lam trans. lam output.
     let first = head states in
     let rest = tail states in
     if (checkEndNode trans first) then
-    let output = strJoin "" [output, "'", (int2string (length states)), "'"] in
+    let output = strJoin "" [output, "'", (int2string (length states)), "',"] in
     parseAllEndStates rest trans output
     else parseAllEndStates rest trans output
 end
@@ -62,22 +62,35 @@ let parseTransitions = lam trans. lam output.
     let parsedFirst = strJoin "" parsedFirst in
     parseTransitions rest (concat output parsedFirst)
 end
-    
+
+-- Parse input-line
+recursive
+let parseInput = lam input. lam output. lam index.
+    if(eqi (length input) index) then output
+    else
+    let char = get input index in
+    let output = strJoin "" [output,"'" , [char] , "',"] in
+    parseInput input output (addi index 1)
+end
 
 
 -- Parse a DFA to JS code and visualize
-let dfaVisual = lam states. lam trans. lam startState.
-    let js_code = strJoin "" ["let dfa = new DFA(
+let dfaVisual = lam states. lam trans. lam startState. lam input.
+    let js_code = strJoin "" [
+    "let input = [",
+    (parseInput input "" 0),
+    "];\n",
+    "let inputModel = new DFA(
     rankDirection = 'LR', \n nodeSettings = {style: 'filled', fillcolor: 'white', shape: 'circle'}, \n nodes = [\n",
     (parseStates states "" startState trans),
     "], \n ",
     (startID states startState),
-    "endIDS = [",
+    "endIDs = [",
     (parseAllEndStates states trans ""),
     "],\n",
     "transistions = [\n",
     (parseTransitions trans ""),
-    "] \n )\n"] in
+    "] \n );\n"] in
     js_code
 
 
@@ -89,8 +102,9 @@ let alfabeth = [l1] in
 let states = [1,2,3] in
 let transitions = [(1,2,l1),(2,3,l1)] in
 let startState = 1 in
-let acceptStates = [2,3] in 
-let newDigraph = dfaAddAllStates states (digraphEmpty eqi eqs) in
-let newDfa = dfaConstr states transitions eqi eqs alfabeth startState acceptStates in
-let output = dfaVisual states transitions startState in
+let acceptStates = [2,3] in
+let input = "01001" in
+let newDfa = dfaConstr states transitions alfabeth startState acceptStates in
+let output = dfaVisual states transitions startState input in
 print output
+

@@ -21,6 +21,7 @@ undirected graphs, and electrical circuits.
 * Create an integration with markdown converters, where the visualized
   models can be used in Latex environments and on static web pages.
 
+
 ### Getting Started
 
 Before you can start visualizing your models inside a web browser, you need to 
@@ -28,11 +29,6 @@ install the following Node packages using NPM (Node Package Manager): http-serve
 
 	npm install -g browser-sync
 
-**!!! There is one important thing to keep in mind: this project folder should be in the same folder as the __miking__ folder** in order to atuomatically run the **mi** command (run). That is, if you do **ls** you should see both folder
-
-	ls -la
-	> miking
-	> miking-ipm
 
 This is how you would write your DFA:
 

@@ -35,14 +35,6 @@ exec(pathToMiking + " " + sourceFile + ' > ' + __dirname +'/webpage/js/data-sour
     }
 });
 
-//Create a folder in which the webpage is created and watched
-
-var dir = './webpage';
-
-if (!fs.existsSync(dir)){
-    fs.mkdirSync(dir);
-}
-
 /** ::::TEMPORARY CHANGE MADE HERE:::: */
 //Temporary: Create a JS source file displaying the JS object
 const updateJS = graph =>

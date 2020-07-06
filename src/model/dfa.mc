@@ -141,3 +141,5 @@ utest checkAcceptedInput "010" newDfa newDfa.startState with false in
 utest checkAcceptedInput "10" newDfa newDfa.startState with true in
 utest checkAcceptedInput "00000000111111110000" newDfa newDfa.startState with false in
 ()
+
+

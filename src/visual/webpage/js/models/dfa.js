@@ -7,18 +7,18 @@ class DFA {
      * @param {string} rankDirection Sets the render direction. Allowed values: TB, BT, RL, LR.
      * @param {object} nodeSettings Used for general node settings. See:
      *                              https://graphviz.org/documentation/ for allowed values.
-     * @param {string} startID The ID of the node from where to start the simulation.
-     * @param {string} endIDs  The accepting nodes.
      * @param {[object]} nodes Each node instance requires a name (string), id (string) and a 
      *                         settings (object) property. Node specific attributes are listed 
      *                         as properties of the settings object attribute. 
                                Note: If no extra settings are wanted, pass an empty object for 
                                the settings attribute: "settings: {}".
+     * @param {string} startID The ID of the node from where to start the simulation.
+     * @param {string} endIDs  The accepting nodes.
      * @param {[object]} transitions Transistions between nodes. Each transition requires the 
      *                               following attributes: from (string), to (string) and 
      *                               label (string).
      */
-    constructor(rankDirection = "TB", nodeSettings = {}, startID, endIDs = [], nodes = [], transitions = []) {
+    constructor(rankDirection = "TB", nodeSettings = {}, nodes = [], startID, endIDs = [], transitions = []) {
         this.rankDirection = rankDirection,
         this.nodeSettings = nodeSettings
         this.startNode = nodes.find(node => node.id === startID)
@@ -52,7 +52,7 @@ class DFA {
             node [${this.objectToString(this.nodeSettings)}]
             s [fontcolor = white color = white]
             ${this.nodes.map(node =>
-                `${node.name} [id=${node.id} class="dfaNode" ${node.settings ? this.objectToString(node.settings):""}]`
+                `${node.name} [id=${node.id} class="dfa-node" ${node.settings ? this.objectToString(node.settings):""}]`
             ).join("\n")}
             s -> ${this.startNode.name} [label=start]
             ${this.transitions.map(transition =>
