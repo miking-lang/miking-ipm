@@ -1,5 +1,5 @@
 /*          CONTROL PANDEL          */
-#controlPanelContainer {
+#control-panel-container {
     padding: 50px;
 }
 
@@ -25,6 +25,6 @@
 }
 
 /*              GRAPH               */
-.dfaNode {
+.dfa-node {
     cursor: pointer;
 }

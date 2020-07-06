@@ -6,8 +6,6 @@ let input = ["0", "0", "1", "0", "1", "1", "1", "0"]
 let inputModel = new DFA(
     rankDirection = "LR",
     nodeSettings = {style: "filled", fillcolor: "white", shape: "circle"},
-    startID = "n1",
-    endIDs = ["n6"],
     nodes = [
         {name: "A", id:"n1"},
         {name: "B", id:"n2"},
@@ -16,6 +14,8 @@ let inputModel = new DFA(
         {name: "E", id:"n5"},
         {name: "F", id:"n6"}
     ], 
+    startID = "n1",
+    endIDs = ["n6"],
     transistions = [
         {from: "A", to: "B", label: "0"},
         {from: "A", to: "C", label: "1"},
