@@ -27,4 +27,3 @@ let inputModel = new DFA(
         {from: "E", to: "F", label: "0"}
     ]
 )
-

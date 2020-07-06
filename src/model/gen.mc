@@ -1,5 +1,5 @@
 include "dfa.mc"
-include "../../../miking/stdlib/string.mc"
+include "string.mc"
 
 
 -- Parse states
@@ -36,7 +36,7 @@ let parseTransitions = lam trans. lam output.
     else
     let first = head trans in
     let rest = tail trans in
-    let parsedFirst = [" {from: '", (int2string first.0), "', to: '" ,(int2string first.1) , "', label: '" , "hardcodedatm" , "'},\n"] in
+    let parsedFirst = [" {from: '", (int2string first.0), "', to: '" ,(int2string first.1) , "', label: '" , [first.2] , "'},\n"] in
     let parsedFirst = strJoin "" parsedFirst in
     parseTransitions rest (concat output parsedFirst)
 end
