@@ -1,66 +1,55 @@
 include "dfa.mc"
 include "string.mc"
+include "map.mc"
 
 
--- Figuring out if a state is end or not
+
+-- Parsing all the accepted states
 recursive
-let checkEndNode = lam trans. lam state.
-    if(eqi (length trans) 0) then true
+let parseAcceptedStates = lam aStates. lam output. lam map.
+    if(eqi (length aStates) 0) then output
     else
-    let first = head trans in
-    let rest = tail trans in
-    if (eqi first.0 state) then false
-    else checkEndNode rest state
-end
-
--- Parsing all the end states
-recursive
-let parseAllEndStates = lam states. lam trans. lam output.
-    if(eqi (length states) 0) then output
-    else
-    let first = head states in
-    let rest = tail states in
-    if (checkEndNode trans first) then
-    let output = strJoin "" [output, "'", (int2string (length states)), "',"] in
-    parseAllEndStates rest trans output
-    else parseAllEndStates rest trans output
+    let first = head aStates in
+    let rest = tail aStates in
+    let output = strJoin "" [output, "'", (int2string (mapLookup eqi first map)) , "',"] in
+    parseAcceptedStates rest output map
 end
 
 -- Formatting the states
 recursive
-let parseStates = lam states. lam output. lam startState. lam trans.
+let parseStates = lam states. lam startState. lam trans. lam map. lam output.
     if (eqi (length states) 0) then output
     else
     let first = head states in
     let rest = tail states in
-    let parsedFirst = strJoin "" [ "{name: '",
+    let parsedFirst = strJoin "" [ "{id: '",
+    (int2string (mapLookup eqi first map)),
+    "', label:'",
     (int2string first),
-    "', id:'",
-    (int2string (length states)),
     "'},\n"] in
-    parseStates rest (concat output parsedFirst) startState trans
+    parseStates rest startState trans map (concat output parsedFirst)
 end
 
 -- Find the Starting State ID
 recursive
-let startID = lam states. lam startState.
+let startID = lam states. lam startState. lam map.
     let first = head states in
     let rest = tail states in
-    if (eqi startState first) then (strJoin "" ["startID = '", (int2string (length states)), "',\n"])
+    if (eqi startState first) then (strJoin "" ["startID = '", (int2string (mapLookup eqi first map)), "',\n"])
     else
-    startID rest startState
+    startID rest startState map
 end
 
 -- Formatting transitions
 recursive
-let parseTransitions = lam trans. lam output.
+let parseTransitions = lam trans. lam output. lam map.
     if(eqi (length trans) 0) then output
     else
     let first = head trans in
     let rest = tail trans in
-    let parsedFirst = [" {from: '", (int2string first.0), "', to: '" ,(int2string first.1) , "', label: '" , [first.2] , "'},\n"] in
+    let parsedFirst = [" {from: '", (int2string (mapLookup eqi first.0 map)), "', to: '" ,(int2string (mapLookup eqi first.1 map)) , "', label: '" , [first.2] , "'},\n"] in
     let parsedFirst = strJoin "" parsedFirst in
-    parseTransitions rest (concat output parsedFirst)
+    parseTransitions rest (concat output parsedFirst) map
 end
 
 -- Parse input-line
@@ -70,41 +59,44 @@ let parseInput = lam input. lam output. lam index.
     else
     let char = get input index in
     let output = strJoin "" [output,"'" , [char] , "',"] in
-    parseInput input output (addi index 1)
+
+parseInput input output (addi index 1)
 end
 
-
 -- Parse a DFA to JS code and visualize
-let dfaVisual = lam states. lam trans. lam startState. lam input.
+let dfaVisual = lam dfa. lam input.
+    let mapId = statesGenId (getStates dfa) 0 [] in
     let js_code = strJoin "" [
     "let input = [",
     (parseInput input "" 0),
     "];\n",
     "let inputModel = new DFA(
     rankDirection = 'LR', \n nodeSettings = {style: 'filled', fillcolor: 'white', shape: 'circle'}, \n nodes = [\n",
-    (parseStates states "" startState trans),
+    (parseStates (getStates dfa) dfa.startState (getTransitions dfa) mapId ""),
     "], \n ",
-    (startID states startState),
+    (startID (getStates dfa) dfa.startState mapId),
     "endIDs = [",
-    (parseAllEndStates states trans ""),
+    (parseAcceptedStates dfa.acceptStates "" mapId),
     "],\n",
     "transistions = [\n",
-    (parseTransitions trans ""),
+    (parseTransitions (getTransitions dfa) "" mapId),
     "] \n );\n"] in
     js_code
 
 
+--Didn't figure out function overloading
+--If there is no input
+let dfaVisualNoInput = lam dfa.
+    dfaVisual dfa ""
 
 mexpr
-let l1 = gensym() in
-let l2 = gensym() in
-let alfabeth = [l1] in
+let alfabeth = ['1','2'] in
 let states = [1,2,3] in
-let transitions = [(1,2,l1),(2,3,l1)] in
+let transitions = [(1,2,'1'),(2,3,'2')] in
 let startState = 1 in
 let acceptStates = [2,3] in
 let input = "01001" in
 let newDfa = dfaConstr states transitions alfabeth startState acceptStates in
-let output = dfaVisual states transitions startState input in
+let output = dfaVisual newDfa input in
 print output
 

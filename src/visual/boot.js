@@ -19,12 +19,12 @@ var sourceFile = myArgs[0];
 
 //Specify the path to the miking executable in this variable:
 
-let pathToMiking = "/home/calin/KTH/Miking/miking/build/boot";
-
+//let pathToMiking = "/home/calin/KTH/Miking/miking/build/boot";
 
 //Compile the code first time
 
-exec(pathToMiking + " " + sourceFile + ' > ' + __dirname +'/webpage/js/data-source.js', (error, stdout, stderr) => {
+// mi or miking don't currently work on my machine so I'm using this path that should work on any machine I guess
+exec("~/.local/bin/miking " + sourceFile + ' > ' + __dirname +'/webpage/js/data-source.js', (error, stdout, stderr) => {
     if (error) {
         console.log(`error: ${error.message}`);
         return;
@@ -49,7 +49,7 @@ fs.watchFile(sourceFile, { interval: 1000 }, (curr, prev) => {
     console.log(`${sourceFile} file Changed`);
     //Re-extract the AST -> JSON from the MCore model to a JSON file and recompile the JS
 
-    exec(pathToMiking + " " + sourceFile + ' > ' + __dirname +'/webpage/js/data-source.js', (error, stdout, stderr) => {
+    exec(pathToMiking + "~/.local/bin/miking " + sourceFile + ' > ' + __dirname +'/webpage/js/data-source.js', (error, stdout, stderr) => {
     if (error) {
         console.log(`error: ${error.message}`);
         return;

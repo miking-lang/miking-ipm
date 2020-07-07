@@ -3,16 +3,15 @@ let inputModel = new DFA(
     rankDirection = 'LR', 
  nodeSettings = {style: 'filled', fillcolor: 'white', shape: 'circle'}, 
  nodes = [
-{name: '1', id:'6'},
-{name: '2', id:'5'},
-{name: '3', id:'4'},
-{name: '4', id:'3'},
-{name: '5', id:'2'},
-{name: '6', id:'1'},
+{name: '1', id:'1'},
+{name: '2', id:'2'},
+{name: '3', id:'3'},
 ], 
- startID = '6',
-endIDs = ['5','4','3','2','1',],
+ startID = '1',
+endIDs = ['2','3',],
 transistions = [
  {from: '1', to: '2', label: '1'},
+ {from: '2', to: '3', label: '0'},
 ] 
  );
+

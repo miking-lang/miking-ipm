@@ -1,4 +1,30 @@
-#graph {
-    text-align: center;
+/*          CONTROL PANDEL          */
+#control-panel-container {
+    padding: 50px;
 }
-
+​
+.std-option-title {
+    font-size: 20px;
+    font-weight: bold;
+    font-family: Arial, Helvetica, sans-serif;
+}
+​
+.std-btn {
+    background-color: white;
+    border-radius: 8px;
+    color: black;
+    border: 2px solid #272727;
+    padding: 10px;
+    font-size: 18px;
+    outline:0;
+    cursor: pointer;
+    margin: 5px;
+}
+.std-btn:hover {
+    border-color: #9b9b9b;
+}
+​
+/*              GRAPH               */
+.dfa-node {
+    cursor: pointer;
+}

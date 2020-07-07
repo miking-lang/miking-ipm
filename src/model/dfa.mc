@@ -1,6 +1,6 @@
 include "digraph.mc"
 include "char.mc"
-
+include "map.mc"
 -- Represents a deterministic finite automaton.
 
 -- States are represented by a vertex in a directed graph. They are unique integers, there cannot be two states whose value of the
@@ -65,6 +65,26 @@ let dfaAddAllTransitions = lam v. lam dfa.
     let rest = tail v in
     dfaAddAllTransitions rest (dfaAddTransition first dfa)
 end
+
+let getStates = lam dfa.
+    digraphVertices dfa.graph
+
+let getTransitions = lam dfa.
+    digraphEdges dfa.graph
+
+
+
+recursive
+let statesGenId = lam states. lam index. lam map.
+    if(eqi (length states) 0) then map
+    else
+    let first = head states in
+    let rest = tail states in 
+    let map = mapInsert eqi first index map in
+    statesGenId rest (addi index 1) map
+end
+
+
 
 -- constructor for DFA
 let dfaConstr = lam s. lam trans. lam alf. lam startS. lam accS. 
