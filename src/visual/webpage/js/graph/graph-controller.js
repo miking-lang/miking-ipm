@@ -6,7 +6,7 @@ class GraphController {
      * @param {<div>} root 
      */
     constructor(model, root){
-        this.graphView = new GraphView(model, root);
+        this.graphView = new GraphView(model, root)
 
         // Defining the callback function, which is called when the graph is rendered.
         const interactive = () =>

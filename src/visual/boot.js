@@ -24,7 +24,7 @@ var sourceFile = myArgs[0];
 //Compile the code first time
 
 // mi or miking don't currently work on my machine so I'm using this path that should work on any machine I guess
-exec("~/.local/bin/miking " + sourceFile + ' > ' + __dirname +'/webpage/js/data-source.js', (error, stdout, stderr) => {
+exec("mi " + sourceFile + ' > ' + __dirname +'/webpage/js/data-source.js', (error, stdout, stderr) => {
     if (error) {
         console.log(`error: ${error.message}`);
         return;
@@ -49,7 +49,7 @@ fs.watchFile(sourceFile, { interval: 1000 }, (curr, prev) => {
     console.log(`${sourceFile} file Changed`);
     //Re-extract the AST -> JSON from the MCore model to a JSON file and recompile the JS
 
-    exec(pathToMiking + "~/.local/bin/miking " + sourceFile + ' > ' + __dirname +'/webpage/js/data-source.js', (error, stdout, stderr) => {
+    exec("mi " + sourceFile + ' > ' + __dirname +'/webpage/js/data-source.js', (error, stdout, stderr) => {
     if (error) {
         console.log(`error: ${error.message}`);
         return;
@@ -70,7 +70,7 @@ var bs = require('browser-sync').create();
 
 bs.init({
     watch: true,
-    port: 8080,
+    port: 3000,
     notify: false,
     server: __dirname + '/webpage'
 });

@@ -75,7 +75,7 @@ let dfaVisual = lam dfa. lam input.
     (parseStates (getStates dfa) dfa.startState (getTransitions dfa) mapId ""),
     "], \n ",
     (startID (getStates dfa) dfa.startState mapId),
-    "endIDs = [",
+    "acceptedIDs = [",
     (parseAcceptedStates dfa.acceptStates "" mapId),
     "],\n",
     "transistions = [\n",

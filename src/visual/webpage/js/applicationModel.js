@@ -15,6 +15,7 @@ class ApplicationModel {
             {label: "Blue",  value: "blue"},
             {label: "Red",   value: "red"}
         ]
+        this.setActiveNodeColor(this.colors[0].value)
     }
 
     /**
@@ -43,33 +44,39 @@ class ApplicationModel {
     }
 
     /**
+     * Checks whether if a given transition index is equal to the current transition.
+     * @param {int} index The index of the transition to compare.
+     */
+    isCurrentTranistionIndex = index => 
+        index === this.currentTransition
+
+    /**
      * Returns the status of whether the simulation has finished or not.
      * True if the simulations is at the last state, false otherwise.
      */
-    simulationIsFinished = () => {
-        return this.currentTransition >= input.length-1
-    }
+    simulationIsFinished = () =>
+        this.currentTransition >= input.length-1
 
+    /*              GETTERS               */
+    /**
+     * Gets the available node colors.
+     */
+    getAvailableColors = () =>
+        this.colors
+        
     /**
      * Updates the visualizationModel to the next state and notifies the observers of the model.
      */
     getNextState = () => {
+        // TEMPORARY CODE
         if (this.simulationIsFinished()) {
             this.currentTransition=-1
-            this.visualizationModel.initState()
+            this.visualizationModel.makeTransition(this.visualizationModel.startNodeID)
         } else {
             this.currentTransition++
             this.visualizationModel.updateState(this.input[this.currentTransition])
         }
         this.notifyObservers()
-    }
-
-    /*              GETTERS               */
-
-    /**
-     * Gets the current active node.
-     */
-    getAvailableColors = () => {
-        return this.colors
+        //
     }
 }

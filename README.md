@@ -24,7 +24,11 @@ undirected graphs, and electrical circuits.
 
 ### Getting Started
 
-Before you can start visualizing your models inside a web browser, you need to 
+###### **MENTION!** 
+This does not work with Safari as a browser, please test it with a different browser for the moment (Chrome and Firefox work)
+
+
+Before you can start visualizing your models inside a web browser, you need to
 install the following Node packages using NPM (Node Package Manager): http-server
 
 	npm install -g browser-sync
@@ -35,42 +39,42 @@ This is how you would write your DFA:
 Starting State:
 
 	let startState = X_i
-	
+
 States (integers):
 
 	let states = [X_1,X_2,X_3,...]
-	
+
 Labels (characters at the moment):
 
 	let alfabeth = [Symbol_1, Symbol_2,..]
-	
+
 Transitions:
 
 	let transitions = [(X_i,X_j,Symbol_h),...]
-	
+
 Accepted States:
 
 	let acceptStates = [X_i,X_j,...]
-	
+
 To construct a DFA use this function:
 
 	let your_dfa = dfaConstr states transitions alfabeth startState acceptStates
-	
+
 To create the visualizer, make sure to use either of this two:
 
 	let visual = dfaVisualNoInput your_dfa in
 	print visual
-	
+
 or if you want to see the input:
 
 	let visual = dfaVisual your_dfa input in
 	print visual
-	
+
 You can start the server for watching your file using this command and sourcing your **.mc** file (this would be if your file is in the root directory of the project):
 
 	node src/visual/boot.js your_file.mc
 
-This will prompt you to the port on your localhost on which the server is started, now if you modify and save the dfa, it should update immediately.
+This will prompt you to the port on your localhost on which the server is started, now if you modify and save the dfa, it should generate a file called **data-source.js** and reflect the update in the browser immediately. The generated file will appear in the src/visual/webpage directory.
 
 ### Example
 
