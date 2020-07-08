@@ -29,9 +29,9 @@ This does not work with Safari as a browser, please test it with a different bro
 
 
 Before you can start visualizing your models inside a web browser, you need to
-install the following Node packages using NPM (Node Package Manager): http-server
+install the following Node packages using NPM (Node Package Manager): browser-sync.
 
-	npm install -g browser-sync
+	npm install  browser-sync
 
 
 This is how you would write your DFA:

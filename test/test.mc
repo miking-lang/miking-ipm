@@ -1,4 +1,4 @@
-include "src/model/gen.mc"
+include "../src/model/gen.mc"
 
 mexpr
 let alfabeth = ['1', '0'] in

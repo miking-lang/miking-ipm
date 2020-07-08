@@ -19,11 +19,8 @@ var sourceFile = myArgs[0];
 
 //Specify the path to the miking executable in this variable:
 
-//let pathToMiking = "/home/calin/KTH/Miking/miking/build/boot";
 
 //Compile the code first time
-
-// mi or miking don't currently work on my machine so I'm using this path that should work on any machine I guess
 exec("mi " + sourceFile + ' > ' + __dirname +'/webpage/js/data-source.js', (error, stdout, stderr) => {
     if (error) {
         console.log(`error: ${error.message}`);

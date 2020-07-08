@@ -3,3 +3,8 @@
 *~
 src/ocaml-server/*
 .DS_Store
+src/visual/webpage/js/data-source.js
+.DS_Store
+node_modules/*
+src/model/dfaModel.mc
+package-lock.json
