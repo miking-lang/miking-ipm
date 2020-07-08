@@ -1,10 +1,21 @@
-// Checks for an existing DFA and input object in the generated source file.
-if (inputModel instanceof DFA && input) {
-    const model = new ApplicationModel(inputModel, input)
-    new ControlPanelController(model, document.body.querySelector("#control-panel-container"))
-    new GraphController(model, document.body.querySelector("#graph-container"))
+// Checks for existing models object in the generated source file.
+if (data && data.models) {
+    const root = document.body.querySelector("#app")
+    // Maps over all models in the generated output.
+    data.models.map(model => {
+        // Creates a root element for the model and add it to the root of the application.
+        let modelRoot = document.createElement(`div`)
+        modelRoot.className = "container"
+        root.appendChild(modelRoot)
+        // Creates the controller for the specified model if the type is supported.
+        if (model.type === "dfa") {
+            new DFAController(model, modelRoot)
+        } else {
+            modelRoot.innerHTML = `<div class="warning">Unsopported model type</div>`
+        }
+    })
 } else {
-    /*      TEMPORARY -->   */
-    console.error("Error: Something is missing in the source file! See README.md for how use this package.")
-    /* < -- TEMPORARY       */
+    document.getElementById("error-container").textContent += data;
 }
+
+

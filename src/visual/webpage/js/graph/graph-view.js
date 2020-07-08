@@ -17,23 +17,26 @@ class GraphView {
     /**
      * Renders the DOM tree of the graph view including 
      */
-    initView = () =>
-        this.root.innerHTML=`<div id="graph"></div>`;
+    initView() {
+        this.root.innerHTML=`<div id="graph"></div>`
+    }
 
     /**
      * Updates the graphView.
      * @param {function} graphCallback The callback function executed when the graphviz
      *                                 object has finished rendering.
      */
-    update = graphCallback =>
+    update(graphCallback) {
         // Renders the visualization object to the graphviz object.
         this.graph.renderDot(this.model.visualizationModel.toDot()).on("end", graphCallback)
+    }
 
     /*              GETTERS               */
 
     /**
      * Gets the nodes of the graph.
      */
-    getNodes = () =>
-        d3.selectAll(".dfa-node")
+    getNodes() {
+        return d3.selectAll(".dfa-node")
+    }
 }
