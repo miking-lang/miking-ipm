@@ -14,8 +14,8 @@ class GraphController {
             // Adds on click event listeners to each of the nodes.
             this.graphView.getNodes().on("click", function () {
                 let id = d3.select(this).attr("id")
-                console.log(id)
-            });
+                console.log(model.visualizationModel.getNodeByID(id))
+            })
             /* < -- TEMPORARY       */
         
         // Render the graph view and add a model observer.

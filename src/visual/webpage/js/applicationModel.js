@@ -5,78 +5,119 @@ class ApplicationModel {
      * @param {object} visualizationModel Valid types: DFA
      * @param {[string]} input An array of strings, each representing a transition.
      */
-    constructor(visualizationModel, input){
+    constructor(visualizationModel, input, activeStates){
         this.visualizationModel = visualizationModel
         this.input = input
-        this.currentTransition = -1
+        this.activeStates = activeStates
+        this.currentStateIndex = 0
         this.callbacks = []
-        this.colors = [
-            {label: "Green", value: "green"},
-            {label: "Blue",  value: "blue"},
-            {label: "Red",   value: "red"}
-        ]
-        this.setActiveNodeColor(this.colors[0].value)
     }
 
     /**
      * Adds a callback function, executed when the model is changed.
      * @param {function} callback The callback function to add.
      */
-    addObserver = callback => {
+    addObserver(callback) {
        this.callbacks.push(callback)
     }
 
     /**
      * Notifies the observers of the model.
      */
-    notifyObservers = () => {
+    notifyObservers() {
        this.callbacks.map(callback => callback())
     }
 
     /**
-     * Sets the active color of the visualization model to the given value. 
-     * @param {string} to The color to set. Possible values are defined in this.colors.
-     *                    This methods expects the "value" parameter.
+     * Updates the visualizationModel to the next state and notifies the observers of the model.
      */
-    setActiveNodeColor = to => {
-        this.visualizationModel.setActiveNodeColor(to)
+    nextState() {
+        this.currentStateIndex = this.simulationIsFinished() 
+                                    ? 0 
+                                    : this.currentStateIndex+=1
+        this.inputWasNotAccepted() || this.transitionWasDenied()
+            ? this.visualizationModel.setNodeColorToWarningByID(this.getPreviousNodeID())
+            : this.visualizationModel.makeTransition(this.getActiveNodeID(), this.getPreviousNodeID())
         this.notifyObservers()
     }
 
     /**
-     * Checks whether if a given transition index is equal to the current transition.
+     * Updates the visualizationModel to the previous state and notifies the observers of the model.
+     */
+    previousState() {
+        this.currentStateIndex = this.isAtStartState()
+                                    ? 0 
+                                    : this.currentStateIndex-=1
+        this.visualizationModel.makeTransition(this.getActiveNodeID(), this.getPreviousNodeID())
+        this.notifyObservers()
+    }
+
+
+    /*             STATE GETTERS            */
+    /**
+     * Checks whether a given transition index is equal to the current transition or not.
      * @param {int} index The index of the transition to compare.
      */
-    isCurrentTranistionIndex = index => 
-        index === this.currentTransition
+    isCurrentTranistionIndex(index) {
+        return index === this.currentStateIndex-1
+    }
+
+    /**
+     * Returs whether the current state is the start state of the execution or not.
+     */
+    isAtStartState() {
+        return this.currentStateIndex === 0
+    }
+
+    /**
+     * Returns whether the input is accepted or not.
+     */
+    isLastStateAndNotAccepted() {
+        return this.simulationIsFinished() && !this.visualizationModel.isAcceptedState(this.getActiveNodeID())
+    }
+
+    /**
+     * Returns whether the input was accepted by the DFA or not.
+     */
+    inputWasAccepted() {
+        return this.simulationIsFinished()
+    }
+
+    /**
+     * Returns whether the input was rejected by the DFA or not.
+     */
+    inputWasNotAccepted() {
+        return this.getActiveNodeID() === "not accepted"
+    }
 
     /**
      * Returns the status of whether the simulation has finished or not.
      * True if the simulations is at the last state, false otherwise.
      */
-    simulationIsFinished = () =>
-        this.currentTransition >= input.length-1
+    simulationIsFinished() {
+        return this.currentStateIndex >= this.activeStates.length-1
+    }
+
+    /**
+     * Returns whether the current transition was denied by the DFA or not.
+     */
+    transitionWasDenied() {
+        return this.getActiveNodeID() === "denied"
+    }
+
 
     /*              GETTERS               */
     /**
-     * Gets the available node colors.
+     * Gets the active state ID.
      */
-    getAvailableColors = () =>
-        this.colors
-        
+    getActiveNodeID() {
+        return this.activeStates[this.currentStateIndex]
+    }
+
     /**
-     * Updates the visualizationModel to the next state and notifies the observers of the model.
+     * Gets the previous state ID.
      */
-    getNextState = () => {
-        // TEMPORARY CODE
-        if (this.simulationIsFinished()) {
-            this.currentTransition=-1
-            this.visualizationModel.makeTransition(this.visualizationModel.startNodeID)
-        } else {
-            this.currentTransition++
-            this.visualizationModel.updateState(this.input[this.currentTransition])
-        }
-        this.notifyObservers()
-        //
+    getPreviousNodeID() {
+        return this.activeStates[this.currentStateIndex-1]
     }
 }

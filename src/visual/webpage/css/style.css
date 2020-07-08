@@ -6,10 +6,14 @@ body {
     padding: 50px;
 }
 
+.simulation-title {
+    font-size: 24px;
+    padding-right: 5px;
+}
+
 .std-option-title {
     font-size: 20px;
     font-weight: bold;
-    font-family: Arial, Helvetica, sans-serif;
 }
 
 .std-btn {
@@ -26,18 +30,33 @@ body {
 .std-btn:hover {
     border-color: #9b9b9b;
 }
+.std-btn:disabled {
+    border-color: #9b9b9b;
+    color: #9b9b9b;
+    cursor: not-allowed;
+}
 
 /*       TRANSITIONS CONTAINER      */
-#transitionsContainer {
+#transitions-container {
     padding-top: 20px;
 }
 .transition {
     font-size: 24px;
     padding: 10px 20px 10px 0px;
 }
-.activeTransition {
+.active-transition {
     color: #008001;
     font-weight: bold;
+}
+#status-container {
+    font-size: 18px;
+    font-weight: bold;
+}
+.warning {
+    color: #CD0100;
+}
+.accepted {
+    color: #008001;
 }
 
 /*              GRAPH               */
@@ -46,4 +65,11 @@ body {
 }
 .start-node {
     cursor: default;
+}
+
+#error-container{
+    font-size: 25px;
+    color: red;
+    font-weight: bold;
+    padding: 0 10px;
 }

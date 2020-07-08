@@ -13,9 +13,7 @@ class ControlPanelController {
         model.addObserver(()=>this.controlPanelView.update())
 
         // Add event listeners
-        this.controlPanelView.getNextButton().addEventListener("click", () => model.getNextState())
-        this.controlPanelView.getActiveColorSelection().addEventListener("change", e => 
-            model.setActiveNodeColor(e.target.value)
-        )
+        this.controlPanelView.getNextButton().addEventListener("click", () => model.nextState())
+        this.controlPanelView.getPreviousButton().addEventListener("click", () => model.previousState())
     }
 }

@@ -23,21 +23,14 @@ var sourceFile = myArgs[0];
 //Compile the code first time
 exec("mi " + sourceFile + ' > ' + __dirname +'/webpage/js/data-source.js', (error, stdout, stderr) => {
     if (error) {
-        console.log(`error: ${error.message}`);
-        return;
-    }
+		fs.readFile(__dirname +'/webpage/js/data-source.js', function(err, buf) {
+		    fs.writeFile(__dirname +'/webpage/js/data-source.js', "let inputModel = '" + buf.toString().replace(/(\r\n|\n|\r)/gm, "") + "';" , function (err) {if (err) return console.log(err);});});return;}
     if (stderr) {
         console.log(`stderr: ${stderr}`);
         return;
     }
 });
 
-/** ::::TEMPORARY CHANGE MADE HERE:::: */
-//Temporary: Create a JS source file displaying the JS object
-const updateJS = graph =>
-    fs.writeFile('webpage/js/data-source.js', topComment+graph, function (err) {
-        if (err) throw err;
-    });
 
 // Inital render of graph
 //updateJS(graph);
@@ -49,6 +42,12 @@ fs.watchFile(sourceFile, { interval: 1000 }, (curr, prev) => {
     exec("mi " + sourceFile + ' > ' + __dirname +'/webpage/js/data-source.js', (error, stdout, stderr) => {
     if (error) {
         console.log(`error: ${error.message}`);
+	fs.readFile(__dirname +'/webpage/js/data-source.js', function(err, buf) {
+	    fs.writeFile(__dirname +'/webpage/js/data-source.js', "let inputModel = '" + buf.toString().replace(/(\r\n|\n|\r)/gm, "") + "';" , function (err) {
+	    if (err) return console.log(err);
+	    });
+
+	});
         return;
     }
     if (stderr) {
@@ -58,7 +57,6 @@ fs.watchFile(sourceFile, { interval: 1000 }, (curr, prev) => {
 });
     
 });
-/** ::::TEMPORARY CHANGE MADE HERE:::: */
 
 
 //This is being displayed on the browser: use index.html for the moment

@@ -15,31 +15,45 @@ class ControlPanelView {
     /**
      * Renders the DOM tree of the control panel view.
      */
-    initView = () =>
+    initView() {
         this.root.innerHTML=`
             <div>
-                <span class="std-option-title">Active color:</span>
-                <select name="nodeColors" id="nodeColors" class="std-btn">
-                    ${this.model.getAvailableColors().map(color =>
-                        `<option value="${color.value}">${color.label}</option>`
-                    )}
-                </select>
+                <span class="simulation-title">Change state:</span>
+                <button id="previousButton" class="std-btn">Previous</button>
                 <button id="nextButton" class="std-btn"></button>
             </div>
-            <div id="transitionsContainer">
+            <div id="transitions-container">
+                <span></span>
+                <span id="status-container"></span>
             </div>`;
+    }
 
     /**
      * Updates the control panel view.
      * @param {function} graphCallback The callback function executed when the graphviz
      *                                 object has finished rendering.
      */
-    update = () => {
+    update() {
         this.getNextButton().textContent = this.model.simulationIsFinished()
-                                            ? "Restart simulation" 
-                                            : "Next"
+                                            ? `Restart simulation`
+                                            : `Next`
+        this.model.isAtStartState() 
+            ? this.getPreviousButton().disabled = true
+            : this.getPreviousButton().disabled = false
+        this.getInfoContainer().innerHTML = 
+            this.model.inputWasNotAccepted() ?
+                `<span class="warning">Not accepted: The given input string was not accepted by the DFA.</span>`
+            : this.model.transitionWasDenied() ?
+                `<span class="warning">Not accepted: This transition is not supported at this state!</span>`
+            : this.model.inputWasAccepted() ?
+                `<span class="accepted">The input was accepted by the DFA</span>`
+            : ``
         this.getTransitionsContainer().innerHTML = this.model.input.map((transition,idx) =>
-            `<span class="transition ${this.model.isCurrentTranistionIndex(idx)?"activeTransition":""}">
+            `<span class="transition ${this.model.isCurrentTranistionIndex(idx)
+                                        ? + this.model.transitionWasDenied()
+                                            ? "active-transition warning"
+                                            : "active-transition"
+                                        : ""}">
                 ${transition}
             </span>`
         ).join("")
@@ -47,21 +61,30 @@ class ControlPanelView {
 
     /*              GETTERS               */
     /**
-     * Gets the active color selection.
+     * Returns the container responsible for displaying statuses.
      */
-    getActiveColorSelection = () =>  
-        this.root.firstElementChild.firstElementChild.nextSibling.nextSibling
-
+    getInfoContainer() {
+        return this.root.lastElementChild.lastElementChild
+    }
     /**
      * Gets the next state button.
      */
-    getNextButton = () => 
-        this.root.firstElementChild.lastElementChild
+    getNextButton() {
+        return this.root.firstElementChild.lastElementChild
+    }
+
+    /**
+     * Gets the previous state button.
+     */
+    getPreviousButton() {
+        return this.root.firstElementChild.firstElementChild.nextElementSibling
+    }
 
     /**
      * Gets the transition container.
      */
-    getTransitionsContainer = () =>
-        this.root.lastElementChild
+    getTransitionsContainer() {
+        return this.root.lastElementChild.firstElementChild
+    }
         
 }
