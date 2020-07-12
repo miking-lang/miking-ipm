@@ -24,13 +24,6 @@ undirected graphs, and electrical circuits.
 
 ### Getting Started
 
-<<<<<<< HEAD
-###### **MENTION!** 
-This does not work with Safari as a browser, please test it with a different browser for the moment (Chrome and Firefox work)
-
-
-=======
->>>>>>> cd57ddb... dfa structure changed, added ID's, updated readme
 Before you can start visualizing your models inside a web browser, you need to
 install the following Node package using NPM (Node Package Manager): browser-sync.
 Install it in the root directory of the project.
