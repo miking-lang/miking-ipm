@@ -24,7 +24,7 @@ var sourceFile = myArgs[0];
 exec("mi " + sourceFile + ' > ' + __dirname +'/webpage/js/data-source.js', (error, stdout, stderr) => {
     if (error) {
 		fs.readFile(__dirname +'/webpage/js/data-source.js', function(err, buf) {
-		    fs.writeFile(__dirname +'/webpage/js/data-source.js', "let inputModel = '" + buf.toString().replace(/(\r\n|\n|\r)/gm, "") + "';" , function (err) {if (err) return console.log(err);});});return;}
+		    fs.writeFile(__dirname +'/webpage/js/data-source.js', "let data = '" + buf.toString().replace(/(\r\n|\n|\r)/gm, "") + "';" , function (err) {if (err) return console.log(err);});});return;}
     if (stderr) {
         console.log(`stderr: ${stderr}`);
         return;
@@ -33,7 +33,6 @@ exec("mi " + sourceFile + ' > ' + __dirname +'/webpage/js/data-source.js', (erro
 
 
 // Inital render of graph
-//updateJS(graph);
 
 fs.watchFile(sourceFile, { interval: 1000 }, (curr, prev) => {
     console.log(`${sourceFile} file Changed`);
@@ -43,7 +42,7 @@ fs.watchFile(sourceFile, { interval: 1000 }, (curr, prev) => {
     if (error) {
         console.log(`error: ${error.message}`);
 	fs.readFile(__dirname +'/webpage/js/data-source.js', function(err, buf) {
-	    fs.writeFile(__dirname +'/webpage/js/data-source.js', "let inputModel = '" + buf.toString().replace(/(\r\n|\n|\r)/gm, "") + "';" , function (err) {
+	    fs.writeFile(__dirname +'/webpage/js/data-source.js', "let data = '" + buf.toString().replace(/(\r\n|\n|\r)/gm, "") + "';" , function (err) {
 	    if (err) return console.log(err);
 	    });
 

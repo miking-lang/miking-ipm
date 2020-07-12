@@ -182,19 +182,20 @@ recursive
 let makeInputPath = lam inpt. lam dfa. lam currentState.
     let graph = dfa.graph in
     if (eqi (length inpt) 0) then 
-        if (isAcceptedState currentState dfa) then [currentState.id]
-        else [currentState.id,(negi 2)]
+        if (isAcceptedState currentState dfa) then [currentState.id,1]
+        else [currentState.id,(negi 1)]
     else 
     let first = head inpt in
     let rest = tail inpt in 
     -- check if transition exists. If yes, go to next state
     if stateHasTransition currentState graph first then
         join [[currentState.id],makeInputPath rest dfa (nextState currentState graph first)]
-    else [currentState.id,(negi 3)]
+    else [currentState.id,0]
 end
 
--- -2 = not accepted
--- -3 = denied
+-- -1 = not accepted
+-- 0 = stuck
+-- 1 = accepted
 
 mexpr
 let alfabeth = ['0','1'] in
@@ -215,10 +216,10 @@ let newDfa = dfaConstr states transitions alfabeth startState acceptStates eqi e
 --utest isAcceptedState 2 newDfa with true in
 --utest isAcceptedState 3 newDfa with false in
 --utest nextState 1 newDfa.graph '0' with 2 in
-utest makeInputPath "1010" newDfa newDfa.startState with [0,1,2,1,2] in
-utest makeInputPath "1011" newDfa newDfa.startState with [0,1,2,1,1,"not accepted"] in
-utest makeInputPath "010" newDfa newDfa.startState with [0,"denied"] in
-utest makeInputPath "10" newDfa newDfa.startState with [0,1,2] in
-utest makeInputPath "00000000111111110000" newDfa newDfa.startState with [0,"denied"] in
-utest makeInputPath "" newDfa newDfa.startState with [0,"not accepted"] in
+utest makeInputPath "1010" newDfa newDfa.startState with [0,1,2,1,2,1] in
+utest makeInputPath "1011" newDfa newDfa.startState with [0,1,2,1,1,negi 1] in
+utest makeInputPath "010" newDfa newDfa.startState with [0,0] in
+utest makeInputPath "10" newDfa newDfa.startState with [0,1,2,1] in
+utest makeInputPath "00000000111111110000" newDfa newDfa.startState with [0,0] in
+utest makeInputPath "" newDfa newDfa.startState with [0,negi 1] in
 ()
