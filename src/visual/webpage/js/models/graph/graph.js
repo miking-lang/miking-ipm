@@ -55,9 +55,9 @@ class Graph {
 
     /*              GETTERS               */
     /**
-     * Gets a node by id.
+     * Gets a node by name.
      */
-    getNodeByID(id) {
-        return this.nodes.find(node => node.name === id)
+    getNodeByName(name) {
+        return this.nodes.find(node => node.name === name)
     }
 }

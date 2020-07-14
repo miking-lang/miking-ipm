@@ -1,4 +1,3 @@
-let controllers = []
 // Checks for existing models object in the generated source file.
 if (data && data.models) {
     const root = document.body.querySelector("#app")
@@ -12,13 +11,12 @@ if (data && data.models) {
         // Creates the controller for the specified model if the type is supported.
         switch (model.type) {
         case "dfa":
-            let dfa = new DFAController(model, modelRoot, "model"+idx)
-            controllers.push(dfa)
+        case "nfa":
+            new NFAController(model, modelRoot, idx)
             break;
         case "graph":
         case "digraph":
-            let graph = new GraphController(model, modelRoot, "model"+idx)
-            controllers.push(graph)
+            new GraphController(model, modelRoot, idx)
             break;
         default:
             modelRoot.innerHTML = `<div class="warning">Unsopported model type</div>`

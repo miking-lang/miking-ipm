@@ -1,14 +1,16 @@
 /**
- * This class acts as a model for DFA. It contains methods for 
+ * This class acts as a model for NFA. It contains methods for 
  * manipulating the object.
  */
-class DFA {
+class NFA {
     /**
-     * @param {object} model Contains the DFA model. Includes acceptedIDs, startID, nodes
+     * @param {object} model Contains the NFA model. Includes acceptedIDs, startID, nodes
      *                       and transitions.
+     * @param {boolean} isDFA Whether the NFA is a DFA or not.
      * @param {string} name A generated name, used to distinguish between visualized models.
      */
-    constructor(model, name) {
+    constructor(model, isDFA, name) {
+        this.isDFA = isDFA
         this.name = name
         // Sets the render direction. Allowed values: TB, BT, RL, LR.
         this.rankDirection = "LR"
@@ -34,12 +36,12 @@ class DFA {
     }
 
     /**
-     * Returns whether the given state id belongs to one of the accepted id:s
-     * of the DFA or not.
-     * @param {string} stateID The state id to check.
+     * Returns whether the given state name belongs to one of the accepted states
+     * of the NFA or not.
+     * @param {string} stateName The state name to check.
      */
-    isAcceptedState(stateID) {
-        return this.acceptedStates.includes(stateID)
+    isAcceptedState(stateName) {
+        return this.acceptedStates.includes(stateName)
     }
 
     /**
@@ -54,8 +56,8 @@ class DFA {
     }
         
     /**
-     * Translates the DFA object to dot syntax.
-     * @returns {string} The DFA object in dot syntax.
+     * Translates the NFA object to dot syntax.
+     * @returns {string} The NFA object in dot syntax.
      */
     toDot() { 
         return `digraph {
@@ -67,13 +69,13 @@ class DFA {
             ).join("\n")}
             start -> ${this.startStateName} [label="start"]
             ${this.transitions.map(transition =>
-                `${transition.from} -> ${transition.to} [label=${transition.label} fontcolor=${transition.fontcolor} color=${transition.color}]`
+                `${transition.from} -> ${transition.to} [label="${transition.label}" fontcolor=${transition.fontcolor} color=${transition.color}]`
             ).join("\n")}
         }`
     }
 
     /**
-     * Updates the state of the DFA by changing the active state and coloring 
+     * Updates the state of the NFA by changing the active state and coloring 
      * states and transitions.
      * @param {string} activeStateID The id of the state to be visualized as active.
      * @param {string} previousStateID The id of the previous state.
@@ -112,9 +114,9 @@ class DFA {
 
     /*              GETTERS               */
     /**
-     * Gets a DFA state by id.
+     * Gets a NFA state by name.
      */
-    getStateByID(id) {
-        return this.states.find(state => state.name === id)
+    getStateByName(name) {
+        return this.states.find(state => state.name === name)
     }
 }
