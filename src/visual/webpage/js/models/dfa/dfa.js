@@ -4,23 +4,21 @@
  */
 class DFA {
     /**
-     * @param {string} rankDirection Sets the render direction. Allowed values: TB, BT, RL, LR.
-     * @param {object} stateSettings Used for general node settings. See:
-     *                              https://graphviz.org/documentation/ for allowed values.
-     * @param {[object]} states Each state instance requires a name (string), id (string) and a 
-     *                         settings (object) property. state specific attributes are listed 
-     *                         as properties of the settings object attribute. 
-                               Note: If no extra settings are wanted, pass an empty object for 
-                               the settings attribute: "settings: {}".
-     * @param {string} startID The ID of the state from where to start the simulation.
      * @param {string} acceptedIDs  The accepting states.
+     * @param {string} startID  The ID of the state from where to start the simulation.
+     * @param {[object]} states Each state instance requires a name (string), id (string) and a 
+     *                          settings (object) property. state specific attributes are listed 
+     *                          as properties of the settings object attribute.
      * @param {[object]} transitions Transistions between states. Each transition requires the 
      *                               following attributes: from (string), to (string) and 
      *                               label (string).
      */
-    // constructor(states = [], startID, acceptedIDs = [], transitions = []) {
-    constructor({acceptedIDs, startID, states, transitions}) {
+    constructor({acceptedIDs, startID, states, transitions, name}) {
+        this.name = name
+        // Sets the render direction. Allowed values: TB, BT, RL, LR.
         this.rankDirection = "LR"
+        // Used for general node settings. See: https://graphviz.org/documentation/ 
+        // for allowed values.
         this.stateSettings = {style: 'filled', fillcolor: 'white', shape: 'circle'}
         this.startStateID = startID
         this.acceptedIDs = acceptedIDs
@@ -29,7 +27,7 @@ class DFA {
         this.states = states.map(state => {
             state.settings = state.settings 
                                 ? state.settings : {}
-            if (this.isAcceptedState(state.id))
+            if (this.isAcceptedState(state.name))
                 state.settings.shape = "doublecircle"
             return state
         })
@@ -71,11 +69,11 @@ class DFA {
             node [${this.objectToString(this.stateSettings)}]
             start [fontcolor = white color = white class="start-node"]
             ${this.states.map(state =>
-                `${state.id} [label="${state.label}" id=${state.id} class="dfa-node" ${state.settings ? this.objectToString(state.settings):""}]`
+                `${state.name} [id=${state.name} class="${this.name}-node" ${this.objectToString(state.settings)}]`
             ).join("\n")}
             start -> ${this.startStateID} [label="start"]
             ${this.transitions.map(transition =>
-                `${transition.from} -> ${transition.to} [label="${transition.label}" fontcolor=${transition.fontcolor} color=${transition.color}]`
+                `${transition.from} -> ${transition.to} [label=${transition.label} fontcolor=${transition.fontcolor} color=${transition.color}]`
             ).join("\n")}
         }`
     }
@@ -89,10 +87,10 @@ class DFA {
      */
     makeTransition(activeStateID, previousStateID, warning) {
         this.states.map(State => {
-            State.settings.fillcolor = activeStateID === State.id
+            State.settings.fillcolor = activeStateID === State.name
                                        ? warning ? this.colors.warning : this.colors.active
                                        : this.colors.white
-            State.settings.fontcolor = activeStateID === State.id
+            State.settings.fontcolor = activeStateID === State.name
                                        ? this.colors.white
                                        : this.colors.black
         })
@@ -123,6 +121,6 @@ class DFA {
      * Gets a DFA state by id.
      */
     getStateByID(id) {
-        return this.states.find(state => state.id === id)
+        return this.states.find(state => state.name === id)
     }
 }

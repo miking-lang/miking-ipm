@@ -1,4 +1,4 @@
-class DFAView {
+class GraphView {
     /**
      * This class is responsible for displaying the graph view.
      * Includes render methods, and getters for elements in the DOM tree.
@@ -11,7 +11,6 @@ class DFAView {
         this.modelRoot = modelRoot
         this.initView() 
 
-        this.controlPanelView = new ControlPanelView(model, modelRoot.firstElementChild)
         this.modelView = new ModelView(model, modelRoot.lastElementChild, () => callbackFunction(this.getNodes()))
     }
     
@@ -19,8 +18,7 @@ class DFAView {
      * Renders the DOM tree of the graph view including 
      */
     initView() {
-        this.modelRoot.innerHTML=`<div></div>
-                                  <div></div>`
+        this.modelRoot.innerHTML=`<div></div>`
     }
     
     /*              GETTERS               */

@@ -39,9 +39,7 @@ class ControlPanelView {
         this.getNextButton().textContent = this.model.simulationIsFinished()
                                             ? `Restart simulation`
                                             : `Next`
-        this.model.isAtStartState() 
-            ? this.getPreviousButton().disabled = true
-            : this.getPreviousButton().disabled = false
+        this.getPreviousButton().disabled = this.model.isAtStartState() 
         let info = this.model.getInfoStatusAndText()
         this.getInfoContainer().innerHTML = info ? `<span class="${info.status}">${info.text}</span>` : ``
         this.getInputContainer().innerHTML = this.model.input.map((input,idx) =>

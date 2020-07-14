@@ -1,28 +1,24 @@
-class DFAController {
+class GraphController {
     /**
-     * Controller class for the DFA view.
+     * Controller class for the Graph view.
      * 
      * @param {ApplicationModel} model 
      * @param {<div>} root 
      */
     constructor(model, modelRoot, modelName){
+        model.model.directed = model.type === "digraph"
         model.model.name = modelName
-        let dfaModel = new DFAModel(new DFA(model.model), model.simulation)
-
+        let graphModel = new GraphModel(new Graph(model.model))
         // Defining the callback function, which is called when the graph is rendered.
         const callbackFunction = nodes =>
             /*      TEMPORARY -->   */
             // Adds on click event listeners to each of the nodes.
             nodes.on("click", function () {
                 let id = d3.select(this).attr("id")
-                console.log(dfaModel.visualizationModel.getStateByID(id))
+                console.log(graphModel.visualizationModel.getNodeByID(id))
             })
             /* < -- TEMPORARY       */
 
-        this.dfaView = new DFAView(dfaModel, modelRoot, callbackFunction)
-        
-        // Add event listeners
-        this.dfaView.controlPanelView.getNextButton().addEventListener("click", () => dfaModel.nextState())
-        this.dfaView.controlPanelView.getPreviousButton().addEventListener("click", () => dfaModel.previousState())
+        this.graphView = new GraphView(graphModel, modelRoot, callbackFunction)
     }
 }

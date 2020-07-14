@@ -4,6 +4,7 @@ body {
 }
 .container {
     padding: 50px;
+    border-bottom: 1px solid #9b9b9b;
 }
 
 
@@ -60,7 +61,7 @@ body {
     color: #008001;
 }
 /*              GRAPH               */
-.dfa-node {
+.node {
     cursor: pointer;
 }
 .start-node {
