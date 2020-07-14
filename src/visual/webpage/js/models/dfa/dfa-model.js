@@ -12,6 +12,7 @@ class DFAModel {
         this.status = simulation.status
         this.currentConfigurationIndex = 0
         this.callbacks = []
+        this.updateDFA()
     }
 
     /**

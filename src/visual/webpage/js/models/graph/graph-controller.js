@@ -6,9 +6,7 @@ class GraphController {
      * @param {<div>} root 
      */
     constructor(model, modelRoot, modelName){
-        model.model.directed = model.type === "digraph"
-        model.model.name = modelName
-        let graphModel = new GraphModel(new Graph(model.model))
+        let graphModel = new GraphModel(new Graph(model.model, model.type === "digraph", modelName))
         // Defining the callback function, which is called when the graph is rendered.
         const callbackFunction = nodes =>
             /*      TEMPORARY -->   */

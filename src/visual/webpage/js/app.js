@@ -5,7 +5,6 @@ if (data && data.models) {
     // Maps over all models in the generated output.
     
     data.models.map((model, idx) => {
-        console.log(idx)
         // Creates a root element for the model and add it to the root of the application.
         let modelRoot = document.createElement(`div`)
         modelRoot.className = "container"

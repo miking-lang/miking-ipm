@@ -4,27 +4,22 @@
  */
 class DFA {
     /**
-     * @param {string} acceptedIDs  The accepting states.
-     * @param {string} startID  The ID of the state from where to start the simulation.
-     * @param {[object]} states Each state instance requires a name (string), id (string) and a 
-     *                          settings (object) property. state specific attributes are listed 
-     *                          as properties of the settings object attribute.
-     * @param {[object]} transitions Transistions between states. Each transition requires the 
-     *                               following attributes: from (string), to (string) and 
-     *                               label (string).
+     * @param {object} model Contains the DFA model. Includes acceptedIDs, startID, nodes
+     *                       and transitions.
+     * @param {string} name A generated name, used to distinguish between visualized models.
      */
-    constructor({acceptedIDs, startID, states, transitions, name}) {
+    constructor(model, name) {
         this.name = name
         // Sets the render direction. Allowed values: TB, BT, RL, LR.
         this.rankDirection = "LR"
         // Used for general node settings. See: https://graphviz.org/documentation/ 
         // for allowed values.
         this.stateSettings = {style: 'filled', fillcolor: 'white', shape: 'circle'}
-        this.startStateID = startID
-        this.acceptedIDs = acceptedIDs
         this.colors = {active: "green", white: "white", black:"black", warning:"red3"}
+        this.startStateName = model.startID
+        this.acceptedStates = model.acceptedIDs
         // Init states
-        this.states = states.map(state => {
+        this.states = model.states.map(state => {
             state.settings = state.settings 
                                 ? state.settings : {}
             if (this.isAcceptedState(state.name))
@@ -32,11 +27,10 @@ class DFA {
             return state
         })
         // Init transitions
-        this.transitions = transitions.map(transition => {
+        this.transitions = model.transitions.map(transition => {
             transition.fontcolor = this.colors.black
             return transition
         })
-        this.makeTransition(this.startStateID)
     }
 
     /**
@@ -45,7 +39,7 @@ class DFA {
      * @param {string} stateID The state id to check.
      */
     isAcceptedState(stateID) {
-        return this.acceptedIDs.includes(stateID)
+        return this.acceptedStates.includes(stateID)
     }
 
     /**
@@ -71,7 +65,7 @@ class DFA {
             ${this.states.map(state =>
                 `${state.name} [id=${state.name} class="${this.name}-node" ${this.objectToString(state.settings)}]`
             ).join("\n")}
-            start -> ${this.startStateID} [label="start"]
+            start -> ${this.startStateName} [label="start"]
             ${this.transitions.map(transition =>
                 `${transition.from} -> ${transition.to} [label=${transition.label} fontcolor=${transition.fontcolor} color=${transition.color}]`
             ).join("\n")}

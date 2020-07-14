@@ -6,8 +6,7 @@ class DFAController {
      * @param {<div>} root 
      */
     constructor(model, modelRoot, modelName){
-        model.model.name = modelName
-        let dfaModel = new DFAModel(new DFA(model.model), model.simulation)
+        let dfaModel = new DFAModel(new DFA(model.model, modelName), model.simulation)
 
         // Defining the callback function, which is called when the graph is rendered.
         const callbackFunction = nodes =>
