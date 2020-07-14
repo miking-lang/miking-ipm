@@ -130,8 +130,29 @@ let digraphVisual = lam model.
     "\t\t\t},\n",
     "],\n\t\t},\n\t"]
 
+-- Format NFA to JS code for visualizing
+let nfaVisual = lam model.
+    "TODO - create this method"
+
+-- Format graph to JS code for visualizing
+let graphVisual = lam model.
+    "TODO - create this method"
+
+-- Format Tree to JS code for visualizing
+let treeVisual = lam model.
+    let tree = model.model in
+    ""
+    
+
+
 let visualize = lam models.
-    let models = strJoin "" (map (lam x. if(setEqual eqchar x.modelType "dfa") then dfaVisual x else digraphVisual x) models) in
+    let models = strJoin "" (map (lam x.
+    if(setEqual eqchar x.modelType "dfa") then dfaVisual x else
+    if(setEqual eqchar x.modelType "digraph") then digraphVisual x else
+    if(setEqual eqchar x.modelType "nfa") then nfaVisual x else
+    if(setEqual eqchar x.modelType "tree") then treeVisual x else
+    if(setEqual eqchar x.modelType "graph") then graphVisual x else
+    "") models) in
     strJoin "" [
     "let data = {\n",
     "\t\"models\": [\n",
