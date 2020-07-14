@@ -9,7 +9,7 @@ class DFAModel {
         this.visualizationModel = visualizationModel
         this.input = simulation.input
         this.configurations = simulation.configurations
-        this.status = simulation.status
+        this.status = simulation.state
         this.currentConfigurationIndex = 0
         this.callbacks = []
         this.updateDFA()
