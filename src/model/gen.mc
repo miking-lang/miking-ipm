@@ -10,7 +10,7 @@ let parseStates = lam states. lam startState. lam dfa. lam output.
     let first = head states in
     let rest = tail states in
     let parsedFirst = strJoin "" [
-    "\t\t\t\t\t{\"name\":\"",
+    "{\"name\":\"",
     (dfa.s2s first),
     "\"},\n"] in
     parseStates rest startState dfa (concat output parsedFirst)
@@ -18,7 +18,7 @@ end
 
 let parseVertices = lam vertices. lam v2s.
         strJoin ""(map (lam x. strJoin "" [
-            "\t\t\t\t\t{\"id\": \"",
+            "{\"id\": \"",
             int2string 0 -- placeholder id
             ,",",
             "\", \"label\":\"",
@@ -53,7 +53,7 @@ recursive
 let parseTransitions = lam trans. lam dfa.
     if (eqi (length trans) 0) then "" else
     let first = head trans in
-    let parsedFirst = [" \t\t\t\t\t{\"from\": \"", (dfa.s2s (first.0)), "\", \"to\": \"" ,(dfa.s2s (first.1)) , "\", \"label\": \"" , (first.2) , "\"},\n"] in
+    let parsedFirst = ["{\"from\": \"", (dfa.s2s (first.0)), "\", \"to\": \"" ,(dfa.s2s (first.1)) , "\", \"label\": \"" , (first.2) , "\"},\n"] in
     if(eqi (length trans) 1) then
     strJoin "" parsedFirst
     else
@@ -86,37 +86,51 @@ end
 
 let tab = lam n. strJoin "" (unfoldr (lam b. if eqi b n then None () else Some ("\t", addi b 1)) 0)
 
+recursive
+let fixTabs = lam inpt. lam t.
+    if (eqi (length inpt) 0 ) then ""
+    else if (eqi (length inpt) 1) then inpt
+    else
+    let first = head inpt in
+    let snd = head (tail inpt) in
+    let rest = tail inpt in
+    if (eqchar first '\n') then 
+        if or (eqchar snd '}') (eqchar snd ']') then concat (strJoin "" [[first],tab (subi t 1)]) (fixTabs rest t) 
+        else concat (strJoin "" [[first],tab t]) (fixTabs rest t) 
+    else if or (eqchar (first) '{') (eqchar first '[') then concat [first] (fixTabs rest (addi t 1))
+    else if (or (eqchar (first) '}') (eqchar (first) ']')) then concat [first] (fixTabs rest (subi t 1)) 
+    else concat [first] (fixTabs rest t) 
+end
+
 -- Parse a DFA to JS code and visualize
 let dfaVisual = lam model.
     let dfa = model.model in
     let input = model.input in
     let transitions = map (lam x. (x.0,x.1,dfa.l2s x.2)) (dfaTransitions dfa) in
-    let tabCount = 2 in
-    let first = strJoin "" [tab tabCount,
-    "{\n"] in
-    let tabCount = addi 1 tabCount in
-    let snd = strJoin "" [tab tabCount,"\"type\" : \"dfa\",\n",
-    tab tabCount,"\"simulation\" : {\n"] in
-    let js_code = strJoin "" [
-        first,
-    snd,
-    "\t\t\t\t\"input\" : [",
-    (parseInput input "" dfa),
-    "],\n",
-    "\t\t\t\t\"configurations\" : [",
-    (parseInputPath (makeInputPath input dfa dfa.startState) "" dfa.s2s),
-    "],\n",
-    "\t\t\t\t\"state\" : ",
-    "\"",dfaAcceptedInput input dfa,"\"",
-    ",\n\t\t\t},\n",
-    "\t\t\t\"model\" : {\n",
-    "\t\t\t\t\"states\" : [\n",parseStates (dfaStates dfa) dfa.startState dfa "" ,"\t\t\t\t],\n",
-    "\t\t\t\t\"transitions\" : [\n", (parseTransitions transitions dfa) ,
-    "\t\t\t\t], \n",
-    (strJoin "" ["\t\t\t\t\"startID\" : \"", (dfa.s2s dfa.startState) , "\",\n"]),
-    "\t\t\t\t\"acceptedIDs\" : [",
-    (strJoin "" (map (lam s. strJoin "" ["\"", (dfa.s2s s), "\","]) dfa.acceptStates)),
-    "],\n\t\t\t}\n\t\t},\n\t"] in
+    let js_code = strJoin "" ["\n",
+        "{\n",
+        "\"type\" : \"dfa\",\n",
+        "\"simulation\" : {\n",
+        "\"input\" : [",
+        (parseInput input "" dfa),
+        "],\n",
+        "\"configurations\" : [",
+        (parseInputPath (makeInputPath input dfa dfa.startState) "" dfa.s2s),
+        "],\n",
+        "\"state\" : ",
+        "\"",dfaAcceptedInput input dfa,"\"",
+        ",\n",
+        "},\n",
+        "\"model\" : {\n",
+        "\"states\" : [\n",parseStates (dfaStates dfa) dfa.startState dfa "" ,"],\n",
+        "\"transitions\" : [\n", (parseTransitions transitions dfa) ,
+        "], \n",
+        (strJoin "" ["\"startID\" : \"", (dfa.s2s dfa.startState) , "\",\n"]),
+        "\"acceptedIDs\" : [",(strJoin "" (map (lam s. strJoin "" ["\"", (dfa.s2s s), "\","]) dfa.acceptStates)),
+        "],\n",
+        "}\n",
+        "},\n"
+    ] in
     js_code
 
 let digraphVisual = lam model.
@@ -132,11 +146,11 @@ let digraphVisual = lam model.
 
 let visualize = lam models.
     let models = strJoin "" (map (lam x. if(setEqual eqchar x.modelType "dfa") then dfaVisual x else digraphVisual x) models) in
-    strJoin "" [
+    fixTabs (strJoin "" [
     "let data = {\n",
     "\t\"models\": [\n",
     models, 
-    "]\n}\n"]
+    "]\n}\n"]) 0
 
 --Didn't figure out function overloading
 --If there is no input
