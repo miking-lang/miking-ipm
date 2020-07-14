@@ -67,17 +67,17 @@ let checkDuplicateLabels = lam trans. lam eqv. lam eql.
 end
 
 -- check that all labels for transitions are in the alphabet
-let dfaCheckLabels = lam graph. lam alf. lam eql.
-    all (lam x. (any (lam y. eql x.2 y) alf)) graph
+let dfaCheckLabels = lam graph. lam alph. lam eql.
+    all (lam x. (any (lam y. eql x.2 y) alph)) graph
 
 -- check that values are accaptable for the DFA
-let dfaCheckValues = lam trans. lam s. lam alf. lam eqv. lam eql. lam accS. lam startS.
-    if not (dfaCheckLabels trans alf eql) then error "Some labels are not in the defined alphabet" else
+let dfaCheckValues = lam trans. lam s. lam alph. lam eqv. lam eql. lam accS. lam startS. lam s2s. lam l2s.
+    if not (dfaCheckLabels trans alph eql) then error "Some labels are not in the defined alphabet" else
         if not (setIsSubsetEq eqv accS s) then error "Some accepted states do not exist" else 
         if not (setMem eqv startS s) then error "The start state does not exist"
         else
 	let err = checkDuplicateLabels trans eqv eql in
-	if(err.0) then error (strJoin "" ["There are duplicate labels for same state outgoing transition at: STATE ", (int2string (err.1).0), ", LABEL ", [(err.1).1]])
+	if(err.0) then error (strJoin "" ["There are duplicate labels for same state outgoing transition at: STATE ", (s2s (err.1).0), ", LABEL ", l2s (err.1).1])
 	else true
 
 -- States are represented by vertices in a directed graph
@@ -103,12 +103,12 @@ let dfaAddTransition = lam dfa. lam trans.
     }
     
 -- constructor for DFA
-let dfaConstr = lam s. lam trans. lam alf. lam startS. lam accS. lam eqv. lam eql. lam s2s. lam l2s.
-    if dfaCheckValues trans s alf eqv eql accS startS then
+let dfaConstr = lam s. lam trans. lam alph. lam startS. lam accS. lam eqv. lam eql. lam s2s. lam l2s.
+    if dfaCheckValues trans s alph eqv eql accS startS s2s l2s then
         let emptyDigraph = digraphEmpty eqv eql in
         let initDfa = {
         graph = emptyDigraph,
-        alphabet = alf,
+        alphabet = alph,
         startState = startS,
         acceptStates = accS,
         s2s = s2s,
@@ -186,5 +186,3 @@ utest dfaAcceptedInput "1010" newDfa with "accepted" in
 utest dfaAcceptedInput "1011" newDfa with "not accepted" in
 utest dfaAcceptedInput "00000000111111110000" newDfa with "stuck" in
 ()
-
-

@@ -1,19 +1,27 @@
-let activeStates = ['0','1','denied'];
-let input = ['1','1',];
-let inputModel = new DFA(
-    rankDirection = 'LR', 
- nodeSettings = {style: 'filled', fillcolor: 'white', shape: 'circle'}, 
- nodes = [
-{id: '0', label:'a'},
-{id: '1', label:'b'},
-{id: '2', label:'c'},
-], 
- startID = '0',
-acceptedIDs = ['0','2',],
-transistions = [
- {from: '0', to: '1', label: '1'},
- {from: '1', to: '2', label: '0'},
- {from: '2', to: '0', label: '1'},
-] 
- );
+let data = {
+	"models": [
+		{
+			"type" : "dfa",
+			"simulation" : {
+				"input" : ["1","0","1","1",],
+				"configurations" : ["a","b","c","a","b",],
+				"state" : "not accepted",
+			},
+			"model" : {
+				"states" : [
+					{"name":"a"},
+					{"name":"b"},
+					{"name":"c"},
+				],
+				"transitions" : [
+ 					{"from": "a", "to": "b", "label": "1"},
+ 					{"from": "b", "to": "c", "label": "0"},
+ 					{"from": "c", "to": "a", "label": "1"},
+				], 
+				"startID" : "a",
+				"acceptedIDs" : ["a","c",],
+			}
+		},
+	]
+}
 
