@@ -18,8 +18,8 @@ type DFA = {
              alfabeth: [a],
              startState: a,
              acceptStates: [a],
-	     s2s: a ->_ ->_ -> String,
-	     l2s: a ->_ ->_ -> String
+             s2s: a ->_ ->_ -> String,
+             l2s: a ->_ ->_ -> String
             }
 -- get equality function for states
 let dfaGetEqv = lam dfa.
@@ -30,11 +30,11 @@ let dfaGetEql = lam dfa.
     dfa.graph.eql
 
 -- get all states in dfa
-let dfaGetStates = lam dfa.
+let dfaStates = lam dfa.
     digraphVertices dfa.graph
 
 -- get all transitions in dfa
-let dfaGetTransitions = lam dfa.
+let dfaTransitions = lam dfa.
     digraphEdges dfa.graph
 
 
@@ -77,7 +77,7 @@ let dfaCheckValues = lam trans. lam s. lam alf. lam eqv. lam eql. lam accS. lam 
 
 -- States are represented by vertices in a directed graph
 let dfaAddState =  lam dfa. lam state.{
-        graph = (digraphAddVertex {data = state, id = (length (dfaGetStates dfa))} dfa.graph),
+        graph = (digraphAddVertex state dfa.graph),
         alfabeth = dfa.alfabeth,
         startState = dfa.startState,
         acceptStates = dfa.acceptStates,
@@ -86,76 +86,30 @@ let dfaAddState =  lam dfa. lam state.{
     }
 
 
--- maps a state to its id in dfa.states
-recursive
-let stateID = lam state. lam dfa. lam states.
-    if(eqi (length states) 0) then (negi 1)
-    else
-    let first = head states in --{data: x, id: 1}
-    -- state = x
-    -- first = {data: x, id: 1}
-    let rest = tail states in
-    if((dfaGetEqv dfa) {data = state} {data = first.data}) then first.id
-    else
-    stateID state dfa rest
-    
-end
-
-
 -- Transitions between two states are represented by edges between vertices
 let dfaAddTransition = lam dfa. lam trans.
-    let state1 = stateID trans.0 dfa (dfaGetStates dfa) in
-    let state2 = stateID trans.1 dfa (dfaGetStates dfa) in
     {
-        graph = (digraphAddEdge {data = trans.0, id = state1} {data = trans.1, id = state2} trans.2 dfa.graph),
+        graph = (digraphAddEdge trans.0 trans.1 trans.2 dfa.graph),
         alfabeth = dfa.alfabeth,
         startState = dfa.startState,
         acceptStates = dfa.acceptStates,
 	s2s= dfa.s2s,
 	l2s= dfa.l2s
     }
-
-
--- add the startState (from dfa.startState) as a {name=_,id=_}
-let getStartStateID =  lam initDfa.
-{
-	graph = initDfa.graph,
-	alfabeth = initDfa.alfabeth,
-	startState = {data = initDfa.startState, id = stateID initDfa.startState initDfa (dfaGetStates initDfa)},
-	acceptStates = initDfa.acceptStates,
-	s2s = initDfa.s2s,
-	l2s = initDfa.l2s
-}
--- add the accepted states (from dfa.acceptStates) as a list of {name=_,id=_}
-let getAcceptedStatesID = lam initDfa.
-{
-    graph = initDfa.graph,
-    alfabeth = initDfa.alfabeth,
-    startState = initDfa.startState,
-    acceptStates = map (lam s. {data = s, id = (stateID s initDfa (dfaGetStates initDfa))}) initDfa.acceptStates,
-    s2s = initDfa.s2s,
-    l2s = initDfa.l2s
-}
-
--- equality function for states. If s1 and s2 have the same data they are considered to be equal.
-let fun_eqv = lam eqv. lam s1. lam s2.
-    if(eqv s1.data s2.data) then true
-    else false
     
 -- constructor for DFA
 let dfaConstr = lam s. lam trans. lam alf. lam startS. lam accS. lam eqv. lam eql. lam s2s. lam l2s.
-    let eqv1 = fun_eqv eqv in
     if dfaCheckValues trans s alf eqv eql accS startS then
-        let emptyDigraph = digraphEmpty eqv1 eql in
+        let emptyDigraph = digraphEmpty eqv eql in
         let initDfa = {
         graph = emptyDigraph,
         alfabeth = alf,
         startState = startS,
         acceptStates = accS,
-	s2s = s2s,
-	l2s = l2s
+        s2s = s2s,
+        l2s = l2s
         } in
-        getAcceptedStatesID (getStartStateID (foldl dfaAddTransition (foldl dfaAddState initDfa s) trans))
+        foldl dfaAddTransition (foldl dfaAddState initDfa s) trans
 	else {}
 
 -- returns true if state s is a accapted state in the dfa
@@ -182,20 +136,21 @@ recursive
 let makeInputPath = lam inpt. lam dfa. lam currentState.
     let graph = dfa.graph in
     if (eqi (length inpt) 0) then 
-        if (isAcceptedState currentState dfa) then [currentState.id,1]
-        else [currentState.id,(negi 1)]
+        [currentState]
     else 
     let first = head inpt in
     let rest = tail inpt in 
     -- check if transition exists. If yes, go to next state
     if stateHasTransition currentState graph first then
-        join [[currentState.id],makeInputPath rest dfa (nextState currentState graph first)]
-    else [currentState.id,0]
+        join [[currentState],makeInputPath rest dfa (nextState currentState graph first)]
+    else [currentState]
 end
 
--- -1 = not accepted
--- 0 = stuck
--- 1 = accepted
+let dfaAcceptedInput = lam inpt. lam dfa.
+    let path = makeInputPath inpt dfa dfa.startState in
+    if (lti (length path) (length inpt)) then "stuck" else
+    let last = last path in
+    if (isAcceptedState last dfa) then "accepted" else "not accepted"
 
 mexpr
 let alfabeth = ['0','1'] in
@@ -204,22 +159,27 @@ let transitions = [(0,1,'1'),(1,1,'1'),(1,2,'0'),(2,2,'0'),(2,1,'1')] in
 let startState = 0 in
 let acceptStates = [2] in 
 let newDfa = dfaConstr states transitions alfabeth startState acceptStates eqi eqchar int2string (lam b. [b]) in
---utest setEqual eqchar alfabeth newDfa.alfabeth with true in
---utest eqi startState newDfa.startState with true in
---utest setEqual eqi acceptStates newDfa.acceptStates with true in
---utest (digraphHasVertices (dfaGetStates newDfa) newDfa.graph) with true --in
---utest (digraphHasEdges transitions newDfa.graph) with true in
---utest dfaCheckLabels transitions alfabeth with true in
---utest dfaCheckLabels [(1,2,'2')] alfabeth with false in
---utest (digraphHasEdges [(1,2,'1')] (dfaAddTransition newDfa (1,2,'1')).g--raph) with true in
---utest (digraphHasVertex 7 (dfaAddState newDfa 7).graph) with true in
---utest isAcceptedState 2 newDfa with true in
---utest isAcceptedState 3 newDfa with false in
---utest nextState 1 newDfa.graph '0' with 2 in
-utest makeInputPath "1010" newDfa newDfa.startState with [0,1,2,1,2,1] in
-utest makeInputPath "1011" newDfa newDfa.startState with [0,1,2,1,1,negi 1] in
-utest makeInputPath "010" newDfa newDfa.startState with [0,0] in
-utest makeInputPath "10" newDfa newDfa.startState with [0,1,2,1] in
-utest makeInputPath "00000000111111110000" newDfa newDfa.startState with [0,0] in
-utest makeInputPath "" newDfa newDfa.startState with [0,negi 1] in
+utest setEqual eqchar alfabeth newDfa.alfabeth with true in
+utest eqi startState newDfa.startState with true in
+utest setEqual eqi acceptStates newDfa.acceptStates with true in
+utest (digraphHasVertices states newDfa.graph) with true in
+utest (digraphHasEdges transitions newDfa.graph) with true in
+utest dfaCheckLabels transitions alfabeth eqchar with true in
+utest dfaCheckLabels [(1,2,'2')] alfabeth eqchar with false in
+utest (digraphHasEdges [(1,2,'1')] (dfaAddTransition newDfa (1,2,'1')).graph) with true in
+utest (digraphHasVertex 7 (dfaAddState newDfa 7).graph) with true in
+utest isAcceptedState 2 newDfa with true in
+utest isAcceptedState 3 newDfa with false in
+utest nextState 1 newDfa.graph '0' with 2 in
+utest makeInputPath "1010" newDfa newDfa.startState with [0,1,2,1,2] in
+utest makeInputPath "1011" newDfa newDfa.startState with [0,1,2,1,1] in
+utest makeInputPath "010" newDfa newDfa.startState with [0] in
+utest makeInputPath "10" newDfa newDfa.startState with [0,1,2] in
+utest makeInputPath "00000000111111110000" newDfa newDfa.startState with [0] in
+utest makeInputPath "" newDfa newDfa.startState with [0] in
+utest dfaAcceptedInput "1010" newDfa with "accepted" in
+utest dfaAcceptedInput "1011" newDfa with "not accepted" in
+utest dfaAcceptedInput "00000000111111110000" newDfa with "stuck" in
 ()
+
+
