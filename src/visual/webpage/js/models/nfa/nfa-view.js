@@ -1,9 +1,9 @@
-class DFAView {
+class NFAView {
     /**
-     * This class is responsible for displaying the graph view.
+     * This class is responsible for displaying the NFA view.
      * Includes render methods, and getters for elements in the DOM tree.
      * 
-     * @param {DFAModel} model 
+     * @param {NFAModel} model 
      * @param {<div>} modelRoot 
      */
     constructor(model, modelRoot, callbackFunction){

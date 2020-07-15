@@ -4,18 +4,17 @@ class GraphController {
      * 
      * @param {ApplicationModel} model 
      * @param {<div>} root 
+     * @param {int} index A unique model number.
      */
-    constructor(model, modelRoot, modelName){
-        model.model.directed = model.type === "digraph"
-        model.model.name = modelName
-        let graphModel = new GraphModel(new Graph(model.model))
+    constructor(model, modelRoot, index){
+        let graphModel = new GraphModel(new Graph(model.model, model.type === "digraph", model.type+index))
         // Defining the callback function, which is called when the graph is rendered.
         const callbackFunction = nodes =>
             /*      TEMPORARY -->   */
             // Adds on click event listeners to each of the nodes.
             nodes.on("click", function () {
-                let id = d3.select(this).attr("id")
-                console.log(graphModel.visualizationModel.getNodeByID(id))
+                let name = d3.select(this).attr("id")
+                console.log(graphModel.visualizationModel.getNodeByName(name))
             })
             /* < -- TEMPORARY       */
 
