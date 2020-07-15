@@ -2,7 +2,7 @@ include "../src/model/gen.mc"
 
 mexpr
 let string2string = (lam b. b) in
-let char2str = (lam b. [b]) in
+let char2string = (lam b. [b]) in
 
 -- create your DFA
 let alfabeth = ['0','1','2','3'] in

@@ -3,35 +3,27 @@ include "map.mc"
 include "dfa.mc"
 include "model.mc"
 
-let char2string = lam b. [b] 
--- Formatting the states
+-- Formatting the vertices
 recursive
-let parseStates = lam states. lam startState. lam output. lam state2str.
-    if (eqi (length states) 0) then output
+let parseVertices = lam vertices. lam vertex2str. lam output.
+    if (eqi (length vertices) 0) then output
     else
-    let first = head states in
-    let rest = tail states in
+    let first = head vertices in
+    let rest = tail vertices in
     let parsedFirst = strJoin "" [
     "{\"name\":\"",
-    (state2str first),
+    (vertex2str first),
     "\"},\n"] in
-    parseStates rest startState (concat output parsedFirst) state2str
+    parseVertices rest vertex2str (concat output parsedFirst) 
 end
+-- Formatting the states
 
-let parseVertices = lam vertices. lam v2s.
-        strJoin ""(map (lam x. strJoin "" [
-            "{",
-            "\"name\":\"",
-            v2s x,
-            "\"},\n"
-        ]) vertices)
+let parseStates = lam states. lam state2str.
+    parseVertices states state2str ""
 
-
-let eqTrans = lam eq. lam l. lam r. if and (eq (l.0) (r.0)) (eq (l.1) (r.1)) then true else false
-
--- parse transitions and squash transitions between the same states.
+-- parse edges and squash edges between the same nodes.
 recursive
-let parseTransitions = lam trans. lam v2s. lam eqv.
+let parseAndSquashEdges = lam trans. lam v2s. lam eqv.
     if (eqi (length trans) 0) then "" else
     let first = head trans in
     let parsedFirst = ["{\"from\": \"", (v2s (first.0)), "\", \"to\": \"" ,(v2s (first.1)) , "\", \"label\": \"" , (first.2) , "\"},\n"] in
@@ -39,15 +31,20 @@ let parseTransitions = lam trans. lam v2s. lam eqv.
     strJoin "" parsedFirst
     else
     let second = head (tail trans) in
-    if (eqTrans eqv first second) then parseTransitions (join [[(first.0,first.1,join [first.2,second.2])], (tail (tail trans))]) v2s eqv
+    if (and (eqv (first.0) (second.0)) (eqv (first.1) (second.1))) then parseAndSquashEdges (join [[(first.0,first.1,join [first.2,second.2])], (tail (tail trans))]) v2s eqv
     else 
-    join [strJoin "" parsedFirst, parseTransitions (tail trans) v2s eqv]
+    join [strJoin "" parsedFirst, parseAndSquashEdges (tail trans) v2s eqv]
 end
 
+-- parse all edges into printable string
 let parseEdges = lam edges. lam v2s. lam l2s. lam eqv.
         let edges_string = map (lam x. (x.0,x.1,l2s x.2)) edges in
-        parseTransitions edges_string v2s eqv
+        parseAndSquashEdges edges_string v2s eqv
 
+-- parse transitions into printable string
+let parseTransitions = lam trans. lam v2s. lam l2s. lam eqv.
+    parseEdges trans v2s l2s eqv
+    
 -- Getting the input path parsed
 recursive
 let parseInputPath = lam path. lam output. lam state2string.
@@ -60,13 +57,13 @@ end
 
 -- Parse input-line
 recursive
-let parseInput = lam input. lam output. lam dfa. lam label2str.
+let parseInput = lam input. lam output. lam label2str.
     if(eqi (length input) 0) then output
     else
     let first = head input in
     let rest = tail input in
     let output = strJoin "" [output,"\"" ,(label2str first) , "\","] in
-    parseInput rest output dfa label2str
+    parseInput rest output label2str
 end
 
 -- return a string with n tabs
@@ -93,18 +90,18 @@ end
 -- Parse a DFA to JS code and visualize
 let dfaVisual = lam model. lam input. lam state2str. lam label2str.
     let dfa = model in
-    let transitions = map (lam x. (x.0,x.1,label2str x.2)) (dfaTransitions dfa) in
+    let transitions = dfaTransitions dfa in
     let js_code = strJoin "" [
         "{\n",
             "\"type\" : \"dfa\",\n",
             "\"simulation\" : {\n",
-                "\"input\" : [", (parseInput input "" dfa label2str),"],\n",
+                "\"input\" : [", (parseInput input "" label2str),"],\n",
                 "\"configurations\" : [", (parseInputPath (makeInputPath input dfa dfa.startState) "" state2str), "],\n",
                 "\"state\" : ","\"",dfaAcceptedInput input dfa,"\"", ",\n",
             "},\n",
             "\"model\" : {\n",
-                "\"states\" : [\n",parseStates (dfaStates dfa) dfa.startState "" state2str,"],\n",
-                "\"transitions\" : [\n", (parseTransitions transitions state2str (dfaGetEqv dfa)) ,"], \n",
+                "\"states\" : [\n",parseStates (dfaStates dfa) state2str,"],\n",
+                "\"transitions\" : [\n", (parseTransitions transitions state2str label2str (dfaGetEqv dfa)) ,"], \n",
                 "\"startID\" : \"", (state2str dfa.startState) , "\",\n",
                 "\"acceptedIDs\" : [",(strJoin "" (map (lam s. strJoin "" ["\"", (state2str s), "\","]) dfa.acceptStates)),"],\n",
             "}\n",
@@ -120,7 +117,7 @@ let digraphVisual = lam model. lam state2str. lam label2str.
     "{\n",
         "\"type\" : \"","digraph","\",\n",
         "\"model\" : {\n",
-            "\"nodes\" : [\n",(parseVertices (digraphVertices digraph) state2str) ,"],\n",
+            "\"nodes\" : [\n",(parseVertices (digraphVertices digraph) state2str "" ) ,"],\n",
             "\"edges\" : [\n", (parseEdges (digraphEdges digraph) state2str label2str digraph.eqv), "], \n",
         "},\n",
     "\n},\n"]
@@ -133,7 +130,7 @@ let graphVisual = lam model. lam state2str. lam label2str.
     "{\n",
         "\"type\" : \"","graph","\",\n",
         "\"model\" : {\n",
-            "\"nodes\" : [\n",(parseVertices (graphVertices graph) state2str) ,"],\n",
+            "\"nodes\" : [\n",(parseVertices (graphVertices graph) state2str "" ) ,"],\n",
             "\"edges\" : [\n", (parseEdges (graphEdges graph) state2str label2str graph.eqv), "], \n",
         "},\n",
     "\n},\n"]
@@ -159,7 +156,6 @@ let visualize = lam models.
                         "]\n}\n"]) 0)
                         
 mexpr
-
 let alfabeth = ['0','1','2'] in
 let states = [1,2,3] in
 let transitions = [(1,2,'0'),(3,1,'0'),(1,2,'1'),(2,3,'1'),(1,2,'2'),(3,1,'1')] in
