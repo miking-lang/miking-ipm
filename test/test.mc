@@ -9,8 +9,8 @@ let startState = "a" in
 let acceptStates = ["a", "c"] in
 
 let dfa = dfaConstr states transitions alfabeth startState acceptStates (setEqual eqchar) eqchar in
-let state2string = lam b. b in
-let trans2string = (lam b. [b]) in
-let model = DFA(dfa, "1011", state2string, trans2string) in 
-let model2 = DFA(dfa, "1001", state2string, trans2string) in 
+let state2str = lam b. b in
+let label2str = (lam b. [b]) in
+let model = DFA(dfa, "1011", state2str, label2str) in 
+let model2 = DFA(dfa, "1001", state2str, label2str) in 
 visualize [model,model2]

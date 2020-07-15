@@ -76,20 +76,20 @@ end
 
 -- Parse input-line
 recursive
-let parseInput = lam input. lam output. lam dfa. lam trans2str.
+let parseInput = lam input. lam output. lam dfa. lam label2str.
     if(eqi (length input) 0) then output
     else
     let first = head input in
     let rest = tail input in
-    let output = strJoin "" [output,"\"" ,(trans2str first) , "\","] in
-    parseInput rest output dfa trans2str
+    let output = strJoin "" [output,"\"" ,(label2str first) , "\","] in
+    parseInput rest output dfa label2str
 end
 
 let tab = lam n. strJoin "" (unfoldr (lam b. if eqi b n then None () else Some ("\t", addi b 1)) 0)
 
 -- Parse a DFA to JS code and visualize
-let dfaVisual = lam dfa. lam input. lam state2str. lam trans2str.
-    let transitions = map (lam x. (x.0,x.1,trans2str x.2)) (dfaTransitions dfa) in
+let dfaVisual = lam dfa. lam input. lam state2str. lam label2str.
+    let transitions = map (lam x. (x.0,x.1,label2str x.2)) (dfaTransitions dfa) in
     let tabCount = 2 in
     let first = strJoin "" [tab tabCount,
     "{\n"] in
@@ -100,7 +100,7 @@ let dfaVisual = lam dfa. lam input. lam state2str. lam trans2str.
         first,
     snd,
     "\t\t\t\t\"input\" : [",
-    (parseInput input "" dfa trans2str),
+    (parseInput input "" dfa label2str),
     "],\n",
     "\t\t\t\t\"configurations\" : [",
     (parseInputPath (makeInputPath input dfa dfa.startState) "" state2str),
@@ -135,12 +135,14 @@ let visualize = lam models.
         map (lam model. 
             match model with Digraph(model,vertex2str,edge2str) then
                 digraphVisual model vertex2str edge2str
-            else match model with DFA(model,input,state2str,trans2str) then
-                dfaVisual model input state2str trans2str
+            else match model with DFA(model,input,state2str,label2str) then
+                dfaVisual model input state2str label2str
             else match model with Graph(model,vertex2str,edge2str) then
                 digraphVisual model vertex2str edge2str
-            else match model with NFA(model,input,state2str,trans2str) then
-                digraphVisual model input state2str trans2str
+                -- change the name of the function above
+            else match model with NFA(model,input,state2str,label2str) then
+                dfaVisual model input state2str label2str
+                -- change the name of the function above
             else error "unknown type") models) in
     print (strJoin "" ["let data = {\n",
                         "\t\"models\": [\n",
