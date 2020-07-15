@@ -24,7 +24,8 @@ var sourceFile = myArgs[0];
 exec("mi " + sourceFile + ' > ' + __dirname +'/webpage/js/data-source.js', (error, stdout, stderr) => {
     if (error) {
 		fs.readFile(__dirname +'/webpage/js/data-source.js', function(err, buf) {
-		    fs.writeFile(__dirname +'/webpage/js/data-source.js', "let data = '" + buf.toString().replace(/(\r\n|\n|\r)/gm, "") + "';" , function (err) {if (err) return console.log(err);});});return;}
+            let msg = "ERROR: ".concat(buf.toString().replace(/(\r\n|\n|\r)/gm, "").split(" ERROR:")[1])
+		    fs.writeFile(__dirname +'/webpage/js/data-source.js', "let data = '" + msg+"';" , function (err) {if (err) return console.log(err);});});return;}
     if (stderr) {
         console.log(`stderr: ${stderr}`);
         return;

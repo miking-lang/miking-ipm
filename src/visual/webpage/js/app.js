@@ -27,7 +27,7 @@ if (data && data.models) {
         }
     })
 } else {
-    console.log(inputModel);
+    console.log(data);
     var paragraph = document.getElementById("error-container");
-    paragraph.textContent += inputModel;
+    paragraph.textContent += data;
 }
