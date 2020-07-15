@@ -4,6 +4,7 @@
 src/ocaml-server/*
 .DS_Store
 src/visual/webpage/js/data-source.js
+src/visual/webpage/js/temp.js
 .DS_Store
 node_modules/*
 src/model/dfaModel.mc

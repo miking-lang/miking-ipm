@@ -2,9 +2,11 @@
 body {
     font-family: Arial, Helvetica, sans-serif;
 }
-#control-panel-container {
+.container {
     padding: 50px;
+    border-bottom: 1px solid #9b9b9b;
 }
+
 
 .simulation-title {
     font-size: 24px;
@@ -58,9 +60,8 @@ body {
 .accepted {
     color: #008001;
 }
-
 /*              GRAPH               */
-.dfa-node {
+.node {
     cursor: pointer;
 }
 .start-node {

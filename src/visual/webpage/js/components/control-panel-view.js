@@ -10,6 +10,10 @@ class ControlPanelView {
         this.root=root
         this.model=model
         this.initView()
+
+        // Render the control panel view and add a model observer.
+        this.update()
+        model.addObserver(()=>this.update())
     }
     
     /**
@@ -25,36 +29,22 @@ class ControlPanelView {
             <div id="transitions-container">
                 <span></span>
                 <span id="status-container"></span>
-            </div>`;
+            </div>`
     }
-
+    
     /**
      * Updates the control panel view.
-     * @param {function} graphCallback The callback function executed when the graphviz
-     *                                 object has finished rendering.
      */
     update() {
         this.getNextButton().textContent = this.model.simulationIsFinished()
                                             ? `Restart simulation`
                                             : `Next`
-        this.model.isAtStartState() 
-            ? this.getPreviousButton().disabled = true
-            : this.getPreviousButton().disabled = false
-        this.getInfoContainer().innerHTML = 
-            this.model.inputWasNotAccepted() ?
-                `<span class="warning">Not accepted: The given input string was not accepted by the DFA.</span>`
-            : this.model.transitionWasDenied() ?
-                `<span class="warning">Not accepted: This transition is not supported at this state!</span>`
-            : this.model.inputWasAccepted() ?
-                `<span class="accepted">The input was accepted by the DFA</span>`
-            : ``
-        this.getTransitionsContainer().innerHTML = this.model.input.map((transition,idx) =>
-            `<span class="transition ${this.model.isCurrentTranistionIndex(idx)
-                                        ? + this.model.transitionWasDenied()
-                                            ? "active-transition warning"
-                                            : "active-transition"
-                                        : ""}">
-                ${transition}
+        this.getPreviousButton().disabled = this.model.isAtStartState() 
+        let info = this.model.getInfoStatusAndText()
+        this.getInfoContainer().innerHTML = info ? `<span class="${info.status}">${info.text}</span>` : ``
+        this.getInputContainer().innerHTML = this.model.input.map((input,idx) =>
+            `<span class="transition ${this.model.isCurrentInputIndex(idx) ? "active-transition" : ""}">
+                ${input}
             </span>`
         ).join("")
     }
@@ -66,6 +56,14 @@ class ControlPanelView {
     getInfoContainer() {
         return this.root.lastElementChild.lastElementChild
     }
+
+    /**
+     * Gets the transition container.
+     */
+    getInputContainer() {
+        return this.root.lastElementChild.firstElementChild
+    }  
+
     /**
      * Gets the next state button.
      */
@@ -78,13 +76,5 @@ class ControlPanelView {
      */
     getPreviousButton() {
         return this.root.firstElementChild.firstElementChild.nextElementSibling
-    }
-
-    /**
-     * Gets the transition container.
-     */
-    getTransitionsContainer() {
-        return this.root.lastElementChild.firstElementChild
-    }
-        
+    }      
 }
