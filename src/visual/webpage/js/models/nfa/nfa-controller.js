@@ -7,7 +7,7 @@ class NFAController {
      * @param {int} index A unique model number.
      */
     constructor(model, modelRoot, index){
-        let nfaModel = new NFAModel(new NFA(model.model, model.type === "dfa", model.type+index), model.simulation)
+        let nfaModel = new NFAModel(new NFA(model.model, model.type, index), model.simulation)
 
         // Defining the callback function, which is called when the graph is rendered.
         const callbackFunction = nodes =>

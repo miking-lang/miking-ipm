@@ -18,7 +18,7 @@ class GraphView {
      * Renders the DOM tree of the graph view including 
      */
     initView() {
-        this.modelRoot.innerHTML=`<div></div>`
+        this.modelRoot.innerHTML=`<h3 class="capitalize">${this.model.getType()}</h3><div></div>`
     }
     
     /*              GETTERS               */

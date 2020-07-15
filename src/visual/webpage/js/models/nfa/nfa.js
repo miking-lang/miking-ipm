@@ -6,12 +6,12 @@ class NFA {
     /**
      * @param {object} model Contains the NFA model. Includes acceptedIDs, startID, nodes
      *                       and transitions.
-     * @param {boolean} isDFA Whether the NFA is a DFA or not.
-     * @param {string} name A generated name, used to distinguish between visualized models.
+     * @param {string} type The type of NFA. (NFA/DFA)
+     * @param {int} index A unique model number.
      */
-    constructor(model, isDFA, name) {
-        this.isDFA = isDFA
-        this.name = name
+    constructor(model, type, index) {
+        this.type = type
+        this.name = type+index
         // Sets the render direction. Allowed values: TB, BT, RL, LR.
         this.rankDirection = "LR"
         // Used for general node settings. See: https://graphviz.org/documentation/ 

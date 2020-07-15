@@ -127,7 +127,7 @@ class NFAModel {
      * Gets the status and text for the current model configuration.
      */
     getInfoStatusAndText() {
-        let automata = this.visualizationModel.isDFA ? "DFA" : "NFA"
+        let automata = this.visualizationModel.type==="dfa" ? "DFA" : "NFA"
         return this.inputWasNotAccepted() ?
             {status: "warning", text: `Not accepted: The given input string was not accepted by the ${automata}.</span>`}
         : this.nfaGotStuck() ?
@@ -142,5 +142,12 @@ class NFAModel {
      */
     getPreviousStateName() {
         return this.configurations[this.currentConfigurationIndex-1]
+    }
+
+    /**
+     * Gets the type of the visualization model.
+     */
+    getType() {
+        return this.visualizationModel.type
     }
 }

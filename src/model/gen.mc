@@ -93,18 +93,18 @@ let dfaVisual = lam model. lam input. lam state2str. lam label2str.
     let transitions = dfaTransitions dfa in
     let js_code = strJoin "" [
         "{\n",
-            "\"type\" : \"dfa\",\n",
-            "\"simulation\" : {\n",
-                "\"input\" : [", (parseInput input "" label2str),"],\n",
-                "\"configurations\" : [", (parseInputPath (makeInputPath input dfa dfa.startState) "" state2str), "],\n",
-                "\"state\" : ","\"",dfaAcceptedInput input dfa,"\"", ",\n",
-            "},\n",
-            "\"model\" : {\n",
-                "\"states\" : [\n",parseStates (dfaStates dfa) state2str,"],\n",
-                "\"transitions\" : [\n", (parseTransitions transitions state2str label2str (dfaGetEqv dfa)) ,"], \n",
-                "\"startID\" : \"", (state2str dfa.startState) , "\",\n",
-                "\"acceptedIDs\" : [",(strJoin "" (map (lam s. strJoin "" ["\"", (state2str s), "\","]) dfa.acceptStates)),"],\n",
-            "}\n",
+	"\"type\" : \"dfa\",\n",
+	"\"simulation\" : {\n",
+	"\"input\" : [", (parseInput input "" label2str),"],\n",
+        "\"configurations\" : [", (parseInputPath (makeInputPath input dfa dfa.startState) "" state2str), "],\n",
+        "\"state\" : ","\"",dfaAcceptedInput input dfa,"\"", ",\n",
+        "},\n",
+        "\"model\" : {\n",
+        "\"states\" : [\n",parseStates (dfaStates dfa) state2str,"],\n",
+        "\"transitions\" : [\n", (parseTransitions transitions state2str label2str (dfaGetEqv dfa)) ,"], \n",
+        "\"startID\" : \"", (state2str dfa.startState) , "\",\n",
+        "\"acceptedIDs\" : [",(strJoin "" (map (lam s. strJoin "" ["\"", (state2str s), "\","]) dfa.acceptStates)),"],\n",
+        "}\n",
         "},\n"
     ] in
     js_code
