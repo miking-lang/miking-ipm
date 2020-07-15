@@ -47,11 +47,10 @@ let parseTransitions = lam trans. lam v2s. lam eqv.
     else
     let second = head (tail trans) in
     if (eqTrans eqv first second) then parseTransitions (join [[(first.0,first.1,join [first.2,second.2])], (tail (tail trans))]) v2s eqv
-    else
+    else 
     join [strJoin "" parsedFirst, parseTransitions (tail trans) v2s eqv]
 end
 
-let eqEdge = lam eq. lam l. lam r. if or (and (eq (l.0) (r.0)) (eq (l.1) (r.1))) (and (eq (l.1) (r.0)) (eq (l.0) (r.1))) then true else false 
 let parseEdges = lam edges. lam v2s. lam l2s. lam eqv.
         let edges_string = map (lam x. (x.0,x.1,l2s x.2)) edges in
         parseTransitions edges_string v2s eqv
