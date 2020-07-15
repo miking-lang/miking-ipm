@@ -18,6 +18,5 @@ let input = "1011" in
 let state2string = int2string in
 let trans2string = (lam b. [b]) in
 let newDfa = {modelType="dfa",model=dfaConstr states transitions alfabeth startState acceptStates (setEqual eqchar) eqchar (lam b. b) (lam b. [b]),input=input} in
-let newDigraph = {modelType="digraph",model=digraphAddVertex 1 (digraphEmpty eqi eqi)} in
-let output = visualize [newDigraph] in
+let output = visualize [newDfa] in
 print output

@@ -18,10 +18,8 @@ end
 
 let parseVertices = lam vertices. lam v2s.
         strJoin ""(map (lam x. strJoin "" [
-            "{\"id\": \"",
-            int2string 0 -- placeholder id
-            ,",",
-            "\", \"label\":\"",
+            "{",
+            "\"name\":\"",
             v2s x,
             "\"},\n"
         ]) vertices)
@@ -50,18 +48,22 @@ let compTrans = lam trans. lam l. lam r.
 
 -- parse transitions and squash transitions between the same states.
 recursive
-let parseTransitions = lam trans. lam dfa.
+let parseTransitions = lam trans. lam v2s. lam eqv.
     if (eqi (length trans) 0) then "" else
     let first = head trans in
-    let parsedFirst = ["{\"from\": \"", (dfa.s2s (first.0)), "\", \"to\": \"" ,(dfa.s2s (first.1)) , "\", \"label\": \"" , (first.2) , "\"},\n"] in
+    let parsedFirst = ["{\"from\": \"", (v2s (first.0)), "\", \"to\": \"" ,(v2s (first.1)) , "\", \"label\": \"" , (first.2) , "\"},\n"] in
     if(eqi (length trans) 1) then
     strJoin "" parsedFirst
     else
     let second = head (tail trans) in
-    if (eqTrans (dfaGetEqv dfa) first second) then parseTransitions (join [[(first.0,first.1,join [first.2,second.2])], (tail (tail trans))]) dfa
+    if (eqTrans eqv first second) then parseTransitions (join [[(first.0,first.1,join [first.2,second.2])], (tail (tail trans))]) v2s eqv
     else 
-    join [strJoin "" parsedFirst, parseTransitions (tail trans) dfa]
+    join [strJoin "" parsedFirst, parseTransitions (tail trans) v2s eqv]
 end
+
+let parseEdges = lam edges. lam v2s. lam l2s. lam eqv.
+        let edges_string = map (lam x. (x.0,x.1,l2s x.2)) edges in
+        parseTransitions edges_string v2s eqv
 
 -- Getting the input path parsed
 recursive
@@ -84,10 +86,11 @@ let parseInput = lam input. lam output. lam dfa.
     parseInput rest output dfa
 end
 
-let tab = lam n. strJoin "" (unfoldr (lam b. if eqi b n then None () else Some ("\t", addi b 1)) 0)
+let tab = lam n. if(lti n 0) then error "Number of tabs can not be smaller than 0" 
+    else strJoin "" (unfoldr (lam b. if eqi b n then None () else Some ("\t", addi b 1)) 0)
 
 recursive
-let fixTabs = lam inpt. lam t.
+let addTabs = lam inpt. lam t.
     if (eqi (length inpt) 0 ) then ""
     else if (eqi (length inpt) 1) then inpt
     else
@@ -95,11 +98,11 @@ let fixTabs = lam inpt. lam t.
     let snd = head (tail inpt) in
     let rest = tail inpt in
     if (eqchar first '\n') then 
-        if or (eqchar snd '}') (eqchar snd ']') then concat (strJoin "" [[first],tab (subi t 1)]) (fixTabs rest t) 
-        else concat (strJoin "" [[first],tab t]) (fixTabs rest t) 
-    else if or (eqchar (first) '{') (eqchar first '[') then concat [first] (fixTabs rest (addi t 1))
-    else if (or (eqchar (first) '}') (eqchar (first) ']')) then concat [first] (fixTabs rest (subi t 1)) 
-    else concat [first] (fixTabs rest t) 
+        if or (eqchar snd '}') (eqchar snd ']') then concat (strJoin "" [[first],tab (subi t 1)]) (addTabs rest t) 
+        else concat (strJoin "" [[first],tab t]) (addTabs rest t) 
+    else if or (eqchar (first) '{') (eqchar first '[') then concat [first] (addTabs rest (addi t 1))
+    else if (or (eqchar (first) '}') (eqchar (first) ']')) then concat [first] (addTabs rest (subi t 1)) 
+    else concat [first] (addTabs rest t) 
 end
 
 -- Parse a DFA to JS code and visualize
@@ -107,7 +110,7 @@ let dfaVisual = lam model.
     let dfa = model.model in
     let input = model.input in
     let transitions = map (lam x. (x.0,x.1,dfa.l2s x.2)) (dfaTransitions dfa) in
-    let js_code = strJoin "" ["\n",
+    let js_code = strJoin "" [
         "{\n",
         "\"type\" : \"dfa\",\n",
         "\"simulation\" : {\n",
@@ -123,7 +126,7 @@ let dfaVisual = lam model.
         "},\n",
         "\"model\" : {\n",
         "\"states\" : [\n",parseStates (dfaStates dfa) dfa.startState dfa "" ,"],\n",
-        "\"transitions\" : [\n", (parseTransitions transitions dfa) ,
+        "\"transitions\" : [\n", (parseTransitions transitions dfa.s2s (dfaGetEqv dfa)) ,
         "], \n",
         (strJoin "" ["\"startID\" : \"", (dfa.s2s dfa.startState) , "\",\n"]),
         "\"acceptedIDs\" : [",(strJoin "" (map (lam s. strJoin "" ["\"", (dfa.s2s s), "\","]) dfa.acceptStates)),
@@ -137,16 +140,18 @@ let digraphVisual = lam model.
     let digraph = model.model in
     let edges = digraphEdges digraph in
     strJoin "" [
-    "\t{\n",
-    "\t\t\t\"type\" : \"digraph\",\n",
-    "\t\t\t\"model\" : {\n",
-    "\t\t\t\t\"states\" : [\n[",(parseVertices (digraphVertices digraph) int2string) ,"\n\t\t\t\t],\n",
-    "\t\t\t},\n",
-    "],\n\t\t},\n\t"]
+    "{\n",
+    "\"type\" : \"digraph\",\n",
+    "\"model\" : {\n",
+    "\"nodes\" : [\n",(parseVertices (digraphVertices digraph) int2string) ,"],\n",
+    "\"edges\" : [\n", (parseEdges (digraphEdges digraph) int2string int2string eqi),
+    "], \n",
+    "},\n",
+    "\n},\n"]
 
 let visualize = lam models.
     let models = strJoin "" (map (lam x. if(setEqual eqchar x.modelType "dfa") then dfaVisual x else digraphVisual x) models) in
-    fixTabs (strJoin "" [
+    addTabs (strJoin "" [
     "let data = {\n",
     "\t\"models\": [\n",
     models, 
@@ -167,4 +172,5 @@ let acceptStates = [1] in
 let input = [0,1,0] in
 let newDfa = {modelType="dfa",model=dfaConstr states transitions alfabeth startState acceptStates eqi eqi int2string int2string,input=input} in
 let output = visualize [newDfa] in
+-- print (addTabs (strJoin "" ["\"states\" : [\n[","" ,"\n],\n"]) 0 )
 print output
