@@ -1,19 +1,21 @@
 include "string.mc"
 include "map.mc"
 include "dfa.mc"
+include "model.mc"
 
+let char2string = lam b. [b] 
 -- Formatting the states
 recursive
-let parseStates = lam states. lam startState. lam dfa. lam output. 
+let parseStates = lam states. lam startState. lam dfa. lam output. lam state2str.
     if (eqi (length states) 0) then output
     else
     let first = head states in
     let rest = tail states in
     let parsedFirst = strJoin "" [
     "{\"name\":\"",
-    (dfa.s2s first),
+    (state2str first),
     "\"},\n"] in
-    parseStates rest startState dfa (concat output parsedFirst)
+    parseStates rest startState dfa (concat output parsedFirst) state2str
 end
 
 let parseVertices = lam vertices. lam v2s.
@@ -24,15 +26,6 @@ let parseVertices = lam vertices. lam v2s.
             "\"},\n"
         ]) vertices)
 
--- Find the Starting State ID
-recursive
-let startID = lam states. lam startState. lam dfa.
-    let first = head states in
-    let rest = tail states in
-    if (dfa.eqs startState first) then (strJoin "" ["startID = '", (int2string first.id) , "',\n"])
-    else
-    startID rest startState dfa
-end
 
 let eqTrans = lam eq. lam l. lam r. if and (eq (l.0) (r.0)) (eq (l.1) (r.1)) then true else false
 
@@ -67,13 +60,13 @@ end
 
 -- Parse input-line
 recursive
-let parseInput = lam input. lam output. lam dfa.
+let parseInput = lam input. lam output. lam dfa. lam label2str.
     if(eqi (length input) 0) then output
     else
     let first = head input in
     let rest = tail input in
-    let output = strJoin "" [output,"\"" ,(dfa.l2s first) , "\","] in
-    parseInput rest output dfa
+    let output = strJoin "" [output,"\"" ,(char2string first) , "\","] in
+    parseInput rest output dfa label2str
 end
 
 -- return a string with n tabs
@@ -98,77 +91,81 @@ let addTabs = lam inpt. lam t.
 end
 
 -- Parse a DFA to JS code and visualize
-let dfaVisual = lam model.
-    let dfa = model.model in
-    let input = model.input in
-    let transitions = map (lam x. (x.0,x.1,dfa.l2s x.2)) (dfaTransitions dfa) in
+let dfaVisual = lam model. lam input. lam state2str. lam label2str.
+    let dfa = model in
+    let transitions = map (lam x. (x.0,x.1,label2str x.2)) (dfaTransitions dfa) in
     let js_code = strJoin "" [
         "{\n",
             "\"type\" : \"dfa\",\n",
             "\"simulation\" : {\n",
-                "\"input\" : [", (parseInput input "" dfa),"],\n",
-                "\"configurations\" : [", (parseInputPath (makeInputPath input dfa dfa.startState) "" dfa.s2s), "],\n",
+                "\"input\" : [", (parseInput input "" dfa label2str),"],\n",
+                "\"configurations\" : [", (parseInputPath (makeInputPath input dfa dfa.startState) "" state2str), "],\n",
                 "\"state\" : ","\"",dfaAcceptedInput input dfa,"\"", ",\n",
             "},\n",
             "\"model\" : {\n",
-                "\"states\" : [\n",parseStates (dfaStates dfa) dfa.startState dfa "" ,"],\n",
-                "\"transitions\" : [\n", (parseTransitions transitions dfa.s2s (dfaGetEqv dfa)) ,"], \n",
-                "\"startID\" : \"", (dfa.s2s dfa.startState) , "\",\n",
-                "\"acceptedIDs\" : [",(strJoin "" (map (lam s. strJoin "" ["\"", (dfa.s2s s), "\","]) dfa.acceptStates)),"],\n",
+                "\"states\" : [\n",parseStates (dfaStates dfa) dfa.startState dfa "" state2str,"],\n",
+                "\"transitions\" : [\n", (parseTransitions transitions state2str (dfaGetEqv dfa)) ,"], \n",
+                "\"startID\" : \"", (state2str dfa.startState) , "\",\n",
+                "\"acceptedIDs\" : [",(strJoin "" (map (lam s. strJoin "" ["\"", (state2str s), "\","]) dfa.acceptStates)),"],\n",
             "}\n",
         "},\n"
     ] in
     js_code
 
 -- Parse a digraph to JS code and visualize
-let digraphVisual = lam model.
-    let digraph = model.model in
+let digraphVisual = lam model. lam state2str. lam label2str.
+    let digraph = model in
     let edges = digraphEdges digraph in
-    let node2string = model.v2s in
-    let label2string = model.l2s in
     strJoin "" [
     "{\n",
-        "\"type\" : \"",model.modelType,"\",\n",
+        "\"type\" : \"","digraph","\",\n",
         "\"model\" : {\n",
-            "\"nodes\" : [\n",(parseVertices (digraphVertices digraph) node2string) ,"],\n",
-            "\"edges\" : [\n", (parseEdges (digraphEdges digraph) node2string label2string digraph.eqv), "], \n",
+            "\"nodes\" : [\n",(parseVertices (digraphVertices digraph) state2str) ,"],\n",
+            "\"edges\" : [\n", (parseEdges (digraphEdges digraph) state2str label2str digraph.eqv), "], \n",
         "},\n",
     "\n},\n"]
 
 -- Parse a graph to JS code and visualize
-let graphVisual = lam model.
-    let graph = model.model in
+let graphVisual = lam model. lam state2str. lam label2str.
+    let graph = model in
     let edges = graphEdges graph in
-    let node2string = model.v2s in
-    let label2string = model.l2s in
     strJoin "" [
     "{\n",
-        "\"type\" : \"",model.modelType,"\",\n",
+        "\"type\" : \"","graph","\",\n",
         "\"model\" : {\n",
-            "\"nodes\" : [\n",(parseVertices (graphVertices graph) node2string) ,"],\n",
-            "\"edges\" : [\n", (parseEdges (graphEdges graph) node2string label2string graph.eqv), "], \n",
+            "\"nodes\" : [\n",(parseVertices (graphVertices graph) state2str) ,"],\n",
+            "\"edges\" : [\n", (parseEdges (graphEdges graph) state2str label2str graph.eqv), "], \n",
         "},\n",
     "\n},\n"]
 
 -- make all models into string object
 let visualize = lam models.
-    let models = strJoin "" (map (lam x. if(setEqual eqchar x.modelType "dfa") then dfaVisual x 
-        else if(setEqual eqchar x.modelType "digraph") then digraphVisual x
-        else graphVisual x) models) in
-    addTabs (strJoin "" [
-    "let data = {\n",
-    "\t\"models\": [\n",
-    models, 
-    "]\n}\n"]) 0
+    let models = strJoin "" (
+        map (lam model. 
+            match model with Digraph(model,vertex2str,edge2str) then
+                digraphVisual model vertex2str edge2str
+            else match model with DFA(model,input,state2str,label2str) then
+                dfaVisual model input state2str label2str
+            else match model with Graph(model,vertex2str,edge2str) then
+                graphVisual model vertex2str edge2str
+                -- change the name of the function above
+            else match model with NFA(model,input,state2str,label2str) then
+                dfaVisual model input state2str label2str
+                -- change the name of the function above
+            else error "unknown type") models) in
+    print (addTabs (strJoin "" ["let data = {\n",
+                        "\t\"models\": [\n",
+                        models,
+                        "]\n}\n"]) 0)
+                        
 mexpr
 
-let alfabeth = [0,1,2] in
+let alfabeth = ['0','1','2'] in
 let states = [1,2,3] in
-let transitions = [(1,2,0),(3,1,0),(1,2,1),(2,3,1),(1,2,2),(3,1,1)] in
+let transitions = [(1,2,'0'),(3,1,'0'),(1,2,'1'),(2,3,'1'),(1,2,'2'),(3,1,'1')] in
 let startState = 1 in
 let acceptStates = [1] in
-let input = [0,1,0] in
-let newDfa = {modelType="dfa",model=dfaConstr states transitions alfabeth startState acceptStates eqi eqi int2string int2string,input=input} in
-let output = visualize [newDfa] in
--- print (addTabs (strJoin "" ["\"states\" : [\n[","" ,"\n],\n"]) 0 )
-print output
+let input = "010" in
+let newDfa = dfaConstr states transitions alfabeth startState acceptStates eqi eqchar in
+let model = DFA(newDfa, input, int2string, (lam b. [b])) in
+visualize [model]

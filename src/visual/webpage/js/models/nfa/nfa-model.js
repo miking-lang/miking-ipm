@@ -1,17 +1,18 @@
-class DFAModel {
+class NFAModel {
     /**
-     * This class is responsible for the data and the current state of a DFA.
+     * This class is responsible for the data and the current state of a NFA.
      * 
-     * @param {object} visualizationModel Valid types: DFA
+     * @param {object} visualizationModel Valid types: NFA (DFA)
      * @param {[string]} input An array of strings, each representing a transition.
      */
     constructor(visualizationModel, simulation){
         this.visualizationModel = visualizationModel
         this.input = simulation.input
         this.configurations = simulation.configurations
-        this.status = simulation.status
+        this.status = simulation.state
         this.currentConfigurationIndex = 0
         this.callbacks = []
+        this.updateNFA()
     }
 
     /**
@@ -37,7 +38,7 @@ class DFAModel {
         this.currentConfigurationIndex = this.simulationIsFinished() 
                                             ? 0 
                                             : this.currentConfigurationIndex+=1
-        this.updateDFA()
+        this.updateNFA()
     }
 
     /**
@@ -48,21 +49,21 @@ class DFAModel {
         this.currentConfigurationIndex = this.isAtStartState() 
                                             ? 0 
                                             : this.currentConfigurationIndex-=1
-        this.updateDFA()
+        this.updateNFA()
     }
 
     /**
-     * Updates the DFA according to the current configuration.
+     * Updates the NFA according to the current configuration.
      */
-    updateDFA() {
-        let warning = this.inputWasNotAccepted() || this.dfaGotStuck()
-        this.visualizationModel.makeTransition(this.getActiveStateID(), this.getPreviousStateID(), warning)
+    updateNFA() {
+        let warning = this.inputWasNotAccepted() || this.nfaGotStuck()
+        this.visualizationModel.makeTransition(this.getActiveStateName(), this.getPreviousStateName(), warning)
         this.notifyObservers()
     }
 
     /**
-     * Translates the DFA object to dot syntax.
-     * @returns {string} The DFA object in dot syntax.
+     * Translates the NFA object to dot syntax.
+     * @returns {string} The NFA object in dot syntax.
      */
     toDot() {
         return this.visualizationModel.toDot()
@@ -85,14 +86,14 @@ class DFAModel {
     }
 
     /**
-     * Returns whether the input was accepted by the DFA or not.
+     * Returns whether the input was accepted by the NFA or not.
      */
     inputWasAccepted() {
         return this.simulationIsFinished() && this.status === "accepted"
     }
 
     /**
-     * Returns whether the input was rejected by the DFA or not.
+     * Returns whether the input was rejected by the NFA or not.
      */
     inputWasNotAccepted() {
         return this.simulationIsFinished() && this.status === "not accepted"
@@ -107,18 +108,18 @@ class DFAModel {
     }
 
     /**
-     * Returns whether the DFA is stuck or not.
+     * Returns whether the NFA is stuck or not.
      */
-    dfaGotStuck() {
+    nfaGotStuck() {
         return this.simulationIsFinished() && this.status === "stuck"
     }
 
 
     /*              GETTERS               */
     /**
-     * Gets the active configuration ID.
+     * Gets the active state name.
      */
-    getActiveStateID() {
+    getActiveStateName() {
         return this.configurations[this.currentConfigurationIndex]
     }
 
@@ -126,19 +127,20 @@ class DFAModel {
      * Gets the status and text for the current model configuration.
      */
     getInfoStatusAndText() {
+        let automata = this.visualizationModel.isDFA ? "DFA" : "NFA"
         return this.inputWasNotAccepted() ?
-            {status: "warning", text: "Not accepted: The given input string was not accepted by the DFA.</span>"}
-        : this.dfaGotStuck() ?
-            {status: "warning", text: "Not accepted: The DFA is stuck in the current state.</span>"}
+            {status: "warning", text: `Not accepted: The given input string was not accepted by the ${automata}.</span>`}
+        : this.nfaGotStuck() ?
+            {status: "warning", text: `Not accepted: The automata is stuck in the current state.</span>`}
         : this.inputWasAccepted() ?
-            {status: "accepted", text: "The input was accepted by the DFA</span>"}
+            {status: "accepted", text: `The input was accepted by the ${automata}.</span>`}
         :   null
     }
 
     /**
-     * Gets the previous configuration ID.
+     * Gets the previous state name.
      */
-    getPreviousStateID() {
+    getPreviousStateName() {
         return this.configurations[this.currentConfigurationIndex-1]
     }
 }

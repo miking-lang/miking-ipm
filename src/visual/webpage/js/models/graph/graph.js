@@ -4,13 +4,11 @@
  */
 class Graph {
     /**
-     * @param {[object]} nodes Each node instance requires a name (string) and an id (string). 
-     *                         Node specific attributes are listed as properties of the optional 
-     *                         settings attribute.
-     * @param {[object]} edges Each transition requires the following attributes: from (string),
-     *                         to (string) and label (string).
+     * @param {object} model Contains nodes and edges of the graph model.
+     * @param {boolean} directed Whether the graph is directed or not.
+     * @param {string} name A generated name, used to distinguish between visualized models.
      */
-    constructor({nodes, edges, directed, name}) {
+    constructor(model, directed, name) {
         this.name = name
         // Sets the render direction. Allowed values: TB, BT, RL, LR.
         this.rankDirection = "LR"
@@ -20,11 +18,11 @@ class Graph {
         this.colors = {active: "green", white: "white", black:"black", warning:"red3"}
         // Init states
         this.directed = directed
-        this.nodes = nodes.map(node => {
+        this.nodes = model.nodes.map(node => {
             node.settings = {}
             return node
         })
-        this.edges = edges
+        this.edges = model.edges
     }
 
     /**
@@ -57,9 +55,9 @@ class Graph {
 
     /*              GETTERS               */
     /**
-     * Gets a node by id.
+     * Gets a node by name.
      */
-    getNodeByID(id) {
-        return this.nodes.find(node => node.name === id)
+    getNodeByName(name) {
+        return this.nodes.find(node => node.name === name)
     }
 }

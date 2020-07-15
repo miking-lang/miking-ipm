@@ -17,9 +17,7 @@ type DFA = {
              graph: Digraph,
              alfabeth: [a],
              startState: a,
-             acceptStates: [a],
-             s2s: a ->_ ->_ -> String,
-             l2s: a ->_ ->_ -> String
+             acceptStates: [a]
             }
 -- get equality function for states
 let dfaGetEqv = lam dfa.
@@ -80,9 +78,7 @@ let dfaAddState =  lam dfa. lam state.{
         graph = (digraphAddVertex state dfa.graph),
         alfabeth = dfa.alfabeth,
         startState = dfa.startState,
-        acceptStates = dfa.acceptStates,
-	s2s = dfa.s2s,
-	l2s = dfa.l2s
+        acceptStates = dfa.acceptStates
     }
 
 
@@ -92,22 +88,18 @@ let dfaAddTransition = lam dfa. lam trans.
         graph = (digraphAddEdge trans.0 trans.1 trans.2 dfa.graph),
         alfabeth = dfa.alfabeth,
         startState = dfa.startState,
-        acceptStates = dfa.acceptStates,
-	s2s= dfa.s2s,
-	l2s= dfa.l2s
+        acceptStates = dfa.acceptStates
     }
     
 -- constructor for DFA
-let dfaConstr = lam s. lam trans. lam alf. lam startS. lam accS. lam eqv. lam eql. lam s2s. lam l2s.
+let dfaConstr = lam s. lam trans. lam alf. lam startS. lam accS. lam eqv. lam eql.
     if dfaCheckValues trans s alf eqv eql accS startS then
         let emptyDigraph = digraphEmpty eqv eql in
         let initDfa = {
         graph = emptyDigraph,
         alfabeth = alf,
         startState = startS,
-        acceptStates = accS,
-        s2s = s2s,
-        l2s = l2s
+        acceptStates = accS
         } in
         foldl dfaAddTransition (foldl dfaAddState initDfa s) trans
 	else {}
