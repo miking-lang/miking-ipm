@@ -1,19 +1,20 @@
 include "string.mc"
 include "map.mc"
 include "dfa.mc"
+include "model.mc"
 
 -- Formatting the states
 recursive
-let parseStates = lam states. lam startState. lam dfa. lam output. 
+let parseStates = lam states. lam startState. lam dfa. lam output. lam state2str.
     if (eqi (length states) 0) then output
     else
     let first = head states in
     let rest = tail states in
     let parsedFirst = strJoin "" [
     "\t\t\t\t\t{\"name\":\"",
-    (dfa.s2s first),
+    (state2str first),
     "\"},\n"] in
-    parseStates rest startState dfa (concat output parsedFirst)
+    parseStates rest startState dfa (concat output parsedFirst) state2str
 end
 
 let parseVertices = lam vertices. lam v2s.
@@ -50,17 +51,17 @@ let compTrans = lam trans. lam l. lam r.
 
 -- parse transitions and squash transitions between the same states.
 recursive
-let parseTransitions = lam trans. lam dfa.
+let parseTransitions = lam trans. lam dfa. lam state2str.
     if (eqi (length trans) 0) then "" else
     let first = head trans in
-    let parsedFirst = [" \t\t\t\t\t{\"from\": \"", (dfa.s2s (first.0)), "\", \"to\": \"" ,(dfa.s2s (first.1)) , "\", \"label\": \"" , (first.2) , "\"},\n"] in
+    let parsedFirst = [" \t\t\t\t\t{\"from\": \"", (state2str (first.0)), "\", \"to\": \"" ,(state2str (first.1)) , "\", \"label\": \"" , (first.2) , "\"},\n"] in
     if(eqi (length trans) 1) then
     strJoin "" parsedFirst
     else
     let second = head (tail trans) in
-    if (eqTrans (dfaGetEqv dfa) first second) then parseTransitions (join [[(first.0,first.1,join [first.2,second.2])], (tail (tail trans))]) dfa
+    if (eqTrans (dfaGetEqv dfa) first second) then parseTransitions (join [[(first.0,first.1,join [first.2,second.2])], (tail (tail trans))]) dfa state2str
     else 
-    join [strJoin "" parsedFirst, parseTransitions (tail trans) dfa]
+    join [strJoin "" parsedFirst, parseTransitions (tail trans) dfa state2str]
 end
 
 -- Getting the input path parsed
@@ -75,22 +76,20 @@ end
 
 -- Parse input-line
 recursive
-let parseInput = lam input. lam output. lam dfa.
+let parseInput = lam input. lam output. lam dfa. lam trans2str.
     if(eqi (length input) 0) then output
     else
     let first = head input in
     let rest = tail input in
-    let output = strJoin "" [output,"\"" ,(dfa.l2s first) , "\","] in
-    parseInput rest output dfa
+    let output = strJoin "" [output,"\"" ,(trans2str first) , "\","] in
+    parseInput rest output dfa trans2str
 end
 
 let tab = lam n. strJoin "" (unfoldr (lam b. if eqi b n then None () else Some ("\t", addi b 1)) 0)
 
 -- Parse a DFA to JS code and visualize
-let dfaVisual = lam model.
-    let dfa = model.model in
-    let input = model.input in
-    let transitions = map (lam x. (x.0,x.1,dfa.l2s x.2)) (dfaTransitions dfa) in
+let dfaVisual = lam dfa. lam input. lam state2str. lam trans2str.
+    let transitions = map (lam x. (x.0,x.1,trans2str x.2)) (dfaTransitions dfa) in
     let tabCount = 2 in
     let first = strJoin "" [tab tabCount,
     "{\n"] in
@@ -101,21 +100,21 @@ let dfaVisual = lam model.
         first,
     snd,
     "\t\t\t\t\"input\" : [",
-    (parseInput input "" dfa),
+    (parseInput input "" dfa trans2str),
     "],\n",
     "\t\t\t\t\"configurations\" : [",
-    (parseInputPath (makeInputPath input dfa dfa.startState) "" dfa.s2s),
+    (parseInputPath (makeInputPath input dfa dfa.startState) "" state2str),
     "],\n",
     "\t\t\t\t\"state\" : ",
     "\"",dfaAcceptedInput input dfa,"\"",
     ",\n\t\t\t},\n",
     "\t\t\t\"model\" : {\n",
-    "\t\t\t\t\"states\" : [\n",parseStates (dfaStates dfa) dfa.startState dfa "" ,"\t\t\t\t],\n",
-    "\t\t\t\t\"transitions\" : [\n", (parseTransitions transitions dfa) ,
+    "\t\t\t\t\"states\" : [\n",parseStates (dfaStates dfa) dfa.startState dfa "" state2str ,"\t\t\t\t],\n",
+    "\t\t\t\t\"transitions\" : [\n", (parseTransitions transitions dfa state2str) ,
     "\t\t\t\t], \n",
-    (strJoin "" ["\t\t\t\t\"startID\" : \"", (dfa.s2s dfa.startState) , "\",\n"]),
+    (strJoin "" ["\t\t\t\t\"startID\" : \"", (state2str dfa.startState) , "\",\n"]),
     "\t\t\t\t\"acceptedIDs\" : [",
-    (strJoin "" (map (lam s. strJoin "" ["\"", (dfa.s2s s), "\","]) dfa.acceptStates)),
+    (strJoin "" (map (lam s. strJoin "" ["\"", (state2str s), "\","]) dfa.acceptStates)),
     "],\n\t\t\t}\n\t\t},\n\t"] in
     js_code
 
@@ -130,13 +129,24 @@ let digraphVisual = lam model.
     "\t\t\t},\n",
     "],\n\t\t},\n\t"]
 
+
 let visualize = lam models.
-    let models = strJoin "" (map (lam x. if(setEqual eqchar x.modelType "dfa") then dfaVisual x else digraphVisual x) models) in
-    strJoin "" [
-    "let data = {\n",
-    "\t\"models\": [\n",
-    models, 
-    "]\n}\n"]
+    let models = strJoin "" (
+        map (lam model. 
+            match model with Digraph(model,vertex2str,edge2str) then
+                digraphVisual model vertex2str edge2str
+            else match model with DFA(model,input,state2str,trans2str) then
+                dfaVisual model input state2str trans2str
+            else match model with Graph(model,vertex2str,edge2str) then
+                digraphVisual model vertex2str edge2str
+            else match model with NFA(model,input,state2str,trans2str) then
+                digraphVisual model input state2str trans2str
+            else error "unknown type") models) in
+    print (strJoin "" ["let data = {\n",
+                        "\t\"models\": [\n",
+                        models,
+                        "]\n}\n"])
+
 
 --Didn't figure out function overloading
 --If there is no input
@@ -151,6 +161,7 @@ let transitions = [(1,2,0),(3,1,0),(1,2,1),(2,3,1),(1,2,2),(3,1,1)] in
 let startState = 1 in
 let acceptStates = [1] in
 let input = [0,1,0] in
-let newDfa = {modelType="dfa",model=dfaConstr states transitions alfabeth startState acceptStates eqi eqi int2string int2string,input=input} in
-let output = visualize [newDfa] in
+let newDfa = dfaConstr states transitions alfabeth startState acceptStates eqi eqi in
+let model = DFA(newDfa, input, int2string, int2string) in
+let output = visualize [model] in
 print output
