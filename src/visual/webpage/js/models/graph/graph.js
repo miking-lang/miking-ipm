@@ -5,19 +5,19 @@
 class Graph {
     /**
      * @param {object} model Contains nodes and edges of the graph model.
-     * @param {boolean} directed Whether the graph is directed or not.
-     * @param {string} name A generated name, used to distinguish between visualized models.
+     * @param {string} type The type of graph.
+     * @param {int} index A unique model number.
      */
-    constructor(model, directed, name) {
-        this.name = name
+    constructor(model, type, index) {
+        this.type = type
+        this.name = type+index
         // Sets the render direction. Allowed values: TB, BT, RL, LR.
-        this.rankDirection = "LR"
+        this.rankDirection = this.type === "tree" ? "TB" : "LR"
         // Used for general node settings. 
         // See: https://graphviz.org/documentation/ for allowed values.
         this.nodeSettings = {style: 'filled', fillcolor: 'white', shape:"circle"}
         this.colors = {active: "green", white: "white", black:"black", warning:"red3"}
         // Init states
-        this.directed = directed
         this.nodes = model.nodes.map(node => {
             node.settings = {}
             return node
@@ -41,16 +41,18 @@ class Graph {
      * @returns {string} The DFA object in dot syntax.
      */
     toDot() { 
-        return `${this.directed ? `digraph` : `graph`} {
+        let d = `${this.type==="digraph"?this.type:"graph"} {
             rankdir=${this.rankDirection}
             node [${this.objectToString(this.nodeSettings)}]
             ${this.nodes.map(node =>
                 `${node.name} [id=${node.name} class="${this.name}-node" ${this.objectToString(node.settings)}]`
             ).join("\n")}
             ${this.edges.map(edge =>
-                `${edge.from} ${this.directed ? `->` : `--`} ${edge.to} [${edge.label ? `label=${edge.label}`:``} fontcolor=${edge.fontcolor} color=${edge.color}]`
+                `${edge.from} ${this.type === `digraph` ? `->` : `--`} ${edge.to} [${edge.label ? `label=${edge.label}`:``} fontcolor=${edge.fontcolor} color=${edge.color}]`
             ).join("\n")}
         }`
+        console.log(d)
+        return d
     }
 
     /*              GETTERS               */

@@ -31,4 +31,11 @@ class GraphModel {
     toDot() {
         return this.visualizationModel.toDot()
     }
+
+    /**
+     * Gets the type of the visualization model.
+     */
+    getType() {
+        return this.visualizationModel.type
+    }
 }

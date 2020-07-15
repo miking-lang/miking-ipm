@@ -7,7 +7,7 @@ class GraphController {
      * @param {int} index A unique model number.
      */
     constructor(model, modelRoot, index){
-        let graphModel = new GraphModel(new Graph(model.model, model.type === "digraph", model.type+index))
+        let graphModel = new GraphModel(new Graph(model.model, model.type, index))
         // Defining the callback function, which is called when the graph is rendered.
         const callbackFunction = nodes =>
             /*      TEMPORARY -->   */

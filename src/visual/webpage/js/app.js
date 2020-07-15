@@ -14,8 +14,9 @@ if (data && data.models) {
         case "nfa":
             new NFAController(model, modelRoot, idx)
             break;
-        case "graph":
         case "digraph":
+        case "graph":
+        case "tree":
             new GraphController(model, modelRoot, idx)
             break;
         default:
