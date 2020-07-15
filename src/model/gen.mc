@@ -1,6 +1,8 @@
 include "string.mc"
 include "map.mc"
 include "dfa.mc"
+include "nfa.mc"
+include "btree.mc"
 
 -- Formatting the states
 recursive
@@ -15,6 +17,47 @@ let parseStates = lam states. lam startState. lam dfa. lam output.
     "\"},\n"] in
     parseStates rest startState dfa (concat output parsedFirst)
 end
+
+
+-- Traversing the tree to format the states
+recursive
+let parseBTreeStates = lam btree. lam n2s. lam output.
+    match btree with BTree t then
+    parseBTreeStates t.0 t.1 ""
+    else match btree with Nil () then
+    output
+    else match btree with Leaf v then strJoin "" [output, "\t\t\t\t\t{\"name\":\"", (n2s v), "\"},\n"]
+    else match btree with Node n then
+    let output =  strJoin "" [output, "\t\t\t\t\t{\"name\":\"", (n2s n.0), "\"},\n"] in
+    let output = parseBTreeStates n.1 n2s output in
+    let output = parseBTreeStates n.2 n2s output in
+    output
+    else "Error, incorrect binary tree"
+end
+
+-- Traversing the tree to format the transitions (edges)
+recursive
+let parseBTreeEdges = lam btree. lam n2s. lam from. lam output.
+    match btree with BTree t then
+    (
+    match t.0 with Node n then
+    let output = parseBTreeEdges n.1 t.1 n.0 "" in
+    parseBTreeEdges n.2 t.1 n.0 output
+    else ""
+    )
+    else match btree with Nil () then
+    output
+    else match btree with Leaf v then
+    strJoin "" [output, " \t\t\t\t\t{\"from\": \"", (n2s from), "\", \"to\": \"" ,(n2s v) , "\"},\n"]
+    else match btree with Node n then
+    let output = strJoin "" [output, " \t\t\t\t\t{\"from\": \"", (n2s from) , "\", \"to\": \"" , (n2s n.0) , "\"},\n"] in
+    let output = parseBTreeEdges n.1 n2s n.0 output in
+    let output = parseBTreeEdges n.2 n2s n.0 output in
+    output
+    
+    else "Wrong input"
+end
+
 
 let parseVertices = lam vertices. lam v2s.
         strJoin ""(map (lam x. strJoin "" [
@@ -84,7 +127,10 @@ let parseInput = lam input. lam output. lam dfa.
     parseInput rest output dfa
 end
 
+
 let tab = lam n. strJoin "" (unfoldr (lam b. if eqi b n then None () else Some ("\t", addi b 1)) 0)
+    
+
 
 -- Parse a DFA to JS code and visualize
 let dfaVisual = lam model.
@@ -132,16 +178,48 @@ let digraphVisual = lam model.
 
 -- Format NFA to JS code for visualizing
 let nfaVisual = lam model.
-    "TODO - create this method"
+    let nfa = model.model in
+    let input = model.input in
+    let transitions = map (lam x. (x.0,x.1,nfa.l2s x.2)) (nfaTransitions nfa) in
+    let tabCount = 3 in
+    let snd = strJoin "" [tab 3,"\"type\" : \"nfa\",\n"] in
+    let first = strJoin "" [tab (subi tabCount 1),
+    "{\n"] in
+    let tabCount = addi 1 tabCount in
+    let js_code = strJoin "" [
+        first,
+	snd,
+	"\t\t\t\"model\" : {\n",
+	"\t\t\t\t\"states\" : [\n",parseStates (nfaStates nfa) nfa.startState nfa "" ,"\t\t\t\t],\n",
+	"\t\t\t\t\"transitions\" : [\n", (parseTransitions transitions nfa) ,
+	"\t\t\t\t], \n",
+	(strJoin "" ["\t\t\t\t\"startID\" : \"", (nfa.s2s nfa.startState) , "\",\n"]),
+    	"\t\t\t\t\"acceptedIDs\" : [",
+    (strJoin "" (map (lam s. strJoin "" ["\"", (nfa.s2s s), "\","]) nfa.acceptStates)),
+    "],\n\t\t\t}\n\t\t},\n\t"] in
+    js_code
 
 -- Format graph to JS code for visualizing
 let graphVisual = lam model.
     "TODO - create this method"
 
 -- Format Tree to JS code for visualizing
-let treeVisual = lam model.
-    let tree = model.model in
-    ""
+let btreeVisual = lam model.
+     let btree = model.model in
+     let tabCount = 3 in
+     let snd = strJoin "" [tab 3, "\"type\" : \"btree\",\n"] in
+     let first = strJoin "" [tab 2, "{\n"] in
+     let tabCount = addi 1 tabCount in
+     let js_code = strJoin "" [
+     first,
+     snd,
+     "\t\t\t\"model\" : {\n",
+     "\t\t\t\t\"nodes\" : [\n",(parseBTreeStates btree "" "") ,"\t\t\t\t],\n",
+     "\t\t\t\t\"edges\" : [\n", (parseBTreeEdges btree "" 0 "") ,
+     "\t\t\t\t], \n",
+     "\n\t\t\t}\n\t\t},\n\t"
+     ] in
+     js_code
     
 
 
@@ -150,7 +228,7 @@ let visualize = lam models.
     if(setEqual eqchar x.modelType "dfa") then dfaVisual x else
     if(setEqual eqchar x.modelType "digraph") then digraphVisual x else
     if(setEqual eqchar x.modelType "nfa") then nfaVisual x else
-    if(setEqual eqchar x.modelType "tree") then treeVisual x else
+    if(setEqual eqchar x.modelType "btree") then btreeVisual x else
     if(setEqual eqchar x.modelType "graph") then graphVisual x else
     "") models) in
     strJoin "" [
@@ -159,10 +237,6 @@ let visualize = lam models.
     models, 
     "]\n}\n"]
 
---Didn't figure out function overloading
---If there is no input
-let dfaVisualNoInput = lam dfa.
-    dfaVisual dfa ""
 
 mexpr
 

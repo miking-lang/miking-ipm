@@ -17,6 +17,7 @@ let acceptStates = ["a", "c"] in
 let input = "1011" in
 let state2string = int2string in
 let trans2string = (lam b. [b]) in
-let newDfa = {modelType="dfa",model=dfaConstr states transitions alfabeth startState acceptStates (setEqual eqchar) eqchar (lam b. b) (lam b. [b]),input=input} in
-let output = visualize [newDfa] in
-print output
+let newNfa = {modelType="nfa",model=nfaConstr states transitions alfabeth startState acceptStates (setEqual eqchar) eqchar (lam b. b) (lam b. [b]),input=input} in
+let btree = BTree (Node(2, Node(3, Nil (), Leaf 4), Leaf 5), int2string) in
+let tree = {modelType="btree",model=btree } in
+print (visualize [tree])
