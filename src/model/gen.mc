@@ -147,12 +147,6 @@ let visualize = lam models.
                         models,
                         "]\n}\n"])
 
-
---Didn't figure out function overloading
---If there is no input
-let dfaVisualNoInput = lam dfa.
-    dfaVisual dfa ""
-
 mexpr
 
 let alfabeth = [0,1,2] in
