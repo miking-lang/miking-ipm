@@ -23,5 +23,5 @@ end
 
 
 mexpr
-let tree = BTree (Node(2, Node(3, Nil () , Leaf 2), Leaf 3), int2string) in
+let tree = BTree (Node(2, Node(3, Nil () , Leaf 2), Leaf 3)) in
 utest count tree  with 10 in ()

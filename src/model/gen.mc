@@ -19,12 +19,50 @@ let formatVertices = lam vertices. lam vertex2str. lam output.
     formatVertices rest vertex2str (concat output formatdFirst)
 end
 
+-- format edges and squash edges between the same nodes.
+recursive
+let formatAndSquashEdges = lam trans. lam v2s. lam eqv.
+    if (eqi (length trans) 0) then "" else
+    let first = head trans in
+    let formatdFirst = ["{\"from\": \"", (v2s (first.0)), "\", \"to\": \"" ,(v2s (first.1)) , "\", \"label\": \"" , (first.2) , "\"},\n"] in
+    if(eqi (length trans) 1) then
+    strJoin "" formatdFirst
+    else
+    let second = head (tail trans) in
+    if (and (eqv (first.0) (second.0)) (eqv (first.1) (second.1))) then formatAndSquashEdges (join [[(first.0,first.1,join [first.2,second.2])], (tail (tail trans))]) v2s eqv
+    else 
+    join [strJoin "" formatdFirst, formatAndSquashEdges (tail trans) v2s eqv]
+end
+
+-- format all edges into printable string
+let formatEdges = lam edges. lam v2s. lam l2s. lam eqv.
+        let edges_string = map (lam x. (x.0,x.1,l2s x.2)) edges in
+        formatAndSquashEdges edges_string v2s eqv
+        
+-- Formatting the states
+let formatStates = lam states. lam state2str.
+    formatVertices states state2str ""
+
+-- format transitions into printable string
+let formatTransitions = lam trans. lam v2s. lam l2s. lam eqv.
+    formatEdges trans v2s l2s eqv
+
+    
+-- Getting the input path formatd
+recursive
+let formatInputPath = lam path. lam output. lam state2string.
+    if(eqi (length path) 0) then output
+    else
+    let first = head path in
+    let rest = tail path in
+    formatInputPath rest (strJoin "" [output,"\"",(state2string first),"\"", ","]) state2string
+end
 
 -- Traversing the tree to format the states
 recursive
 let formatBTreeStates = lam btree. lam n2s. lam output.
     match btree with BTree t then
-    formatBTreeStates t.0 t.1 ""
+    formatBTreeStates t n2s ""
     else match btree with Nil () then
     output
     else match btree with Leaf v then strJoin "" [output, "{\"name\":\"", (n2s v), "\"},\n"]
@@ -41,9 +79,9 @@ recursive
 let formatBTreeEdges = lam btree. lam n2s. lam from. lam output.
     match btree with BTree t then
     (
-    match t.0 with Node n then
-    let output = formatBTreeEdges n.1 t.1 n.0 "" in
-    formatBTreeEdges n.2 t.1 n.0 output
+    match t with Node n then
+    let output = formatBTreeEdges n.1 n2s n.0 "" in
+    formatBTreeEdges n.2 n2s n.0 output
     else ""
     )
     else match btree with Nil () then
@@ -58,6 +96,7 @@ let formatBTreeEdges = lam btree. lam n2s. lam from. lam output.
     
     else "Wrong input"
 end
+
 
 -- Formatting the states
 let formatStates = lam states. lam state2str.
@@ -192,9 +231,9 @@ let nfaVisual = lam model. lam input. lam s2s. lam l2s.
 	(formatStates (nfaStates nfa) s2s),
 	"],\n",
 	"\"transitions\" : [\n", (formatTransitions (nfaTransitions nfa) s2s l2s (nfaGetEqv nfa)) ,
-	"t], \n",
-	(strJoin "" ["\t\t\t\t\"startID\" : \"", (s2s nfa.startState) , "\",\n"]),
-    	"t\"acceptedIDs\" : [",
+	"], \n",
+	(strJoin "" ["\"startID\" : \"", (s2s nfa.startState) , "\",\n"]),
+    	"\"acceptedIDs\" : [",
     (strJoin "" (map (lam s. strJoin "" ["\"", (s2s s), "\","]) nfa.acceptStates)),
     "],\n}\n},\n"] in
     js_code
@@ -209,8 +248,8 @@ let btreeVisual = lam model. lam n2s.
      first,
      snd,
      "\"model\" : {\n",
-     "\"nodes\" : [\n",(formatBTreeStates btree "" "") ,"],\n",
-     "\"edges\" : [\n", (formatBTreeEdges btree "" 0 "") ,
+     "\"nodes\" : [\n",(formatBTreeStates btree n2s "") ,"],\n",
+     "\"edges\" : [\n", (formatBTreeEdges btree n2s 0 "") ,
      "], \n",
      "}\n},\n"
      ] in
