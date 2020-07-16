@@ -7,14 +7,20 @@ let char2string = (lam b. [b]) in
 
 
 -- create your DFA
-let alphabet = ['0','1','2','3'] in
-let states = ["a","b","c"] in
-let transitions = [("c","a",'0'),("a","b",'1'),("b","c",'0'),("c","a",'1'),("a","b",'3'),("c","a",'2'),("a","b",'0')] in
-let startState = "a" in
-let acceptStates = ["a", "c"] in
+let alphabet = ['0','1'] in
+let states = ["s0","s1","s2"] in
+let transitions = [
+  ("s0","s1",'1'),
+  ("s1","s1",'1'),
+  ("s1","s2",'0'),
+  ("s2","s1",'1'),
+  ("s2","s2",'0')
+] in
 
-let dfa = dfaConstr states transitions alphabet startState acceptStates (setEqual eqchar) eqchar in
+let startState = "s0" in
+let acceptStates = ["s2"] in
 
+let dfa = dfaConstr states transitions alphabet startState acceptStates eqString eqchar in
 
 -- create your graph
 let graph = foldr (lam e. lam g. graphAddEdge e.0 e.1 e.2 g) 
@@ -32,10 +38,16 @@ let nfa = nfaConstr states transitions alphabet startState acceptStates (setEqua
 let btree = BTree (Node(2, Node(3, Nil (), Leaf 4), Leaf 5)) in
 
 visualize [
-    DFA(dfa, "1011", string2string, char2string),
+    -- accepted by the DFA
+    DFA(dfa,"1000",string2string, char2string),
+    -- accepted by the DFA
+    DFA(dfa,"101110",string2string, char2string),
+    -- not accepted by the DFA
+    DFA(dfa,"1010001",string2string, char2string),
     Digraph(digraph, char2string,int2string),
     Graph(graph,int2string,string2string),
     BTree(btree, int2string),
     NFA(nfa, "1101", string2string, char2string)
 
 ]
+

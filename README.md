@@ -162,7 +162,7 @@ There is a **test.mc** in the root folder of the project which already contains 
 ```javascript
 mexpr
 let string2string = (lam b. b) in
-let eqString = setEqual eqchar
+let eqString = setEqual eqchar in
 let char2string = (lam b. [b]) in
 
 -- create your DFA

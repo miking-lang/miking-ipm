@@ -48,14 +48,28 @@ let formatTransitions = lam trans. lam v2s. lam l2s. lam eqv.
     formatEdges trans v2s l2s eqv
 
     
--- Getting the input path formatd
+-- Getting the input path formated
 recursive
 let formatInputPath = lam path. lam output. lam state2string.
     if(eqi (length path) 0) then output
     else
     let first = head path in
     let rest = tail path in
-    formatInputPath rest (strJoin "" [output,"\"",(state2string first),"\"", ","]) state2string
+    formatInputPath rest (strJoin "" [output,
+        "{\"state\": \"",(state2string first.state),"\"", ",",
+        "\"status\": ",(int2string first.status),"", ",",
+        "\"index\": ",(int2string first.index),"}", ",\n"]) state2string
+end
+
+-- format input-line
+recursive
+let formatInput = lam input. lam output. lam label2str.
+    if(eqi (length input) 0) then output
+    else
+    let first = head input in
+    let rest = tail input in
+    let output = strJoin "" [output,"\"" ,(label2str first) , "\","] in
+    formatInput rest output label2str
 end
 
 -- Traversing the tree to format the states
@@ -97,7 +111,6 @@ let formatBTreeEdges = lam btree. lam n2s. lam from. lam output.
     else "Wrong input"
 end
 
-
 -- Formatting the states
 let formatStates = lam states. lam state2str.
     formatVertices states state2str ""
@@ -126,26 +139,6 @@ let formatEdges = lam edges. lam v2s. lam l2s. lam eqv.
 let formatTransitions = lam trans. lam v2s. lam l2s. lam eqv.
     formatEdges trans v2s l2s eqv
     
--- Getting the input path formatd
-recursive
-let formatInputPath = lam path. lam output. lam state2string.
-    if(eqi (length path) 0) then output
-    else
-    let first = head path in
-    let rest = tail path in
-    formatInputPath rest (strJoin "" [output,"\"",(state2string first),"\"", ","]) state2string
-end
-
--- Format input-line
-recursive
-let formatInput = lam input. lam output. lam label2str.
-    if(eqi (length input) 0) then output
-    else
-    let first = head input in
-    let rest = tail input in
-    let output = strJoin "" [output,"\"" ,(label2str first) , "\","] in
-    formatInput rest output label2str
-end
 
 
 -- return a string with n tabs
@@ -170,6 +163,7 @@ let addTabs = lam inpt. lam t.
     else concat [first] (addTabs rest t) 
 end
 
+
 -- Format a DFA to JS code and visualize
 let dfaVisual = lam model. lam input. lam state2str. lam label2str.
     let dfa = model in
@@ -179,20 +173,20 @@ let dfaVisual = lam model. lam input. lam state2str. lam label2str.
 	"\"type\" : \"dfa\",\n",
 	"\"simulation\" : {\n",
 	"\"input\" : [", (formatInput input "" label2str),"],\n",
-        "\"configurations\" : [", (formatInputPath (makeInputPath input dfa dfa.startState) "" state2str), "],\n",
-        "\"state\" : ","\"",dfaAcceptedInput input dfa,"\"", ",\n",
+        "\"configurations\" : [\n", (formatInputPath (makeInputPath 0 dfa.startState input dfa) "" state2str), "],\n",
         "},\n",
         "\"model\" : {\n",
         "\"states\" : [\n",formatStates (dfaStates dfa) state2str,"],\n",
         "\"transitions\" : [\n", (formatTransitions transitions state2str label2str (dfaGetEqv dfa)) ,"], \n",
-        "\"startID\" : \"", (state2str dfa.startState) , "\",\n",
-        "\"acceptedIDs\" : [",(strJoin "" (map (lam s. strJoin "" ["\"", (state2str s), "\","]) dfa.acceptStates)),"],\n",
+        "\"startState\" : \"", (state2str dfa.startState) , "\",\n",
+        "\"acceptedStates\" : [",(strJoin "" (map (lam s. strJoin "" ["\"", (state2str s), "\","]) dfa.acceptStates)),"],\n",
         "}\n",
         "},\n"
     ] in
     js_code
 
--- Format a digraph to JS code and visualize
+
+-- format a digraph to JS code and visualize
 let digraphVisual = lam model. lam state2str. lam label2str.
     let digraph = model in
     let edges = digraphEdges digraph in
@@ -206,7 +200,7 @@ let digraphVisual = lam model. lam state2str. lam label2str.
     "\n},\n"]
 
 
--- Format a graph to JS code and visualize
+-- format a graph to JS code and visualize
 let graphVisual = lam model. lam state2str. lam label2str.
     let graph = model in
     let edges = graphEdges graph in
@@ -255,9 +249,6 @@ let btreeVisual = lam model. lam n2s.
      ] in
      js_code
     
-
-
-
 -- make all models into string object
 let visualize = lam models.
     let models = strJoin "" (
