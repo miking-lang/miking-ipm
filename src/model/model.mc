@@ -1,4 +1,4 @@
-include "./dfa.mc"
+include "dfa.mc"
 
 -- Represents models that can be visualized and its associated data.
 type Model
@@ -6,6 +6,7 @@ con Digraph : (Digraph,    vertex2str, edge2str ) -> Model
 con DFA     : (DFA, input, state2str,  label2str) -> Model
 con Graph   : (Graph,      vertex2str, edge2str ) -> Model
 con NFA     : (NFA, input, state2str,  label2str) -> Model
+con BTree   : (BTree, node2str) -> Model
 
 
 
