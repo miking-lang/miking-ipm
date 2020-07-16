@@ -16,9 +16,7 @@ type NFA = {
      graph: Digraph,
      alphabet: [b],
      startState: a,
-     acceptStates: [a],
-     s2s: a -> String,
-     l2s: b -> String
+     acceptStates: [a]
 }
 
 	    
@@ -43,7 +41,7 @@ let nfaCheckLabels = lam graph. lam alph. lam eql.
     all (lam x. (any (lam y. eql x.2 y) alph)) graph
 
 -- check that values are accaptable for the NFA
-let nfaCheckValues = lam trans. lam s. lam alph. lam eqv. lam eql. lam accS. lam startS. lam s2s. lam l2s.
+let nfaCheckValues = lam trans. lam s. lam alph. lam eqv. lam eql. lam accS. lam startS.
     if not (nfaCheckLabels trans alph eql) then error "Some labels are not in the defined alphabet" else
         if not (setIsSubsetEq eqv accS s) then error "Some accepted states do not exist" else 
         if not (setMem eqv startS s) then error "The start state does not exist"
@@ -54,9 +52,7 @@ let nfaAddState =  lam nfa. lam state.{
         graph = (digraphAddVertex state nfa.graph),
         alphabet = nfa.alphabet,
         startState = nfa.startState,
-        acceptStates = nfa.acceptStates,
-	s2s = nfa.s2s,
-	l2s = nfa.l2s
+        acceptStates = nfa.acceptStates
     }
 
 
@@ -66,23 +62,19 @@ let nfaAddTransition = lam nfa. lam trans.
         graph = (digraphAddEdge trans.0 trans.1 trans.2 nfa.graph),
         alphabet = nfa.alphabet,
         startState = nfa.startState,
-        acceptStates = nfa.acceptStates,
-	s2s = nfa.s2s,
-	l2s = nfa.l2s
+        acceptStates = nfa.acceptStates
     }
 
 
-let nfaConstr = lam s. lam trans. lam alph. lam startS. lam accS. lam eqv. lam eql. lam s2s. lam l2s.
-    if nfaCheckValues trans s alph eqv eql accS startS s2s l2s
+let nfaConstr = lam s. lam trans. lam alph. lam startS. lam accS. lam eqv. lam eql.
+    if nfaCheckValues trans s alph eqv eql accS startS
     then
     let emptyDigraph = digraphEmpty eqv eql in
     let initNfa = {
     graph = emptyDigraph,
     alphabet = alph,
     startState = startS,
-    acceptStates = accS,
-    s2s = s2s,
-    l2s = l2s
+    acceptStates = accS
     } in
     foldl nfaAddTransition (foldl nfaAddState initNfa s) trans
     else {}
@@ -94,7 +86,7 @@ let states = [0,1,2] in
 let transitions = [(0,1,'1'),(1,1,'1'),(1,2,'0'),(2,2,'0'),(2,1,'1')] in
 let startState = 0 in
 let acceptStates = [2] in 
-let newNfa = nfaConstr states transitions alphabet startState acceptStates eqi eqchar int2string (lam b. [b]) in
+let newNfa = nfaConstr states transitions alphabet startState acceptStates eqi eqchar in
 utest setEqual eqchar alphabet newNfa.alphabet with true in
 utest eqi startState newNfa.startState with true in
 utest setEqual eqi acceptStates newNfa.acceptStates with true in

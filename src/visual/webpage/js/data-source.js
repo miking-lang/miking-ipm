@@ -65,6 +65,23 @@ let data = {
 				], 
 			}
 		},
+		{
+			"type" : "nfa",
+			"model" : {
+				"states" : [
+					{"name":"a"},
+					{"name":"b"},
+					{"name":"c"},
+				],
+				"transitions" : [
+					{"from": "a", "to": "b", "label": "130"},
+					{"from": "b", "to": "c", "label": "0"},
+					{"from": "c", "to": "a", "label": "012"},
+					t], 
+								"startID" : "a",
+				t"acceptedIDs" : ["a","c",],
+			}
+		},
 	]
 }
 
