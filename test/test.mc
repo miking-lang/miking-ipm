@@ -18,7 +18,11 @@ let digraph = digraphAddEdge 1 2 0 (foldr digraphAddVertex (digraphEmpty eqi eqi
 
 let graph = graphAddEdge 1 2 3 (foldr graphAddVertex (digraphEmpty eqi eqi) [1,2]) in
 
+let btree = BTree (Node(2, Node(3, Nil (), Leaf 4), Leaf 5), int2string) in
+
 visualize [
     DFA(dfa, "1011", string2string, char2string),
     Digraph(digraph, int2string,int2string),
-    Graph(graph, int2string,int2string)]
+    Graph(graph, int2string,int2string),
+    BTree(btree, int2string)
+]

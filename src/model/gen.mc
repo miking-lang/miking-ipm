@@ -2,6 +2,8 @@ include "string.mc"
 include "map.mc"
 include "dfa.mc"
 include "model.mc"
+include "nfa.mc"
+include "btree.mc"
 
 -- Formatting the vertices
 recursive
@@ -14,10 +16,50 @@ let parseVertices = lam vertices. lam vertex2str. lam output.
     "{\"name\":\"",
     (vertex2str first),
     "\"},\n"] in
-    parseVertices rest vertex2str (concat output parsedFirst) 
+    parseVertices rest vertex2str (concat output parsedFirst)
 end
--- Formatting the states
 
+
+-- Traversing the tree to format the states
+recursive
+let parseBTreeStates = lam btree. lam n2s. lam output.
+    match btree with BTree t then
+    parseBTreeStates t.0 t.1 ""
+    else match btree with Nil () then
+    output
+    else match btree with Leaf v then strJoin "" [output, "{\"name\":\"", (n2s v), "\"},\n"]
+    else match btree with Node n then
+    let output =  strJoin "" [output, "{\"name\":\"", (n2s n.0), "\"},\n"] in
+    let output = parseBTreeStates n.1 n2s output in
+    let output = parseBTreeStates n.2 n2s output in
+    output
+    else "Error, incorrect binary tree"
+end
+
+-- Traversing the tree to format the transitions (edges)
+recursive
+let parseBTreeEdges = lam btree. lam n2s. lam from. lam output.
+    match btree with BTree t then
+    (
+    match t.0 with Node n then
+    let output = parseBTreeEdges n.1 t.1 n.0 "" in
+    parseBTreeEdges n.2 t.1 n.0 output
+    else ""
+    )
+    else match btree with Nil () then
+    output
+    else match btree with Leaf v then
+    strJoin "" [output, " {\"from\": \"", (n2s from), "\", \"to\": \"" ,(n2s v) , "\"},\n"]
+    else match btree with Node n then
+    let output = strJoin "" [output, " {\"from\": \"", (n2s from) , "\", \"to\": \"" , (n2s n.0) , "\"},\n"] in
+    let output = parseBTreeEdges n.1 n2s n.0 output in
+    let output = parseBTreeEdges n.2 n2s n.0 output in
+    output
+    
+    else "Wrong input"
+end
+
+-- Formatting the states
 let parseStates = lam states. lam state2str.
     parseVertices states state2str ""
 
@@ -65,6 +107,7 @@ let parseInput = lam input. lam output. lam label2str.
     let output = strJoin "" [output,"\"" ,(label2str first) , "\","] in
     parseInput rest output label2str
 end
+
 
 -- return a string with n tabs
 let tab = lam n. if(lti n 0) then error "Number of tabs can not be smaller than 0" 
@@ -122,6 +165,7 @@ let digraphVisual = lam model. lam state2str. lam label2str.
         "},\n",
     "\n},\n"]
 
+
 -- Parse a graph to JS code and visualize
 let graphVisual = lam model. lam state2str. lam label2str.
     let graph = model in
@@ -135,6 +179,50 @@ let graphVisual = lam model. lam state2str. lam label2str.
         "},\n",
     "\n},\n"]
 
+
+-- Format NFA to JS code for visualizing
+let nfaVisual = lam model.
+    let nfa = model.model in
+    let input = model.input in
+    let transitions = map (lam x. (x.0,x.1,nfa.l2s x.2)) (nfaTransitions nfa) in
+    let tabCount = 3 in
+    let snd = strJoin "" [tab 3,"\"type\" : \"nfa\",\n"] in
+    let first = strJoin "" [tab (subi tabCount 1),
+    "{\n"] in
+    let tabCount = addi 1 tabCount in
+    let js_code = strJoin "" [
+        first,
+	snd,
+	"\t\t\t\"model\" : {\n",
+	"\t\t\t\t\"states\" : [\n",parseStates (nfaStates nfa) nfa.startState nfa "" ,"\t\t\t\t],\n",
+	"\t\t\t\t\"transitions\" : [\n", (parseTransitions transitions nfa) ,
+	"\t\t\t\t], \n",
+	(strJoin "" ["\t\t\t\t\"startID\" : \"", (nfa.s2s nfa.startState) , "\",\n"]),
+    	"\t\t\t\t\"acceptedIDs\" : [",
+    (strJoin "" (map (lam s. strJoin "" ["\"", (nfa.s2s s), "\","]) nfa.acceptStates)),
+    "],\n\t\t\t}\n\t\t},\n\t"] in
+    js_code
+
+
+-- Format Tree to JS code for visualizing
+let btreeVisual = lam model. lam n2s.
+     let btree = model in
+     let snd = strJoin "" [ "\"type\" : \"btree\",\n"] in
+     let first = strJoin "" [ "{\n"] in
+     let js_code = strJoin "" [
+     first,
+     snd,
+     "\"model\" : {\n",
+     "\"nodes\" : [\n",(parseBTreeStates btree "" "") ,"],\n",
+     "\"edges\" : [\n", (parseBTreeEdges btree "" 0 "") ,
+     "], \n",
+     "}\n},\n"
+     ] in
+     js_code
+    
+
+
+
 -- make all models into string object
 let visualize = lam models.
     let models = strJoin "" (
@@ -147,8 +235,9 @@ let visualize = lam models.
                 graphVisual model vertex2str edge2str
                 -- change the name of the function above
             else match model with NFA(model,input,state2str,label2str) then
-                dfaVisual model input state2str label2str
-                -- change the name of the function above
+                nfaVisual model input state2str label2str
+	    else match model with BTree(model, node2str) then
+	    	 btreeVisual model node2str
             else error "unknown type") models) in
     print (addTabs (strJoin "" ["let data = {\n",
                         "\t\"models\": [\n",

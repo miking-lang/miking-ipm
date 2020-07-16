@@ -4,21 +4,26 @@ include "map.mc"
 include "string.mc"
 
 -- Represents a deterministic finite automaton.
--- Equality and print functions are required for the states (eqv,s2s) and labels (eql,l2s) for the 
+-- Equality and print functions are required for
+-- the states (eqv,s2s) and labels (eql,l2s) for the 
 -- construct function (dfaConstr).
 
--- States are represented by a vertex in a directed graph. They are unique integers, there cannot be two states whose value of the
--- equality function is true.
+-- States are represented by a vertex in a directed graph.
+-- They are unique integers, there cannot be two states
+-- whose value of the equality function is true.
 
--- transitions are represented as edges in a directed graph (digraph), where the vertices are states
--- All labels for the transitions are chars. All labels between two states also has to be unique. 
+-- transitions are represented as edges in a directed graph
+-- (digraph), where the vertices are states. All labels for
+-- the transitions are chars. All labels between two states
+-- also has to be unique. 
 
 type DFA = {
              graph: Digraph,
-             alfabeth: [a],
+             alphabet: [b],
              startState: a,
              acceptStates: [a]
             }
+	    
 -- get equality function for states
 let dfaGetEqv = lam dfa.
     dfa.graph.eqv
@@ -59,24 +64,24 @@ let checkDuplicateLabels = lam trans. lam eqv. lam eql.
     checkDuplicateLabels rest eqv eql
 end
 
--- check that all labels for transitions are in the alfabeth
-let dfaCheckLabels = lam graph. lam alf. lam eql.
-    all (lam x. (any (lam y. eql x.2 y) alf)) graph
+-- check that all labels for transitions are in the alphabet
+let dfaCheckLabels = lam graph. lam alph. lam eql.
+    all (lam x. (any (lam y. eql x.2 y) alph)) graph
 
 -- check that values are accaptable for the DFA
-let dfaCheckValues = lam trans. lam s. lam alf. lam eqv. lam eql. lam accS. lam startS.
-    if not (dfaCheckLabels trans alf eql) then error "Some labels are not in the defined alfabeth" else
+let dfaCheckValues = lam trans. lam s. lam alph. lam eqv. lam eql. lam accS. lam startS.
+    if not (dfaCheckLabels trans alph eql) then error "Some labels are not in the defined alphabet" else
         if not (setIsSubsetEq eqv accS s) then error "Some accepted states do not exist" else 
         if not (setMem eqv startS s) then error "The start state does not exist"
         else
 	let err = checkDuplicateLabels trans eqv eql in
-	if(err.0) then error (strJoin "" ["There are duplicate labels for same state outgoing transition at: STATE ", (int2string (err.1).0), ", LABEL ", [(err.1).1]])
+	if(err.0) then error "There are duplicate labels for same state outgoing transition at"
 	else true
 
 -- States are represented by vertices in a directed graph
 let dfaAddState =  lam dfa. lam state.{
         graph = (digraphAddVertex state dfa.graph),
-        alfabeth = dfa.alfabeth,
+        alphabet = dfa.alphabet,
         startState = dfa.startState,
         acceptStates = dfa.acceptStates
     }
@@ -86,23 +91,24 @@ let dfaAddState =  lam dfa. lam state.{
 let dfaAddTransition = lam dfa. lam trans.
     {
         graph = (digraphAddEdge trans.0 trans.1 trans.2 dfa.graph),
-        alfabeth = dfa.alfabeth,
+        alphabet = dfa.alphabet,
         startState = dfa.startState,
         acceptStates = dfa.acceptStates
     }
     
--- constructor for DFA
-let dfaConstr = lam s. lam trans. lam alf. lam startS. lam accS. lam eqv. lam eql.
-    if dfaCheckValues trans s alf eqv eql accS startS then
-        let emptyDigraph = digraphEmpty eqv eql in
-        let initDfa = {
-        graph = emptyDigraph,
-        alfabeth = alf,
-        startState = startS,
-        acceptStates = accS
-        } in
-        foldl dfaAddTransition (foldl dfaAddState initDfa s) trans
-	else {}
+
+let dfaConstr = lam s. lam trans. lam alph. lam startS. lam accS. lam eqv. lam eql.
+    if dfaCheckValues trans s alph eqv eql accS startS then
+    let emptyDigraph = digraphEmpty eqv eql in
+    let initDfa = {
+    graph = emptyDigraph,
+    alphabet = alph,
+    startState = startS,
+    acceptStates = accS
+    } in
+    foldl dfaAddTransition (foldl dfaAddState initDfa s) trans
+    else error "The values are not right"
+    
 
 -- returns true if state s is a accapted state in the dfa
 let isAcceptedState = lam s. lam dfa. 
@@ -145,19 +151,19 @@ let dfaAcceptedInput = lam inpt. lam dfa.
     if (isAcceptedState last dfa) then "accepted" else "not accepted"
 
 mexpr
-let alfabeth = ['0','1'] in
+let alphabet = ['0','1'] in
 let states = [0,1,2] in
 let transitions = [(0,1,'1'),(1,1,'1'),(1,2,'0'),(2,2,'0'),(2,1,'1')] in
 let startState = 0 in
 let acceptStates = [2] in 
-let newDfa = dfaConstr states transitions alfabeth startState acceptStates eqi eqchar int2string (lam b. [b]) in
-utest setEqual eqchar alfabeth newDfa.alfabeth with true in
+let newDfa = dfaConstr states transitions alphabet startState acceptStates eqi eqchar in
+utest setEqual eqchar alphabet newDfa.alphabet with true in
 utest eqi startState newDfa.startState with true in
 utest setEqual eqi acceptStates newDfa.acceptStates with true in
 utest (digraphHasVertices states newDfa.graph) with true in
 utest (digraphHasEdges transitions newDfa.graph) with true in
-utest dfaCheckLabels transitions alfabeth eqchar with true in
-utest dfaCheckLabels [(1,2,'2')] alfabeth eqchar with false in
+utest dfaCheckLabels transitions alphabet eqchar with true in
+utest dfaCheckLabels [(1,2,'2')] alphabet eqchar with false in
 utest (digraphHasEdges [(1,2,'1')] (dfaAddTransition newDfa (1,2,'1')).graph) with true in
 utest (digraphHasVertex 7 (dfaAddState newDfa 7).graph) with true in
 utest isAcceptedState 2 newDfa with true in
@@ -173,5 +179,3 @@ utest dfaAcceptedInput "1010" newDfa with "accepted" in
 utest dfaAcceptedInput "1011" newDfa with "not accepted" in
 utest dfaAcceptedInput "00000000111111110000" newDfa with "stuck" in
 ()
-
-
