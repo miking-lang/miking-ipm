@@ -19,6 +19,44 @@ let parseVertices = lam vertices. lam vertex2str. lam output.
     parseVertices rest vertex2str (concat output parsedFirst)
 end
 
+-- parse edges and squash edges between the same nodes.
+recursive
+let parseAndSquashEdges = lam trans. lam v2s. lam eqv.
+    if (eqi (length trans) 0) then "" else
+    let first = head trans in
+    let parsedFirst = ["{\"from\": \"", (v2s (first.0)), "\", \"to\": \"" ,(v2s (first.1)) , "\", \"label\": \"" , (first.2) , "\"},\n"] in
+    if(eqi (length trans) 1) then
+    strJoin "" parsedFirst
+    else
+    let second = head (tail trans) in
+    if (and (eqv (first.0) (second.0)) (eqv (first.1) (second.1))) then parseAndSquashEdges (join [[(first.0,first.1,join [first.2,second.2])], (tail (tail trans))]) v2s eqv
+    else 
+    join [strJoin "" parsedFirst, parseAndSquashEdges (tail trans) v2s eqv]
+end
+
+-- parse all edges into printable string
+let parseEdges = lam edges. lam v2s. lam l2s. lam eqv.
+        let edges_string = map (lam x. (x.0,x.1,l2s x.2)) edges in
+        parseAndSquashEdges edges_string v2s eqv
+        
+-- Formatting the states
+let parseStates = lam states. lam state2str.
+    parseVertices states state2str ""
+
+-- parse transitions into printable string
+let parseTransitions = lam trans. lam v2s. lam l2s. lam eqv.
+    parseEdges trans v2s l2s eqv
+
+    
+-- Getting the input path parsed
+recursive
+let parseInputPath = lam path. lam output. lam state2string.
+    if(eqi (length path) 0) then output
+    else
+    let first = head path in
+    let rest = tail path in
+    parseInputPath rest (strJoin "" [output,"\"",(state2string first),"\"", ","]) state2string
+end
 
 -- Traversing the tree to format the states
 recursive
@@ -57,44 +95,6 @@ let parseBTreeEdges = lam btree. lam n2s. lam from. lam output.
     output
     
     else "Wrong input"
-end
-
--- Formatting the states
-let parseStates = lam states. lam state2str.
-    parseVertices states state2str ""
-
--- parse edges and squash edges between the same nodes.
-recursive
-let parseAndSquashEdges = lam trans. lam v2s. lam eqv.
-    if (eqi (length trans) 0) then "" else
-    let first = head trans in
-    let parsedFirst = ["{\"from\": \"", (v2s (first.0)), "\", \"to\": \"" ,(v2s (first.1)) , "\", \"label\": \"" , (first.2) , "\"},\n"] in
-    if(eqi (length trans) 1) then
-    strJoin "" parsedFirst
-    else
-    let second = head (tail trans) in
-    if (and (eqv (first.0) (second.0)) (eqv (first.1) (second.1))) then parseAndSquashEdges (join [[(first.0,first.1,join [first.2,second.2])], (tail (tail trans))]) v2s eqv
-    else 
-    join [strJoin "" parsedFirst, parseAndSquashEdges (tail trans) v2s eqv]
-end
-
--- parse all edges into printable string
-let parseEdges = lam edges. lam v2s. lam l2s. lam eqv.
-        let edges_string = map (lam x. (x.0,x.1,l2s x.2)) edges in
-        parseAndSquashEdges edges_string v2s eqv
-
--- parse transitions into printable string
-let parseTransitions = lam trans. lam v2s. lam l2s. lam eqv.
-    parseEdges trans v2s l2s eqv
-    
--- Getting the input path parsed
-recursive
-let parseInputPath = lam path. lam output. lam state2string.
-    if(eqi (length path) 0) then output
-    else
-    let first = head path in
-    let rest = tail path in
-    parseInputPath rest (strJoin "" [output,"\"",(state2string first),"\"", ","]) state2string
 end
 
 -- Parse input-line
