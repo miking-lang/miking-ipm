@@ -100,18 +100,18 @@ class NFAModel {
     }
 
     /**
+     * Returns whether the NFA is stuck or not.
+     */
+    nfaGotStuck() {
+        return this.simulationIsFinished() && this.status === "stuck"
+    }
+
+    /**
      * Returns the status of whether the simulation has finished or not.
      * True if the simulations is at the last state, false otherwise.
      */
     simulationIsFinished() {
         return this.currentConfigurationIndex >= this.configurations.length-1
-    }
-
-    /**
-     * Returns whether the NFA is stuck or not.
-     */
-    nfaGotStuck() {
-        return this.simulationIsFinished() && this.status === "stuck"
     }
 
 

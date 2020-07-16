@@ -2,7 +2,7 @@ class GraphModel {
     /**
      * This class is responsible for the data and the current state of a graph.
      * 
-     * @param {object} visualizationModel Valid types: Graph
+     * @param {object} visualizationModel Valid types: Graph (Digraph, Tree)
      */
     constructor(visualizationModel){
         this.visualizationModel = visualizationModel
@@ -25,8 +25,8 @@ class GraphModel {
     }
 
     /**
-     * Translates the DFA object to dot syntax.
-     * @returns {string} The DFA object in dot syntax.
+     * Translates the graph object to dot syntax.
+     * @returns {string} The graph object in dot syntax.
      */
     toDot() {
         return this.visualizationModel.toDot()

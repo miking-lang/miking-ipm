@@ -5,7 +5,7 @@
 class Graph {
     /**
      * @param {object} model Contains nodes and edges of the graph model.
-     * @param {string} type The type of graph.
+     * @param {string} type The type of graph (graph/digraph/tree).
      * @param {int} index A unique model number.
      */
     constructor(model, type, index) {
@@ -37,11 +37,11 @@ class Graph {
     }
         
     /**
-     * Translates the DFA object to dot syntax.
-     * @returns {string} The DFA object in dot syntax.
+     * Translates the graph object to dot syntax.
+     * @returns {string} The graph object in dot syntax.
      */
     toDot() { 
-        let d = `${this.type==="digraph"?this.type:"graph"} {
+        return `${this.type==="digraph"?this.type:"graph"} {
             rankdir=${this.rankDirection}
             node [${this.objectToString(this.nodeSettings)}]
             ${this.nodes.map(node =>
@@ -51,8 +51,6 @@ class Graph {
                 `${edge.from} ${this.type === `digraph` ? `->` : `--`} ${edge.to} [${edge.label ? `label=${edge.label}`:``} fontcolor=${edge.fontcolor} color=${edge.color}]`
             ).join("\n")}
         }`
-        console.log(d)
-        return d
     }
 
     /*              GETTERS               */

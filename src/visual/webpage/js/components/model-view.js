@@ -3,8 +3,10 @@ class ModelView {
      * This class is responsible for visualizing the model.
      * Includes render methods for the model.
      * 
-     * @param {Model} model 
-     * @param {<div>} root 
+     * @param {object} model The model including the data used in this view.
+     * @param {<div>} root The root element of the view.
+     * @param {function} callbackFunction The callback function called, when interacting with the
+     *                                    graphviz graph.
      */
     constructor(model, root, callbackFunction){
         this.root=root

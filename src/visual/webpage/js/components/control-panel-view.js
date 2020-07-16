@@ -3,8 +3,8 @@ class ControlPanelView {
      * This class is responsible for displaying the control panel view.
      * Includes render methods, and getters for elements in the DOM tree.
      * 
-     * @param {ApplicationModel} model 
-     * @param {<div>} root 
+     * @param {object} model The model including the data used in this view.
+     * @param {<div>} root The root element of the view.
      */
     constructor(model, root){
         this.root=root

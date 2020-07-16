@@ -2,8 +2,8 @@ class NFAController {
     /**
      * Controller class for the NFA view.
      * 
-     * @param {ApplicationModel} model 
-     * @param {<div>} root 
+     * @param {object} model An object representing a model.
+     * @param {<div>} modelRoot The root element of the view.
      * @param {int} index A unique model number.
      */
     constructor(model, modelRoot, index){

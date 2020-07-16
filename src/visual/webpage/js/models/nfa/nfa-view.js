@@ -3,8 +3,10 @@ class NFAView {
      * This class is responsible for displaying the NFA view.
      * Includes render methods, and getters for elements in the DOM tree.
      * 
-     * @param {NFAModel} model 
-     * @param {<div>} modelRoot 
+     * @param {NFAModel} model The model including the data used in this view.
+     * @param {<div>} modelRoot The root element of the view.
+     * @param {function} callbackFunction The callback function called, when interacting with the
+     *                                    graphviz graph.
      */
     constructor(model, modelRoot, callbackFunction){
         this.model = model
