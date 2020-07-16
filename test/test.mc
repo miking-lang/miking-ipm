@@ -33,7 +33,15 @@ let digraph = foldr (lam e. lam g. digraphAddEdge e.0 e.1 e.2 g)
                 (foldr digraphAddVertex (digraphEmpty eqchar eqi) ['A','B','C','D','E']) 
                 [('A','B',2),('A','C',5),('B','C',2),('B','D',4),('C','D',5),('C','E',5),('E','D',2)] in
 
-let nfa = nfaConstr states transitions alphabet startState acceptStates (setEqual eqchar) eqchar in
+
+
+let nfaAlphabet = ['0','1','2','3'] in
+let nfaStates = ["a","b","c","d","e","f"] in
+let nfaTransitions = [("a","b",'1'),("b","c",'0'),("c","d",'2'),("c","e",'2'),("d","a",'1'),("e","f",'1')] in
+let nfaStartState = "a" in
+let nfaAcceptStates = ["a"] in
+
+let nfa = nfaConstr nfaStates nfaTransitions nfaAlphabet nfaStartState nfaAcceptStates (setEqual eqchar) eqchar in
 
 let btree = BTree (Node(2, Node(3, Nil (), Leaf 4), Leaf 5)) in
 
@@ -47,7 +55,7 @@ visualize [
     Digraph(digraph, char2string,int2string),
     Graph(graph,int2string,string2string),
     BTree(btree, int2string),
-    NFA(nfa, "1101", string2string, char2string)
+    NFA(nfa, "1021", string2string, char2string)
 
 ]
 

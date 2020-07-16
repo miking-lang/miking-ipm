@@ -215,11 +215,14 @@ let graphVisual = lam model. lam state2str. lam label2str.
 
 
 -- Format NFA to JS code for visualizing
-let nfaVisual = lam model. lam input. lam s2s. lam l2s.
-    let nfa = model in
-    let first = strJoin "" ["{\n", "\"type\" : \"nfa\",\n"] in
+let nfaVisual = lam nfa. lam input. lam s2s. lam l2s.
     let js_code = strJoin "" [
-        first,
+         "{\n",
+	"\"type\" : \"nfa\",\n",
+	"\"simulation\" : {\n",
+	"\"input\" : [", (formatInput input "" l2s),"],\n",
+        "\"configurations\" : [\n", (formatInputPath (nfaMakeInputPath 0 nfa.startState input nfa) "" s2s), "],\n",
+        "},\n",
 	"\"model\" : {\n",
 	"\"states\" : [\n",
 	(formatStates (nfaStates nfa) s2s),

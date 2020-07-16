@@ -66,6 +66,55 @@ let nfaAddTransition = lam nfa. lam trans.
     }
 
 
+-- returns true if state s is a accapted state in the nfa
+let nfaIsAcceptedState = lam s. lam nfa. 
+    setMem nfa.graph.eqv s nfa.acceptStates
+
+
+-- check if there is a transition with label lbl from state s
+let nfaStateHasTransition = lam s. lam trans. lam lbl.
+    let neighbors = digraphEdgesFrom s trans in
+    --check if lbl is a label in the neighbors list
+    setMem trans.eql lbl (map (lam x. x.2) neighbors)
+
+-- get next state from state s with label lbl. Throws error if no transition is found
+let nfaNextState = lam from. lam graph. lam lbl.
+    let neighbors = digraphEdgesFrom from graph in
+    let nxt = partition (lam x. graph.eql x.2 lbl) neighbors in
+    let matches = nxt.0 in
+    match matches with [] then
+    error "No transition was found"
+    else
+    -- The transition contains (from,to,label). Take out 'to' state
+    matches
+
+
+
+-- goes through the nfa, one state of the input at a time. Returns a list of {state, status, input}
+-- where status is either 1 (accepted) 0 (neutral) -1 (stuck) or -2 (not accepted)
+recursive
+let nfaMakeInputPath = lam i. lam currentState. lam inpt. lam nfa.
+    let graph = nfa.graph in
+    if (eqi (length inpt) 0) then
+       if (nfaIsAcceptedState currentState) then [{state = currentState,index = i, status = 1}]
+       else [{state = currentState, index = i, status = negi 2}]
+    else
+    let first_inpt = head inpt in
+    let rest_inpt = tail inpt in 
+    -- check if transition exists. If yes, go to next state
+    if nfaStateHasTransition currentState graph first_inpt then
+       let config = [{state = currentState,index = i, status = 0}] in
+       let next = nfaNextState currentState graph first_inpt in
+       let branches = map (lam x. join [config, (nfaMakeInputPath (addi i 1) x.1 rest_inpt nfa)]) next in
+    	join branches
+    else
+    [{state = currentState, index = i, status = negi 1}]
+end    
+
+
+
+
+-- constructor for the NFA
 let nfaConstr = lam s. lam trans. lam alph. lam startS. lam accS. lam eqv. lam eql.
     if nfaCheckValues trans s alph eqv eql accS startS
     then
