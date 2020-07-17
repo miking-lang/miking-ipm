@@ -3,7 +3,7 @@ class GraphController {
      * Controller class for the Graph view.
      * 
      * @param {object} model An object representing a model.
-     * @param {<div>} modelRoot The root element of the view.
+     * @param {div} modelRoot The root element of the view.
      * @param {int} index A unique model number.
      */
     constructor(model, modelRoot, index){

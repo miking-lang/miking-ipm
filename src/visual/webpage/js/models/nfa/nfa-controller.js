@@ -3,7 +3,7 @@ class NFAController {
      * Controller class for the NFA view.
      * 
      * @param {object} model An object representing a model.
-     * @param {<div>} modelRoot The root element of the view.
+     * @param {div} modelRoot The root element of the view.
      * @param {int} index A unique model number.
      */
     constructor(model, modelRoot, index){
@@ -20,9 +20,5 @@ class NFAController {
             /* < -- TEMPORARY       */
 
         this.nfaView = new NFAView(nfaModel, modelRoot, callbackFunction)
-        
-        // Add event listeners
-        this.nfaView.controlPanelView.getNextButton().addEventListener("click", () => nfaModel.nextState())
-        this.nfaView.controlPanelView.getPreviousButton().addEventListener("click", () => nfaModel.previousState())
     }
 }

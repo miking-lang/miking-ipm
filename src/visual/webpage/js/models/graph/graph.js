@@ -24,40 +24,23 @@ class Graph {
         })
         this.edges = model.edges
     }
-
-    /**
-     * Translates the given object to a space separated string.
-     * @param {object} attributes An object with attributes of primitive type.
-     * @returns {string} The translated string.
-     */
-    objectToString(attributes) { 
-        return Object.keys(attributes).map(key =>
-            `${key} = ${attributes[key]}`
-        ).join(" ")
-    }
         
     /**
      * Translates the graph object to dot syntax.
      * @returns {string} The graph object in dot syntax.
      */
     toDot() { 
+        // Translates the given object to a space separated string.
+        const objectToString = attributes => Object.keys(attributes).map(key => `${key} = ${attributes[key]}`).join(" ")
         return `${this.type==="digraph"?this.type:"graph"} {
             rankdir=${this.rankDirection}
-            node [${this.objectToString(this.nodeSettings)}]
+            node [${objectToString(this.nodeSettings)}]
             ${this.nodes.map(node =>
-                `${node.name} [id=${node.name} class="${this.name}-node" ${this.objectToString(node.settings)}]`
+                `${node.name} [id=${node.name} class="${this.name}-node" ${objectToString(node.settings)}]`
             ).join("\n")}
             ${this.edges.map(edge =>
                 `${edge.from} ${this.type === `digraph` ? `->` : `--`} ${edge.to} [${edge.label ? `label=${edge.label}`:``} fontcolor=${edge.fontcolor} color=${edge.color}]`
             ).join("\n")}
         }`
-    }
-
-    /*              GETTERS               */
-    /**
-     * Gets a node by name.
-     */
-    getNodeByName(name) {
-        return this.nodes.find(node => node.name === name)
     }
 }

@@ -60,11 +60,14 @@ body {
     font-size: 18px;
     font-weight: bold;
 }
-.warning {
-    color: #CD0100;
-}
 .accepted {
     color: #008001;
+}
+.danger {
+    color: #CD0100;
+}
+.warning {
+    color: #8B8B00;
 }
 /*              GRAPH               */
 .node {
