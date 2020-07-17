@@ -62,8 +62,9 @@ class NFA {
      * @param {string} activeStateName The name of the state to be visualized as active.
      * @param {string} previousStateName The name of the previous state.
      * @param {boolean} activeColor The color for the active node.
+     * @param {boolean} colorPreviousEdge Whether to color the previous edge or not.
      */
-    makeTransition(activeStateName, previousStateName, activeColor) {
+    makeTransition(activeStateName, previousStateName, activeColor, colorPreviousEdge) {
         this.states.map(State => {
             State.settings.fillcolor = activeStateName === State.name
                                        ? this.colors[activeColor]
@@ -74,10 +75,10 @@ class NFA {
         })
         this.transitions.map(transition => {
             let isPreviousTransition = transition.from === previousStateName && transition.to === activeStateName
-            transition.color = isPreviousTransition
+            transition.color = isPreviousTransition && colorPreviousEdge
                                 ? this.colors[activeColor]
                                 : this.colors.black
-            transition.fontcolor = isPreviousTransition
+            transition.fontcolor = isPreviousTransition && colorPreviousEdge
                                 ? this.colors[activeColor]
                                 : this.colors.black
         })

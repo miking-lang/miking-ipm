@@ -60,7 +60,8 @@ class NFAModel {
                     : this.nfaBranchGotStuck() ?
                         "warning"
                     :   "active"
-        this.visualizationModel.makeTransition(this.getActiveStateName(), this.getPreviousStateName(), activeColor)
+        let colorPreviousEdge = this.getPreviousConfigurationStatus() !== -1
+        this.visualizationModel.makeTransition(this.getActiveStateName(), this.getPreviousStateName(), activeColor, colorPreviousEdge)
         this.notifyObservers()
     }
 
@@ -124,7 +125,6 @@ class NFAModel {
         return this.currentConfigurationIndex >= this.configurations.length-1
     }
 
-
     /*              GETTERS               */
     /**
      * Gets the active state name.
@@ -138,6 +138,15 @@ class NFAModel {
      */
     getConfigurationStatus() {
         return this.configurations[this.currentConfigurationIndex].status
+    }
+
+    /**
+     * Gets the status of the previous configuration.
+     */
+    getPreviousConfigurationStatus() {
+        return this.currentConfigurationIndex > 0
+                ? this.configurations[this.currentConfigurationIndex-1].status
+                : false
     }
 
     /**
