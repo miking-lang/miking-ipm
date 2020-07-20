@@ -43,4 +43,12 @@ class Graph {
             ).join("\n")}
         }`
     }
+
+    /*              GETTERS               */
+    /**
+     * Gets a graph node by name.
+     */
+    getNodeByName(name) {
+        return this.nodes.find(node => node.name === name)
+    }
 }

@@ -83,4 +83,12 @@ class NFA {
                                 : this.colors.black
         })
     }
+
+    /*              GETTERS               */
+    /**
+     * Gets a nfa state by name.
+     */
+    getStateByName(name) {
+        return this.states.find(node => node.name === name)
+    }
 }
