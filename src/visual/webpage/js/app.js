@@ -16,7 +16,7 @@ if (data && data.models) {
             break;
         case "digraph":
         case "graph":
-        case "btree":
+        case "tree":
             new GraphController(model, modelRoot, idx)
             break;
         default:

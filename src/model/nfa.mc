@@ -96,7 +96,7 @@ recursive
 let nfaMakeInputPath = lam i. lam currentState. lam inpt. lam nfa.
     let graph = nfa.graph in
     if (eqi (length inpt) 0) then
-       if (nfaIsAcceptedState currentState) then [{state = currentState,index = i, status = 1}]
+       if (nfaIsAcceptedState currentState nfa) then [{state = currentState,index = i, status = 1}]
        else [{state = currentState, index = i, status = negi 2}]
     else
     let first_inpt = head inpt in

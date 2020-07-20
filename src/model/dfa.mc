@@ -134,8 +134,8 @@ let nextState = lam from. lam graph. lam lbl.
 recursive
 let makeInputPath = lam i. lam currentState. lam inpt. lam dfa. 
     let graph = dfa.graph in
-    if (eqi (length inpt) 0) then 
-        if (isAcceptedState currentState) then [{state = currentState,index = i, status = 1}]
+    if (eqi (length inpt) 0) then
+        if (isAcceptedState currentState dfa) then [{state = currentState,index = i, status = 1}]
         else [{state = currentState,index = i, status = negi 2}]
     else 
     let first = head inpt in
@@ -148,7 +148,7 @@ let makeInputPath = lam i. lam currentState. lam inpt. lam dfa.
 end
 
 let dfaAcceptedInput = lam inpt. lam dfa.
-    let path = makeInputPath 0 dfa.startState inpt dfa  in
+    let path = makeInputPath (negi 1) dfa.startState inpt dfa  in
     if (lti (length path) (length inpt)) then "stuck" else
     let last = last path in
     if (isAcceptedState last dfa) then "accepted" else "not accepted"
@@ -172,7 +172,7 @@ utest (digraphHasVertex 7 (dfaAddState newDfa 7).graph) with true in
 utest isAcceptedState 2 newDfa with true in
 utest isAcceptedState 3 newDfa with false in
 utest nextState 1 newDfa.graph '0' with 2 in
-utest makeInputPath 0 newDfa.startState "1010" newDfa  with [0,1,2,1,2] in
+utest makeInputPath (negi 1) newDfa.startState "10" newDfa  with [{status = 0,state = 0,index = (negi 1)},{status = 0,state = 1,index = 0},{status = 0,state = 2,index = 1}] in
 -- utest makeInputPath 0 "1011" newDfa newDfa.startState with [0,1,2,1,1] in
 -- utest makeInputPath 0 "010" newDfa newDfa.startState with [0] in
 -- utest makeInputPath 0 "10" newDfa newDfa.startState with [0,1,2] in

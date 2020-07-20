@@ -173,7 +173,7 @@ let dfaVisual = lam model. lam input. lam state2str. lam label2str.
 	"\"type\" : \"dfa\",\n",
 	"\"simulation\" : {\n",
 	"\"input\" : [", (formatInput input "" label2str),"],\n",
-        "\"configurations\" : [\n", (formatInputPath (makeInputPath 0 dfa.startState input dfa) "" state2str), "],\n",
+        "\"configurations\" : [\n", (formatInputPath (makeInputPath (negi 1) dfa.startState input dfa) "" state2str), "],\n",
         "},\n",
         "\"model\" : {\n",
         "\"states\" : [\n",formatStates (dfaStates dfa) state2str,"],\n",
@@ -221,7 +221,7 @@ let nfaVisual = lam nfa. lam input. lam s2s. lam l2s.
 	"\"type\" : \"nfa\",\n",
 	"\"simulation\" : {\n",
 	"\"input\" : [", (formatInput input "" l2s),"],\n",
-        "\"configurations\" : [\n", (formatInputPath (nfaMakeInputPath 0 nfa.startState input nfa) "" s2s), "],\n",
+        "\"configurations\" : [\n", (formatInputPath (nfaMakeInputPath (negi 1) nfa.startState input nfa) "" s2s), "],\n",
         "},\n",
 	"\"model\" : {\n",
 	"\"states\" : [\n",
@@ -229,8 +229,8 @@ let nfaVisual = lam nfa. lam input. lam s2s. lam l2s.
 	"],\n",
 	"\"transitions\" : [\n", (formatTransitions (nfaTransitions nfa) s2s l2s (nfaGetEqv nfa)) ,
 	"], \n",
-	(strJoin "" ["\"startID\" : \"", (s2s nfa.startState) , "\",\n"]),
-    	"\"acceptedIDs\" : [",
+	(strJoin "" ["\"startState\" : \"", (s2s nfa.startState) , "\",\n"]),
+    	"\"acceptedStates\" : [",
     (strJoin "" (map (lam s. strJoin "" ["\"", (s2s s), "\","]) nfa.acceptStates)),
     "],\n}\n},\n"] in
     js_code
@@ -239,7 +239,7 @@ let nfaVisual = lam nfa. lam input. lam s2s. lam l2s.
 -- Format Tree to JS code for visualizing
 let btreeVisual = lam model. lam n2s.
      let btree = model in
-     let snd = strJoin "" [ "\"type\" : \"btree\",\n"] in
+     let snd = strJoin "" [ "\"type\" : \"tree\",\n"] in
      let first = strJoin "" [ "{\n"] in
      let js_code = strJoin "" [
      first,
