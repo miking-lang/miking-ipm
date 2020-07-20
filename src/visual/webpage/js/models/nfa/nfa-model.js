@@ -9,7 +9,6 @@ class NFAModel {
         this.visualizationModel = visualizationModel
         this.input = simulation.input
         this.configurations = simulation.configurations
-        this.status = simulation.state
         this.currentConfigurationIndex = 0
         this.callbacks = []
         this.updateNFA()
@@ -56,8 +55,13 @@ class NFAModel {
      * Updates the NFA according to the current configuration.
      */
     updateNFA() {
-        let warning = this.inputWasNotAccepted() || this.nfaGotStuck()
-        this.visualizationModel.makeTransition(this.getActiveStateName(), this.getPreviousStateName(), warning)
+        let activeColor = this.inputWasNotAccepted() || this.nfaGotStuck() ? 
+                        "danger"
+                    : this.nfaBranchGotStuck() ?
+                        "warning"
+                    :   "active"
+        let colorPreviousEdge = this.getPreviousConfigurationStatus() !== -1
+        this.visualizationModel.makeTransition(this.getActiveStateName(), this.getPreviousStateName(), activeColor, colorPreviousEdge)
         this.notifyObservers()
     }
 
@@ -75,7 +79,7 @@ class NFAModel {
      * @param {int} index The index of the input to compare.
      */
     isCurrentInputIndex(index) {
-        return index === this.currentConfigurationIndex-1
+        return index === this.configurations[this.currentConfigurationIndex].index
     }
 
     /**
@@ -89,14 +93,28 @@ class NFAModel {
      * Returns whether the input was accepted by the NFA or not.
      */
     inputWasAccepted() {
-        return this.simulationIsFinished() && this.status === "accepted"
+        return this.simulationIsFinished() && this.getConfigurationStatus() === 1
     }
 
     /**
      * Returns whether the input was rejected by the NFA or not.
      */
     inputWasNotAccepted() {
-        return this.simulationIsFinished() && this.status === "not accepted"
+        return this.simulationIsFinished() && this.getConfigurationStatus() === -2
+    }
+
+    /**
+     * Returns whether the NFA is stuck or not.
+     */
+    nfaGotStuck() {
+        return this.simulationIsFinished() && this.nfaBranchGotStuck()
+    }
+
+    /**
+     * Returns whether the NFA is stuck at the current branch.
+     */
+    nfaBranchGotStuck() {
+        return this.getConfigurationStatus() === -1
     }
 
     /**
@@ -107,20 +125,28 @@ class NFAModel {
         return this.currentConfigurationIndex >= this.configurations.length-1
     }
 
-    /**
-     * Returns whether the NFA is stuck or not.
-     */
-    nfaGotStuck() {
-        return this.simulationIsFinished() && this.status === "stuck"
-    }
-
-
     /*              GETTERS               */
     /**
      * Gets the active state name.
      */
     getActiveStateName() {
-        return this.configurations[this.currentConfigurationIndex]
+        return this.configurations[this.currentConfigurationIndex].state
+    }
+
+    /**
+     * Gets the status of the current configuration.
+     */
+    getConfigurationStatus() {
+        return this.configurations[this.currentConfigurationIndex].status
+    }
+
+    /**
+     * Gets the status of the previous configuration.
+     */
+    getPreviousConfigurationStatus() {
+        return this.currentConfigurationIndex > 0
+                ? this.configurations[this.currentConfigurationIndex-1].status
+                : false
     }
 
     /**
@@ -129,19 +155,21 @@ class NFAModel {
     getInfoStatusAndText() {
         let automata = this.visualizationModel.type==="dfa" ? "DFA" : "NFA"
         return this.inputWasNotAccepted() ?
-            {status: "warning", text: `Not accepted: The given input string was not accepted by the ${automata}.</span>`}
+            {status: "danger", text: `Not accepted: The given input string was not accepted by the ${automata}.</span>`}
         : this.nfaGotStuck() ?
-            {status: "warning", text: `Not accepted: The automata is stuck in the current state.</span>`}
+            {status: "danger", text: `Not accepted: The automata is stuck in the current state.</span>`}
         : this.inputWasAccepted() ?
             {status: "accepted", text: `The input was accepted by the ${automata}.</span>`}
-        :   null
+        : this.nfaBranchGotStuck() ?
+            {status: "warning", text: `This branch is stuck at the current branch. Click next to trace back to the branching state.</span>`}
+        : null
     }
 
     /**
      * Gets the previous state name.
      */
     getPreviousStateName() {
-        return this.configurations[this.currentConfigurationIndex-1]
+        return this.configurations[this.currentConfigurationIndex-1] ? this.configurations[this.currentConfigurationIndex-1].state : undefined
     }
 
     /**
