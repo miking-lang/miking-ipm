@@ -167,17 +167,17 @@ end
 -- Format a DFA to JS code and visualize
 let dfaVisual = lam model. lam input. lam state2str. lam label2str.
     let dfa = model in
-    let transitions = dfaTransitions dfa in
+    let transitions = getTransitions dfa in
     let js_code = strJoin "" [
         "{\n",
 	"\"type\" : \"dfa\",\n",
 	"\"simulation\" : {\n",
 	"\"input\" : [", (formatInput input "" label2str),"],\n",
-        "\"configurations\" : [\n", (formatInputPath (makeInputPath (negi 1) dfa.startState input dfa) "" state2str), "],\n",
+        "\"configurations\" : [\n", (formatInputPath (nfaMakeInputPath (negi 1) dfa.startState input dfa) "" state2str), "],\n",
         "},\n",
         "\"model\" : {\n",
-        "\"states\" : [\n",formatStates (dfaStates dfa) state2str,"],\n",
-        "\"transitions\" : [\n", (formatTransitions transitions state2str label2str (dfaGetEqv dfa)) ,"], \n",
+        "\"states\" : [\n",formatStates (getStates dfa) state2str,"],\n",
+        "\"transitions\" : [\n", (formatTransitions transitions state2str label2str (getEqv dfa)) ,"], \n",
         "\"startState\" : \"", (state2str dfa.startState) , "\",\n",
         "\"acceptedStates\" : [",(strJoin "" (map (lam s. strJoin "" ["\"", (state2str s), "\","]) dfa.acceptStates)),"],\n",
         "}\n",
@@ -225,9 +225,9 @@ let nfaVisual = lam nfa. lam input. lam s2s. lam l2s.
         "},\n",
 	"\"model\" : {\n",
 	"\"states\" : [\n",
-	(formatStates (nfaStates nfa) s2s),
+	(formatStates (getStates nfa) s2s),
 	"],\n",
-	"\"transitions\" : [\n", (formatTransitions (nfaTransitions nfa) s2s l2s (nfaGetEqv nfa)) ,
+	"\"transitions\" : [\n", (formatTransitions (getTransitions nfa) s2s l2s (getEqv nfa)) ,
 	"], \n",
 	(strJoin "" ["\"startState\" : \"", (s2s nfa.startState) , "\",\n"]),
     	"\"acceptedStates\" : [",
