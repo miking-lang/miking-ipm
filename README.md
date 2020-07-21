@@ -40,7 +40,7 @@ This will prompt you to the port on your localhost on which the server is starte
 
 This environment supports the datatypes of type _model_. Right now this includes:
 * DFA
-* (NFA)
+* NFA
 * Directed graph
 * Graph
 * Binary tree
@@ -87,6 +87,7 @@ To construct a DFA use this function:
 
 
 ## This is how you would write your NFA:
+A NFA works the same as a DFA, just replace "dfa" with "nfa". The transitions labels do not need to be unique for a state.
 
 ## This is how you would write your directed graph:
 
@@ -114,7 +115,7 @@ A graph works the same was as the digraph, just replace `digraph` with `graph` i
 ## This is how you would write your binary tree:
 To create a binary tree the constructor BTree can be used.
 
-	BTree (Node(leftTree, rightTree)) // doesnt work right now
+	BTree (Node(value, Nil()/Node()/Leaf(),Nil()/Node()/Leaf())) 
 
 ## Visualizing the data
 To visualize any of the types defined above they need to be of type model. **toString**  functions are also required. These **toString** functions returns a string that represents the type you are modelling. For example, if you had a graph with vertices of type integer and labels of type character, the toString methods would be:
@@ -159,72 +160,88 @@ There is a **test.mc** in the root folder of the project which already contains 
 
 ### This dfa  accepts strings of '1' and '0' that start with '1' and end with '2'.
 
-```javascript
-mexpr
-let string2string = (lam b. b) in
-let eqString = setEqual eqchar in
-let char2string = (lam b. [b]) in
 
--- create your DFA
-let alfabeth = ['0','1'] in
-let states = ["s0","s1","s2"] in
-let transitions = [
-  ("s0","s1",'1'),
-  ("s1","s1",'1'),
-  ("s1","s2",'0'),
-  ("s2","s1",'1'),
-  ("s2","s2",'0')
-] in
+	mexpr
+	let string2string = (lam b. b) in
+	let eqString = setEqual eqchar in
+	let char2string = (lam b. [b]) in
 
-let startState = "s0" in
-let acceptStates = ["s2"] in
+	-- create your DFA
+	let alfabeth = ['0','1'] in
+	let states = ["s0","s1","s2"] in
+	let transitions = [
+	("s0","s1",'1'),
+	("s1","s1",'1'),
+	("s1","s2",'0'),
+	("s2","s1",'1'),
+	("s2","s2",'0')
+	] in
 
-let dfa = dfaConstr states transitions alfabeth startState acceptStates eqString eqchar in
+	let startState = "s0" in
+	let acceptStates = ["s2"] in
 
-visualize [
-    -- accepted by the DFA
+	let dfa = dfaConstr states transitions alfabeth startState acceptStates eqString eqchar in
+
+	visualize [
+		-- accepted by the DFA
     DFA(dfa,"1000",string2string, char2string),
     -- accepted by the DFA
     DFA(dfa,"101110",string2string, char2string),
     -- not accepted by the DFA
     DFA(dfa,"1010001",string2string, char2string)
-]
+	]
 
-```
 
-### Different types
+
+### Different types: digraph and graph
 
 This program displays a digraph and a graph on the same page.
 
+	mexpr
+	let string2string = (lam b. b) in
+	let eqString = setEqual eqchar in
+	let char2string = (lam b. [b]) in
 
-```javascript
-mexpr
-let string2string = (lam b. b) in
-let eqString = setEqual eqchar in
-let char2string = (lam b. [b]) in
-
--- create your directed graph
-let digraph = foldr (lam e. lam g. digraphAddEdge e.0 e.1 e.2 g) 
-                (foldr digraphAddVertex (digraphEmpty eqchar eqi) ['A','B','C','D','E']) 
+	-- create your directed graph
+	let digraph = foldr (lam e. lam g. digraphAddEdge e.0 e.1 e.2 g) 
+	(foldr digraphAddVertex (digraphEmpty eqchar eqi) ['A','B','C','D','E']) 
                 [('A','B',2),('A','C',5),('B','C',2),('B','D',4),('C','D',5),('C','E',5),('E','D',2)] in
 
--- create your graph
-let graph = foldr (lam e. lam g. graphAddEdge e.0 e.1 e.2 g) 
-              (foldr graphAddVertex (graphEmpty eqi eqString) [1,2,3,4]) 
-              [(1,2,""),(3,2,""),(1,3,""),(3,4,"")] in
+	-- create your graph
+	let graph = foldr (lam e. lam g. graphAddEdge e.0 e.1 e.2 g) 
+	(foldr graphAddVertex (graphEmpty eqi eqString) [1,2,3,4]) [(1,2,""),(3,2,""),(1,3,""),(3,4,"")] in
 
-visualize [
-    Digraph(digraph, char2string,int2string),
+	visualize [
+	Digraph(digraph, char2string,int2string),
     Graph(graph,int2string,string2string)
-]
+	]
 
-```
 
-##### TO DO:
+### Different types: NFA and Binary Tree
 
-- Ocaml server
-- Planning on how to get modifications from the browser to the source-file
-- Adding more modelling subjects (electric circuits, tree structures, directed/undirected graphs)
+This program creates both a NFA and a Binary tree and displays them. 
+
+	mexpr 
+	let stringEq = setEqual eqchar in
+	let nfaAlphabet = ['0','1','2','3'] in
+	let nfaStates = ["a","b","c","d","e","f"] in
+	let nfaTransitions = [("a","b",'1'),("b","c",'0'),("c","d",'2'),("c","e",'2'),("d","a",'1'),("e","f",'1')] in
+	let nfaStartState = "a" in
+	let nfaAcceptStates = ["a"] in
+	
+	-- create your NFA
+	let nfa = nfaConstr nfaStates nfaTransitions nfaAlphabet nfaStartState nfaAcceptStates stringEq eqchar in
+
+
+	-- create your Binary Tree
+	let btree = BTree (Node(2, Node(3, Nil (), Leaf 4), Leaf 5)) in
+
+	visualize [
+    BTree(btree, int2string),
+    NFA(nfa, "1021", string2string, char2string),
+    NFA(nfa, "102", string2string, char2string)
+	]
+
 
 
 ## MIT License

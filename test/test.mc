@@ -34,7 +34,7 @@ let digraph = foldr (lam e. lam g. digraphAddEdge e.0 e.1 e.2 g)
                 [('A','B',2),('A','C',5),('B','C',2),('B','D',4),('C','D',5),('C','E',5),('E','D',2)] in
 
 
-
+-- create your NFA
 let nfaAlphabet = ['0','1','2','3'] in
 let nfaStates = ["a","b","c","d","e","f"] in
 let nfaTransitions = [("a","b",'1'),("b","c",'0'),("c","d",'2'),("c","e",'2'),("d","a",'1'),("e","f",'1')] in
@@ -43,6 +43,8 @@ let nfaAcceptStates = ["a"] in
 
 let nfa = nfaConstr nfaStates nfaTransitions nfaAlphabet nfaStartState nfaAcceptStates (setEqual eqchar) eqchar in
 
+
+-- create your BTree
 let btree = BTree (Node(2, Node(3, Nil (), Leaf 4), Leaf 5)) in
 
 visualize [
