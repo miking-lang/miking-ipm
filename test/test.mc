@@ -47,15 +47,15 @@ let btree = BTree (Node(2, Node(3, Nil (), Leaf 4), Leaf 5)) in
 
 visualize [
     -- accepted by the DFA
-    DFA(dfa,"1000",string2string, char2string),
+    DFA(dfa,"1",string2string, char2string),
     -- accepted by the DFA
     DFA(dfa,"101110",string2string, char2string),
-    -- not accepted by the DFA
+    -- not accepted by the DFA 
     DFA(dfa,"1010001",string2string, char2string),
     Digraph(digraph, char2string,int2string),
     Graph(graph,int2string,string2string),
     BTree(btree, int2string),
-    NFA(nfa, "1021", string2string, char2string)
-
+    NFA(nfa, "1021", string2string, char2string),
+    NFA(nfa, "102", string2string, char2string)
 ]
 

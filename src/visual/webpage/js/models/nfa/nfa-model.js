@@ -107,14 +107,14 @@ class NFAModel {
      * Returns whether the NFA is stuck or not.
      */
     nfaGotStuck() {
-        return this.simulationIsFinished() && this.nfaBranchGotStuck()
+        return this.simulationIsFinished() && this.getConfigurationStatus() === -1
     }
 
     /**
      * Returns whether the NFA is stuck at the current branch.
      */
     nfaBranchGotStuck() {
-        return this.getConfigurationStatus() === -1
+        return this.getConfigurationStatus() === -2
     }
 
     /**

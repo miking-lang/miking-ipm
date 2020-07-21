@@ -96,20 +96,24 @@ recursive
 let nfaMakeInputPath = lam i. lam currentState. lam inpt. lam nfa.
     let graph = nfa.graph in
     if (eqi (length inpt) 0) then
-       if (nfaIsAcceptedState currentState nfa) then [{state = currentState,index = i, status = 1}]
-       else [{state = currentState, index = i, status = negi 2}]
+        if (nfaIsAcceptedState currentState nfa) then [{state = currentState,index = i, status = 1}]
+        else [{state = currentState, index = i, status = negi 2}]
     else
     let first_inpt = head inpt in
     let rest_inpt = tail inpt in 
     -- check if transition exists. If yes, go to next state
     if nfaStateHasTransition currentState graph first_inpt then
-       let config = [{state = currentState,index = i, status = 0}] in
-       let next = nfaNextState currentState graph first_inpt in
-       let branches = map (lam x. join [config, (nfaMakeInputPath (addi i 1) x.1 rest_inpt nfa)]) next in
-    	join branches
+        let config = [{state = currentState,index = i, status = 0}] in
+        let next = nfaNextState currentState graph first_inpt in
+        let branches = map (lam x. join [config, (nfaMakeInputPath (addi i 1) x.1 rest_inpt nfa)]) next in
+        let idx = index (lam branch. (eqi (last branch).status 1)) branches in
+        match idx with Some i then
+        join (slice branches 0 (addi 1 i))
+        else join branches
+       -- edit --
     else
     [{state = currentState, index = i, status = negi 1}]
-end    
+end
 
 
 
@@ -132,10 +136,14 @@ let nfaConstr = lam s. lam trans. lam alph. lam startS. lam accS. lam eqv. lam e
 mexpr
 let alphabet = ['0','1'] in
 let states = [0,1,2] in
+let states2 = [0,1,2,3,4] in
 let transitions = [(0,1,'1'),(1,1,'1'),(1,2,'0'),(2,2,'0'),(2,1,'1')] in
+let transitions2 = [(0,1,'1'),(1,3,'1'),(1,2,'1')] in
 let startState = 0 in
 let acceptStates = [2] in 
 let newNfa = nfaConstr states transitions alphabet startState acceptStates eqi eqchar in
+let newNfa2 = nfaConstr states2 transitions2 alphabet startState acceptStates eqi eqchar in
+let newNfa3 = nfaConstr states2 transitions2 alphabet startState [3] eqi eqchar in
 utest setEqual eqchar alphabet newNfa.alphabet with true in
 utest eqi startState newNfa.startState with true in
 utest setEqual eqi acceptStates newNfa.acceptStates with true in
@@ -148,12 +156,39 @@ utest (digraphHasVertex 7 (nfaAddState newNfa 7).graph) with true in
 utest isAcceptedState 2 newNfa with true in
 utest isAcceptedState 3 newNfa with false in
 utest nextState 1 newNfa.graph '0' with 2 in
-utest makeInputPath "1010" newNfa newNfa.startState with [0,1,2,1,2] in
-utest makeInputPath "1011" newNfa newNfa.startState with [0,1,2,1,1] in
-utest makeInputPath "010" newNfa newNfa.startState with [0] in
-utest makeInputPath "10" newNfa newNfa.startState with [0,1,2] in
-utest makeInputPath "00000000111111110000" newNfa newNfa.startState with [0] in
-utest makeInputPath "" newNfa newNfa.startState with [0] in
+-- Not accepted
+--utest nfaMakeInputPath (negi 1) newNfa.startState "1011" newNfa with
+ --   [{status = 0,state = 0,index = negi 1},
+  --  {status = 0,state = 1,index = 0},
+  --  {status = 0,state = 2,index = 1},
+  --  {status = 0,state = 1,index = 2},
+  --  {status = negi 2,state = 1,index = 3}] in
+-- Accepted
+utest nfaMakeInputPath (negi 1) newNfa.startState "10110" newNfa with
+    [{status = 0,state = 0,index = negi 1},
+    {status = 0,state = 1,index = 0},
+    {status = 0,state = 2,index = 1},
+    {status = 0,state = 1,index = 2},
+    {status = 0,state = 1,index = 3},
+    {status = 1,state = 2,index = 4}] in
+-- Invalid transition
+utest nfaMakeInputPath (negi 1) newNfa.startState "0110" newNfa with
+    [{status = negi 1,state = 0,index = negi 1}] in
+-- Input of length 0
+utest nfaMakeInputPath (negi 1) newNfa.startState "" newNfa with 
+    [{status = negi 2,state = 0,index = negi 1}] in
+-- Accepted, after branch got stuck.
+ utest nfaMakeInputPath (negi 1) newNfa2.startState "11" newNfa2 with 
+    [{status = 0, state = 0, index = (negi 1)},
+    {status = 0, state = 1, index = 0},
+    {status = negi 2, state = 3, index = 1},
+    {status = 0, state = 1, index = 0},
+    {status = 1, state = 2, index = 1}] in
+-- Accepted, got accepted in the first branch (the second isn't)
+utest nfaMakeInputPath (negi 1) newNfa3.startState "11" newNfa3 with 
+    [{status = 0, state = 0, index = (negi 1)},
+    {status = 0, state = 1, index = 0},
+    {status = 1, state = 3, index = 1}] in
 ()
 
 

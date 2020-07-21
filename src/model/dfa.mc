@@ -147,12 +147,6 @@ let makeInputPath = lam i. lam currentState. lam inpt. lam dfa.
     else [{state = currentState,index = i, status = negi 1}]
 end
 
-let dfaAcceptedInput = lam inpt. lam dfa.
-    let path = makeInputPath (negi 1) dfa.startState inpt dfa  in
-    if (lti (length path) (length inpt)) then "stuck" else
-    let last = last path in
-    if (isAcceptedState last dfa) then "accepted" else "not accepted"
-
 mexpr
 let alphabet = ['0','1'] in
 let states = [0,1,2] in
@@ -172,13 +166,25 @@ utest (digraphHasVertex 7 (dfaAddState newDfa 7).graph) with true in
 utest isAcceptedState 2 newDfa with true in
 utest isAcceptedState 3 newDfa with false in
 utest nextState 1 newDfa.graph '0' with 2 in
-utest makeInputPath (negi 1) newDfa.startState "10" newDfa  with [{status = 0,state = 0,index = (negi 1)},{status = 0,state = 1,index = 0},{status = 0,state = 2,index = 1}] in
--- utest makeInputPath 0 "1011" newDfa newDfa.startState with [0,1,2,1,1] in
--- utest makeInputPath 0 "010" newDfa newDfa.startState with [0] in
--- utest makeInputPath 0 "10" newDfa newDfa.startState with [0,1,2] in
--- utest makeInputPath 0 "00000000111111110000" newDfa newDfa.startState with [0] in
--- utest makeInputPath 0 "" newDfa newDfa.startState with [0] in
--- utest dfaAcceptedInput "1010" newDfa with "accepted" in
--- utest dfaAcceptedInput "1011" newDfa with "not accepted" in
--- utest dfaAcceptedInput "00000000111111110000" newDfa with "stuck" in
+-- Not accepted
+utest makeInputPath (negi 1) newDfa.startState "1011" newDfa with
+    [{status = 0,state = 0,index = negi 1},
+    {status = 0,state = 1,index = 0},
+    {status = 0,state = 2,index = 1},
+    {status = 0,state = 1,index = 2},
+    {status = negi 2,state = 1,index = 3}] in
+-- Accepted
+utest makeInputPath (negi 1) newDfa.startState "10110" newDfa with
+    [{status = 0,state = 0,index = negi 1},
+    {status = 0,state = 1,index = 0},
+    {status = 0,state = 2,index = 1},
+    {status = 0,state = 1,index = 2},
+    {status = 0,state = 1,index = 3},
+    {status = 1,state = 2,index = 4}] in
+-- Invalid transition
+utest makeInputPath (negi 1) newDfa.startState "0110" newDfa with
+    [{status = negi 1,state = 0,index = negi 1}] in
+-- Input of length 0
+utest makeInputPath (negi 1) newDfa.startState "" newDfa with 
+    [{status = negi 2, state = 0, index = negi 1}] in
 ()
