@@ -57,7 +57,7 @@ class NFAModel {
     updateNFA() {
         let activeColor = this.inputWasNotAccepted() || this.nfaGotStuck() ? 
                         "danger"
-                    : this.nfaBranchGotStuck() ?
+                    : this.nfaBranchGotStuck() || this.inputWasNotAcceptedByBranch() ?
                         "warning"
                     :   "active"
         let colorPreviousEdge = this.getPreviousConfigurationStatus() !== -1
@@ -80,6 +80,13 @@ class NFAModel {
      */
     isCurrentInputIndex(index) {
         return index === this.configurations[this.currentConfigurationIndex].index
+    }
+
+    /**
+     * Returns whether the simulation is at the last input or not.
+     */
+    isAtFinalInput() {
+        return this.configurations[this.currentConfigurationIndex].index === this.input.length-1
     }
 
     /**
@@ -111,10 +118,17 @@ class NFAModel {
     }
 
     /**
+     * Returns whether the given input was accepted by the current branch or not.
+     */
+    inputWasNotAcceptedByBranch() {
+        return this.getConfigurationStatus() === -1
+    }
+
+    /**
      * Returns whether the NFA is stuck at the current branch.
      */
     nfaBranchGotStuck() {
-        return this.getConfigurationStatus() === -2
+        return this.isAtFinalInput() && this.getConfigurationStatus() === -2
     }
 
     /**
@@ -155,13 +169,17 @@ class NFAModel {
     getInfoStatusAndText() {
         let automata = this.visualizationModel.type==="dfa" ? "DFA" : "NFA"
         return this.inputWasNotAccepted() ?
-            {status: "danger", text: `Not accepted: The given input string was not accepted by the ${automata}.</span>`}
+            {status: "danger", text: `Not accepted: The given input string is not accepted by the ${automata}.`}
         : this.nfaGotStuck() ?
-            {status: "danger", text: `Not accepted: The automata is stuck in the current state.</span>`}
+            {status: "danger", text: `Not accepted: The automata is stuck in the current state.`}
         : this.inputWasAccepted() ?
-            {status: "accepted", text: `The input was accepted by the ${automata}.</span>`}
+            {status: "accepted", text: `The input is accepted by the ${automata}.`}
         : this.nfaBranchGotStuck() ?
-            {status: "warning", text: `This branch is stuck at the current branch. Click next to trace back to the branching state.</span>`}
+            {status: "warning", text: `This NFA is stuck at the current state: Out of input. 
+                                       Click next to trace back to the branching state.`}
+        : this.inputWasNotAcceptedByBranch() ?
+            {status: "warning", text: `The NFA is stuck at the current state: No matching outgoing transition. 
+                                       Click next to trace back to the branching state.`}
         : null
     }
 
