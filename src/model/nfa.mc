@@ -157,12 +157,12 @@ utest isAcceptedState 2 newNfa with true in
 utest isAcceptedState 3 newNfa with false in
 utest nextState 1 newNfa.graph '0' with 2 in
 -- Not accepted
---utest nfaMakeInputPath (negi 1) newNfa.startState "1011" newNfa with
- --   [{status = 0,state = 0,index = negi 1},
-  --  {status = 0,state = 1,index = 0},
-  --  {status = 0,state = 2,index = 1},
-  --  {status = 0,state = 1,index = 2},
-  --  {status = negi 2,state = 1,index = 3}] in
+utest nfaMakeInputPath (negi 1) newNfa.startState "1011" newNfa with
+    [{status = 0,state = 0,index = negi 1},
+    {status = 0,state = 1,index = 0},
+    {status = 0,state = 2,index = 1},
+    {status = 0,state = 1,index = 2},
+    {status = negi 2,state = 1,index = 3}] in
 -- Accepted
 utest nfaMakeInputPath (negi 1) newNfa.startState "10110" newNfa with
     [{status = 0,state = 0,index = negi 1},
@@ -179,16 +179,16 @@ utest nfaMakeInputPath (negi 1) newNfa.startState "" newNfa with
     [{status = negi 2,state = 0,index = negi 1}] in
 -- Accepted, after branch got stuck.
  utest nfaMakeInputPath (negi 1) newNfa2.startState "11" newNfa2 with 
-    [{status = 0, state = 0, index = (negi 1)},
-    {status = 0, state = 1, index = 0},
-    {status = negi 2, state = 3, index = 1},
-    {status = 0, state = 1, index = 0},
-    {status = 1, state = 2, index = 1}] in
+    [{status = 0,state = 0,index = (negi 1)},
+    {status = 0,state = 1,index = 0},
+    {status = negi 2, state = 3,index = 1},
+    {status = 0,state = 1,index = 0},
+    {status = 1,state = 2,index = 1}] in
 -- Accepted, got accepted in the first branch (the second isn't)
 utest nfaMakeInputPath (negi 1) newNfa3.startState "11" newNfa3 with 
-    [{status = 0, state = 0, index = (negi 1)},
-    {status = 0, state = 1, index = 0},
-    {status = 1, state = 3, index = 1}] in
+    [{status = 0,state = 0,index = (negi 1)},
+    {status = 0,state = 1,index = 0},
+    {status = 1,state = 3,index = 1}] in
 ()
 
 
