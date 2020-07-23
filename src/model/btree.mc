@@ -1,27 +1,14 @@
 include "string.mc"
 
 type BTree
-     con BTree: (BTree) -> BTree
-     con Node : (a,BTree,BTree) -> BTree 
-     con Leaf : (a) -> BTree
-     con Nil : () -> BTree
-
-
-recursive
-let count = lam tree.
-    match tree with BTree t then
-    count t.0
-    else match tree with Node t then
-      let left = t.1 in
-      let right = t.2 in
-      addi t.0 (addi (count left) (count right))
-    else match tree with Leaf v then v
-    else match tree with Nil _ then 0
-    else error "Unknown node"
-end
-
-
+    con BTree : (BTree) -> BTree
+    con Node  : (a,BTree,BTree) -> BTree 
+    con Leaf  : (a) -> BTree
+    con Nil   : () -> BTree
 
 mexpr
-let tree = BTree (Node(2, Node(3, Nil () , Leaf 2), Leaf 3)) in
-utest count tree  with 10 in ()
+let tree = BTree(Node(2, Nil (), Leaf 3)) in
+utest match tree with BTree t then t else 1 with Node(2, Nil (), Leaf 3) in
+utest match tree with BTree Node t then t.0 else (negi 100) with 2 in
+utest match tree with BTree Node t then t.1 else (negi 100) with Nil () in
+utest match tree with BTree Node t then t.2 else (negi 100) with Leaf 3 in ()
