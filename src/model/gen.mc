@@ -15,7 +15,7 @@ let formatVertices = lam vertices. lam vertex2str.
     foldl (lam output. lam vertex.
         concat output (formatVertex (vertex2str (head vertices)))
     ) "" vertices
-
+ 
 -- format edges and squash edges between the same nodes.
 recursive
 let formatAndSquashEdges = lam trans. lam v2s. lam eqv.
@@ -120,34 +120,34 @@ end
 -- format NFA to JS code for visualizing
 let nfaVisual = lam nfa. lam input. lam s2s. lam l2s. lam nfaType.
     strJoin "" [
-        "{\n",
-            "\"type\" : \"",nfaType,"\",\n",
-            "\"simulation\" : {\n",
-                "\"input\" : [", (formatInput input l2s),"],\n",
-                "\"configurations\" : [\n", 
-                    (formatInputPath (nfaMakeInputPath (negi 1) nfa.startState input nfa) s2s), "],\n",
-                "},\n",
-            "\"model\" : {\n",
-                "\"states\" : [\n", (formatStates (getStates nfa) s2s),"],\n",
-                "\"transitions\" : [\n", (formatTransitions (getTransitions nfa) s2s l2s (getEqv nfa)), "], \n",
-                "\"startState\" : \"", (s2s nfa.startState), "\",\n",
-                "\"acceptedStates\" : [",
-                    strJoin "" (map (lam s. strJoin "" ["\"", (s2s s), "\","]) nfa.acceptStates),
-                "],\n",
-            "}\n",
-        "}"
+        "{\n \"type\" : \"",
+	nfaType,
+	"\",\n \"simulation\" : {\n \"input\" : [",
+	(formatInput input l2s),
+	"],\n \"configurations\" : [\n", 
+        (formatInputPath (nfaMakeInputPath (negi 1) nfa.startState input nfa) s2s),
+	"],\n },\n \"model\" : {\n \"states\" : [\n",
+	(formatStates (getStates nfa) s2s),
+	"],\n \"transitions\" : [\n",
+	(formatTransitions (getTransitions nfa) s2s l2s (getEqv nfa)),
+	"], \n \"startState\" : \"",
+	(s2s nfa.startState),
+	"\",\n \"acceptedStates\" : [",
+	strJoin "" (map (lam s. strJoin "" ["\"", (s2s s), "\","]) nfa.acceptStates),
+	"],\n }\n }"
     ]
 
 -- format a graph to JS code
 let formatGraph = lam nodes. lam edges. lam graphType.
     strJoin "" [
-        "{\n",
-            "\"type\" : \"",graphType,"\",\n",
-            "\"model\" : {\n",
-                "\"nodes\" : [\n", nodes ,"],\n",
-                "\"edges\" : [\n", edges, "], \n",
-            "},\n",
-        "}"]
+        "{\n \"type\" : \"",
+	graphType,
+	"\",\n \"model\" : {\n \"nodes\" : [\n",
+	nodes ,
+	"],\n \"edges\" : [\n",
+	edges,
+	"], \n },\n }"
+	]
 
 -- format a graph to JS code for visualizing
 let graphVisual = lam model. lam vertex2str. lam edge2str. lam graphType.
@@ -171,15 +171,13 @@ let visualize = lam models.
                 nfaVisual model input state2str label2str "dfa"
             else match model with Graph(model,vertex2str,edge2str) then
                 graphVisual model vertex2str edge2str "graph"
-                -- change the name of the function above
             else match model with NFA(model,input,state2str,label2str) then
                 nfaVisual model input state2str label2str "nfa"
 	        else match model with BTree(model, node2str) then
                 treeVisual model node2str
             else error "unknown type") models) in
     print (addTabs (strJoin "" [
-        "let data = {\n",
-        "\t\"models\": [\n",
+        "let data = {\n \t\"models\": [\n",
         models,
         "]\n}\n"]) 0)
                         
