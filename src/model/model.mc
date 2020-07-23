@@ -1,12 +1,14 @@
+include "btree.mc"
 include "dfa.mc"
+include "nfa.mc"
 
 -- Represents models that can be visualized and its associated data.
 type Model
-con Digraph : (Digraph,    vertex2str, edge2str ) -> Model
-con DFA     : (DFA, input, state2str,  label2str) -> Model
-con Graph   : (Graph,      vertex2str, edge2str ) -> Model
-con NFA     : (NFA, input, state2str,  label2str) -> Model
-con BTree   : (BTree, node2str) -> Model
+    con Digraph : (Digraph,    vertex2str, edge2str ) -> Model
+    con DFA     : (DFA, input, state2str,  label2str) -> Model
+    con Graph   : (Graph,      vertex2str, edge2str ) -> Model
+    con NFA     : (NFA, input, state2str,  label2str) -> Model
+    con BTree   : (BTree, node2str) -> Model
 
 
 mexpr
@@ -18,7 +20,6 @@ let startState = "a" in
 let acceptStates = ["a", "c"] in
 let dfa = dfaConstr states transitions alfabeth startState acceptStates (setEqual eqchar) eqchar in
 let model = DFA(dfa, "1011", lam b. b, lam b. [b]) in 
-
 utest match model with DFA(d,i,s2s,t2s) then i else "" with "1011" in
 utest match model with DFA(d,i,s2s,t2s) then d.acceptStates else "" with ([(['a']),(['c'])]) in 
 ()
