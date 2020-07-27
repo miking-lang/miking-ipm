@@ -1,9 +1,22 @@
-/*          CONTROL PANDEL          */
+/*             GENERAL             */
+.capitalize {
+    text-transform: capitalize;
+}
+.uppercase {
+    text-transform: uppercase;
+}
 body {
     font-family: Arial, Helvetica, sans-serif;
 }
 .container {
     padding: 50px;
+    border-bottom: 1px solid #9b9b9b;
+}
+
+/*          CONTROL PANEL          */
+.simulation-title {
+    font-size: 24px;
+    padding-right: 5px;
 }
 .simulation-title {
     font-size: 24px;
@@ -51,14 +64,17 @@ body {
     font-size: 18px;
     font-weight: bold;
 }
-.warning {
-    color: #CD0100;
-}
 .accepted {
     color: #008001;
 }
+.danger {
+    color: #CD0100;
+}
+.warning {
+    color: #8B8B00;
+}
 /*              GRAPH               */
-.dfa-node {
+.node {
     cursor: pointer;
 }
 .start-node {
