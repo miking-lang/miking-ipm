@@ -29,3 +29,4 @@ if (data && data.models) {
     var paragraph = document.getElementById("error-container");
     paragraph.textContent += data;
 }
+
