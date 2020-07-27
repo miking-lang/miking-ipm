@@ -4,11 +4,11 @@ include "model.mc"
 
 -- format vertex
 let formatVertex = lam name.
-    strJoin "" ["{\"name\":\"", name, "\"},\n"]
+    foldl concat [] ["{\"name\":\"", name, "\"},\n"]
 
 -- format edge
 let formatEdge = lam from. lam to. lam label.
-    strJoin "" ["{\"from\": \"", from, "\", \"to\": \"" , to, "\", \"label\": \"" , label , "\"},\n"]
+    foldl concat [] ["{\"from\": \"", from, "\", \"to\": \"" , to, "\", \"label\": \"" , label , "\"},\n"]
 
 -- format vertices
 let formatVertices = lam vertices. lam vertex2str.
@@ -47,7 +47,7 @@ let formatTransitions = lam trans. lam v2s. lam l2s. lam eqv.
 -- Getting the input path formated
 let formatInputPath = lam path. lam state2string.
     foldl (lam output. lam elem.
-        strJoin "" [output,
+        foldl concat [] [output,
             "{\"state\": \"",state2string elem.state,
             "\",\"status\": ",int2string elem.status,
             ",\"index\": ",int2string elem.index,"},\n"
@@ -57,7 +57,7 @@ let formatInputPath = lam path. lam state2string.
 -- format input-line
 let formatInput = lam input. lam label2str.
     foldl (lam output. lam elem.
-        strJoin "" [output,"\"" ,label2str elem, "\","]
+        foldl concat [] [output,"\"" ,label2str elem, "\","]
     ) "" input
 
 -- Traversing the tree to format the states
@@ -67,9 +67,9 @@ let formatBTreeStates = lam btree. lam n2s. lam output.
     formatBTreeStates t n2s ""
     else match btree with Nil () then
     output
-    else match btree with Leaf v then strJoin "" [output, formatVertex (n2s v)]
+    else match btree with Leaf v then foldl concat [] [output, formatVertex (n2s v)]
     else match btree with Node n then
-    let output =  strJoin "" [output, formatVertex (n2s n.0)] in
+    let output =  foldl concat [] [output, formatVertex (n2s n.0)] in
     let output = formatBTreeStates n.1 n2s output in
     let output = formatBTreeStates n.2 n2s output in
     output
@@ -87,9 +87,9 @@ let formatBTreeEdges = lam btree. lam n2s. lam from. lam output.
     else match btree with Nil () then
         output
     else match btree with Leaf v then
-        strJoin "" [output, formatEdge (n2s from) (n2s v) ""]
+        foldl concat [] [output, formatEdge (n2s from) (n2s v) ""]
     else match btree with Node n then
-        let output = strJoin "" [output, formatEdge (n2s from) (n2s n.0) ""] in
+        let output = foldl concat [] [output, formatEdge (n2s from) (n2s n.0) ""] in
         let output = formatBTreeEdges n.1 n2s n.0 output in
         let output = formatBTreeEdges n.2 n2s n.0 output in
         output
@@ -98,55 +98,58 @@ end
 
 -- return a string with n tabs
 let tab = lam n. if(lti n 0) then error "Number of tabs can not be smaller than 0" 
-    else strJoin "" (unfoldr (lam b. if eqi b n then None () else Some ("\t", addi b 1)) 0)
-	   
+    else (unfoldr (lam b. if eqi b n then None () else Some ('\t', addi b 1)) 0)
+    
 -- add tabs after every \n to string, tab according to brackets ('{','}','[,']')
 recursive
 let addTabs = lam inpt. lam t.
     if (eqi (length inpt) 0 ) then ""
-    else if (eqi (length inpt) 1) then inpt
+    else if (eqi (length inpt) 1) then [head inpt]
     else
-        let first = head inpt in
-        let snd = head (tail inpt) in
-        let rest = tail inpt in
-        if (eqchar first '\n') then 
-            if or (eqchar snd '}') (eqchar snd ']') then concat (strJoin "" [[first],tab (subi t 1)]) (addTabs rest t) 
-            else concat (strJoin "" [[first],tab t]) (addTabs rest t) 
-        else if or (eqchar (first) '{') (eqchar first '[') then concat [first] (addTabs rest (addi t 1))
-        else if (or (eqchar (first) '}') (eqchar (first) ']')) then concat [first] (addTabs rest (subi t 1)) 
-        else concat [first] (addTabs rest t) 
+    let first = head inpt in
+    let rest = tail inpt in
+    let next = head rest in
+    let tabs = (if or (eqchar first '{') (eqchar first '[') then addi t 1
+        else if or (eqchar next '}') (eqchar next ']') then subi t 1
+        else t) in
+    if eqchar first '\n' then concat (concat "\n" (tab tabs)) (addTabs rest tabs) else cons first (addTabs rest tabs)
 end
 
+-- (any (lam x. or (eqchar x '{') (eqchar x '[')) first)
 -- format NFA to JS code for visualizing
 let nfaVisual = lam nfa. lam input. lam s2s. lam l2s. lam nfaType.
-    strJoin "" [
-        "{\n \"type\" : \"",
-	nfaType,
-	"\",\n \"simulation\" : {\n \"input\" : [",
-	(formatInput input l2s),
-	"],\n \"configurations\" : [\n", 
-        (formatInputPath (nfaMakeInputPath (negi 1) nfa.startState input nfa) s2s),
-	"],\n },\n \"model\" : {\n \"states\" : [\n",
-	(formatStates (getStates nfa) s2s),
-	"],\n \"transitions\" : [\n",
-	(formatTransitions (getTransitions nfa) s2s l2s (getEqv nfa)),
-	"], \n \"startState\" : \"",
-	(s2s nfa.startState),
-	"\",\n \"acceptedStates\" : [",
-	strJoin "" (map (lam s. strJoin "" ["\"", (s2s s), "\","]) nfa.acceptStates),
-	"],\n }\n }"
-    ]
+    foldl concat [] ["{\n ",
+        "\"type\" : \"", nfaType,"\",\n ",
+        "\"simulation\" : {\n",
+            " \"input\" : [", (formatInput input l2s),"],\n",
+            " \"configurations\" : [\n", 
+            (formatInputPath (nfaMakeInputPath (negi 1) nfa.startState input nfa) s2s),
+            "],\n",
+        "},\n ",
+        "\"model\" : {\n ",
+            "\"states\" : [\n",
+            (formatStates (getStates nfa) s2s),
+            "],\n ",
+            "\"transitions\" : [\n",
+            (formatTransitions (getTransitions nfa) s2s l2s (getEqv nfa)),
+            "], \n ",
+            "\"startState\" : \"", (s2s nfa.startState),"\",\n ",
+            "\"acceptedStates\" : [", foldl concat [] (map (lam s. foldl concat [] ["\"", (s2s s), "\","]) nfa.acceptStates),"],\n",
+        "}\n",
+    "}"
+]
+
+let dfaVisual = nfaVisual 
 
 -- format a graph to JS code
 let formatGraph = lam nodes. lam edges. lam graphType.
-    strJoin "" [
-        "{\n \"type\" : \"",
+    foldl concat [] ["{\n \"type\" : \"",
 	graphType,
 	"\",\n \"model\" : {\n \"nodes\" : [\n",
 	nodes ,
 	"],\n \"edges\" : [\n",
 	edges,
-	"], \n },\n }"
+	"], \n },\n}"
 	]
 
 -- format a graph to JS code for visualizing
@@ -168,7 +171,7 @@ let visualize = lam models.
             match model with Digraph(model,vertex2str,edge2str) then
                 graphVisual model vertex2str edge2str "digraph"
             else match model with DFA(model,input,state2str,label2str) then
-                nfaVisual model input state2str label2str "dfa"
+                dfaVisual model input state2str label2str "dfa"
             else match model with Graph(model,vertex2str,edge2str) then
                 graphVisual model vertex2str edge2str "graph"
             else match model with NFA(model,input,state2str,label2str) then
@@ -176,10 +179,7 @@ let visualize = lam models.
 	        else match model with BTree(model, node2str) then
                 treeVisual model node2str
             else error "unknown type") models) in
-    print (addTabs (strJoin "" [
-        "let data = {\n \t\"models\": [\n",
-        models,
-        "]\n}\n"]) 0)
+    print (concat "let data = {\"models\": [\n" (concat models "]\n}\n"))
                         
 mexpr
 let alfabeth = ['0','1','2'] in
