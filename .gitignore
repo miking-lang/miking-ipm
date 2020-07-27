@@ -8,3 +8,4 @@ src/visual/webpage/js/temp.js
 node_modules/*
 src/model/dfaModel.mc
 package-lock.json
+src/ocaml-server/_build/*

@@ -1,0 +1,3 @@
+(executable
+	(name         main)
+	(libraries    cohttp-async async_kernel async.async_command async_unix base cohttp cohttp_server fmt.tty async async_inotify core str))
