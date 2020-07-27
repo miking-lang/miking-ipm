@@ -1,9 +1,14 @@
-// Checks for existing models object in the generated source file.
-if (data && data.models) {
-    const root = document.body.querySelector("#app")
-    // Maps over all models in the generated output.
+
+
+function render() {
+  
+  
+  
+    if (data && data.models) {
+	const root = document.body.querySelector("#app")
+	// Maps over all models in the generated output.
     
-    data.models.map((model, idx) => {
+	data.models.map((model, idx) => {
         // Creates a root element for the model and add it to the root of the application.
         let modelRoot = document.createElement(`div`)
         modelRoot.className = "container"
@@ -29,4 +34,21 @@ if (data && data.models) {
     var paragraph = document.getElementById("error-container");
     paragraph.textContent += data;
 }
+}
 
+
+
+function reloadCSS() {
+  const links = document.getElementsByTagName('data');
+
+  Array.from(links)
+    .forEach(link => {
+      const url = new URL(link.src, location.href);
+      url.searchParams.set('forceReload', Date.now());
+      link.src = url.src;
+    });
+}
+
+
+render();
+var i = setInterval("reloadCSS();", 1000);

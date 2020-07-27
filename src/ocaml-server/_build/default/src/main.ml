@@ -75,6 +75,7 @@ let check_if_specific_file_mod event =
   in
   if contains event "modified" && contains event file_name then
     let _ = Sys.command (String.concat "" ["mi "; Sys.argv.(1);" > ../../visual/webpage/js/data-source.js "]) in
+    let _ = Sys.command("./refreshpage.sh") in
     (file_flag.modified) := true;;
     ()
 

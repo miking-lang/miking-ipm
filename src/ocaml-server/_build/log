@@ -2,10 +2,10 @@
 # OCAMLPARAM: unset
 # Workspace root:
 # /home/calin/repos/github.com/miking-lang/fork-ipm/src/ocaml-server
-$ /usr/bin/nproc > /tmp/duneb29b4d.output 2> /dev/null
+$ /usr/bin/nproc > /tmp/dune748e61.output 2> /dev/null
 # Auto-detected concurrency: 8
 # disable binary cache
-$ /usr/bin/ocamlc.opt -config > /tmp/dune74aeba.output
+$ /usr/bin/ocamlc.opt -config > /tmp/duned6ba77.output
 # Dune context:
 #  { name = "default"
 #  ; kind = "default"
