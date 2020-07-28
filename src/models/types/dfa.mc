@@ -14,6 +14,7 @@ include "nfa.mc"
 -- the transitions are chars. All labels between two states
 -- also has to be unique. 
 
+
 -- adds syntactic sugar for DFA type
 type DFA = NFA
 
@@ -53,7 +54,7 @@ let alphabet = ['0','1'] in
 let states = [0,1,2] in
 let transitions = [(0,1,'1'),(1,1,'1'),(1,2,'0'),(2,2,'0'),(2,1,'1')] in
 let startState = 0 in
-let acceptStates = [2] in 
+let acceptStates = [2] in
 let newDfa = dfaConstr states transitions alphabet startState acceptStates eqi eqchar in
 -- Not accepted
 utest nfaMakeInputPath (negi 1) newDfa.startState "1011" newDfa with
@@ -77,3 +78,11 @@ utest nfaMakeInputPath (negi 1) newDfa.startState "0110" newDfa with
 utest nfaMakeInputPath (negi 1) newDfa.startState "" newDfa with 
     [{status = negi 2, state = 0, index = negi 1}] in
 ()
+
+
+
+
+
+
+
+

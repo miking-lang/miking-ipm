@@ -75,6 +75,7 @@ There are no data type requirements, thus you would need to write equality funct
 
 * For example, if your states were integers and your labels were chars, you could do:
 
+
 		let eqv = lam s1. lam s2.
 			eqi s1 s2
 		let eql = lam s1. lam s2.
