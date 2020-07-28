@@ -160,7 +160,7 @@ Functions for writing the datatypes in dot are provided. Given the dot code, a c
 
 To write the dot code for some data of type `model`, use this command:
 
-	model2dot "YOUR-DATA"
+	modelPrintDot "YOUR-DATA"
 
 This command then creates your new file:
 
@@ -260,7 +260,7 @@ This program creates both a NFA and a Binary tree and displays them.
 	]
 
 ## Printing to pdf
-The following code creates a directed graph and prints it as dot code. To do the same with any other model object, create your objects the same way as the examples above and call the model2dot function with the object as argument.
+The following code creates a directed graph and prints it as dot code. To do the same with any other model object, create your objects the same way as the examples above and call the modelPrintDot function with the object as argument.
 
 	mexpr 
 	let char2string = (lam b. [b]) in
@@ -272,7 +272,7 @@ The following code creates a directed graph and prints it as dot code. To do the
   
 	let digraphModel = Digraph(digraph, char2string,int2string) in
 
-	model2dot digraphModel
+	modelPrintDot digraphModel
 
 The following command runs the code, which is located in the file "test.mc", and creates a pdf file called "myDigraph.pdf" from the output:
 

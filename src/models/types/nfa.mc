@@ -110,6 +110,16 @@ let nfaMakeInputPath = lam i. lam currentState. lam input. lam nfa.
     else [{state = currentState, index = i, status = negi 1}]
 end
 
+recursive
+let nfaMakeEdgeInputPath = lam currentState. lam input. lam nfa.
+    if (eqi (length input) 0) then []
+    -- check if transition exists. If yes, go to next state
+    else if nfaStateHasTransition currentState nfa.graph (head input) then
+        foldl (lam path. lam elem.
+            join [path, [(currentState,elem)], nfaMakeEdgeInputPath elem (tail input) nfa]
+        ) [] (nfaNextStates currentState nfa.graph (head input))
+    else []
+end
 
 -- constructor for the NFA
 let nfaConstr = lam s. lam trans. lam alph. lam startS. lam accS. lam eqv. lam eql.
@@ -126,26 +136,46 @@ let nfaConstr = lam s. lam trans. lam alph. lam startS. lam accS. lam eqv. lam e
 
 let printList = lam list. 
     map (lam x. print x) list
-    
-let nfaPrintDot = lam nfa. lam v2str. lam l2str. 
+
+let nfaPrintDot = lam nfa. lam v2str. lam l2str. lam input. lam steps.
     let eqv = getEqv nfa in
     let edges = getTransitions nfa in
     let vertices = getStates nfa in
     let direction = "LR" in 
     let startState = nfa.startState in
     let acceptedStates = nfa.acceptStates in
+    let path = (if (lti (negi 1) steps) then slice (nfaMakeEdgeInputPath startState input nfa) 0 steps
+        else []) in
+    let currentState = if (eqi steps 0) then startState
+        else if (lti steps 0) then None()
+        else (last path).1 in 
+    let finalEdge = if (lti steps 0) then None() else last path in
     let _ = print "digraph {" in
     let _ = printList ["rankdir=", direction, ";\n"] in
     let _ = printList ["node [style=filled fillcolor=white shape=circle];"] in
     let _ = map 
         (lam v. 
             let _ = print (v2str v) in
-            print (if (any (lam x. eqv x v) acceptedStates) then "[shape=doublecircle];" else ";") ) 
+            let _ = print (if (any (lam x. eqv x v) acceptedStates) then "[shape=doublecircle]" 
+            else "") in
+            let _ = print (if (lti (negi 1) steps) then 
+                if (eqv v currentState)  then "[fillcolor=darkgreen color=darkgreen fontcolor = white]"  else ""
+            else "") in
+            print ";" )
         vertices in
-    let _ = print "start [fontcolor = white color = white];" in
+    let _ = print "start [fontcolor = white color = white];\n" in
     let _ = printList ["start -> ", startState, "[label=start];"] in
+    let _ = print (if (lti (negi 1) steps) then "" else "edge [style=solid];") in
+    let eqEdge = (lam a. lam b. if and (eqv a.0 b.0) (eqv a.1 b.1) then true else false) in
     let _ = map
-        (lam e. let _ = print (v2str e.0) in
+        (lam e. 
+            let _ =  if (lti (negi 1) steps) then 
+                (
+                if (eqEdge (e.0,e.1) finalEdge) then print "edge [color=darkgreen style=bold];\n"
+                else if (setMem eqEdge (e.0,e.1) path) then print "edge [color= black style=bold];\n"
+                else print "edge [color=black style=dashed];\n"
+            ) else "" in
+            let _ = print (v2str e.0) in
             let _ = print " -> " in
             let _ = print (v2str e.1) in
             let _ = print "[label=\"" in

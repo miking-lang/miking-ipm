@@ -14,7 +14,7 @@ type Model
 let printList = lam list. 
     map (lam x. print x) list
 
-let graph2dot = lam graph. lam v2str. lam l2str. lam isGraph.
+let graphPrintDot = lam graph. lam v2str. lam l2str. lam isGraph.
     let edges = graphEdges graph in
     let vertices = graphVertices graph in
     let direction = "LR" in
@@ -36,9 +36,9 @@ let graph2dot = lam graph. lam v2str. lam l2str. lam isGraph.
         edges in
     let _ = print "}\n" in ()
 
-let model2dot = lam model.
+let modelPrintDot = lam model.
     match model with Graph(graph,v2str,l2str) then
-        graph2dot graph v2str l2str true
+        graphPrintDot graph v2str l2str true
     else match model with Digraph(digraph,v2str,l2str) then 
         digraphPrintDot digraph v2str l2str
     else match model with NFA(nfa,input,state2str,label2str) then
