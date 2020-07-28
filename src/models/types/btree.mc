@@ -23,7 +23,7 @@ let btreeEdgesPrintDot = lam tree. lam from. lam node2str.
     else ""
 end
 
-let btreePrintDot = lam tree. lam node2str. 
+let btreePrintDot = lam tree. lam node2str.
     let _ = print "digraph {" in 
     let _  = btreeEdgesPrintDot tree (None()) node2str in 
     let _ = print "} " in

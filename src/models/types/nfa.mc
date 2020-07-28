@@ -137,44 +137,33 @@ let nfaConstr = lam s. lam trans. lam alph. lam startS. lam accS. lam eqv. lam e
 let printList = lam list. 
     map (lam x. print x) list
 
-let nfaPrintDot = lam nfa. lam v2str. lam l2str. lam input. lam steps.
+let nfaPrintDotWithStates = lam nfa. lam v2str. lam l2str. lam direction. lam activeState.
     let eqv = getEqv nfa in
     let edges = getTransitions nfa in
     let vertices = getStates nfa in
-    let direction = "LR" in 
-    let startState = nfa.startState in
-    let acceptedStates = nfa.acceptStates in
-    let path = (if (lti (negi 1) steps) then slice (nfaMakeEdgeInputPath startState input nfa) 0 steps
-        else []) in
-    let currentState = if (eqi steps 0) then startState
-        else if (lti steps 0) then None()
-        else (last path).1 in 
-    let finalEdge = if (lti steps 0) then None() else last path in
     let _ = print "digraph {" in
     let _ = printList ["rankdir=", direction, ";\n"] in
     let _ = printList ["node [style=filled fillcolor=white shape=circle];"] in
     let _ = map 
         (lam v. 
             let _ = print (v2str v) in
-            let _ = print (if (any (lam x. eqv x v) acceptedStates) then "[shape=doublecircle]" 
-            else "") in
-            let _ = print (if (lti (negi 1) steps) then 
-                if (eqv v currentState)  then "[fillcolor=darkgreen color=darkgreen fontcolor = white]"  else ""
-            else "") in
-            print ";" )
+            let dbl = (if (any (lam x. eqv x v) nfa.acceptStates) then "shape=doublecircle " else "") in
+            let active = match activeState with () then "" else (
+                if (eqv v activeState) then "fillcolor=darkgreen color=darkgreen fontcolor = white" else ""
+            ) in
+            printList ["[", dbl, active, "];"])
         vertices in
     let _ = print "start [fontcolor = white color = white];\n" in
-    let _ = printList ["start -> ", startState, "[label=start];"] in
-    let _ = print (if (lti (negi 1) steps) then "" else "edge [style=solid];") in
+    let _ = printList ["start -> ", nfa.startState, "[label=start];"] in
     let eqEdge = (lam a. lam b. if and (eqv a.0 b.0) (eqv a.1 b.1) then true else false) in
     let _ = map
         (lam e. 
-            let _ =  if (lti (negi 1) steps) then 
-                (
-                if (eqEdge (e.0,e.1) finalEdge) then print "edge [color=darkgreen style=bold];\n"
-                else if (setMem eqEdge (e.0,e.1) path) then print "edge [color= black style=bold];\n"
-                else print "edge [color=black style=dashed];\n"
-            ) else "" in
+            --let _ =  if (lti (negi 1) steps) then 
+            --    (
+            --    if (eqEdge (e.0,e.1) finalEdge) then print "edge [color=darkgreen style=bold];\n"
+            --    else if (setMem eqEdge (e.0,e.1) path) then print "edge [color= black style=bold];\n"
+            --    else print "edge [color=black style=dashed];\n"
+            --) else "" in
             let _ = print (v2str e.0) in
             let _ = print " -> " in
             let _ = print (v2str e.1) in
@@ -182,8 +171,10 @@ let nfaPrintDot = lam nfa. lam v2str. lam l2str. lam input. lam steps.
             let _ = print (l2str e.2) in
             print "\"];")
         edges in
-    let _ = print "}\n" in 
-    ()
+    let _ = print "}\n" in ()
+
+let nfaPrintDot = lam nfa. lam v2str. lam l2str. lam direction.
+    nfaPrintDotWithStates nfa v2str l2str direction ()
 
 mexpr
 let alphabet = ['0','1'] in

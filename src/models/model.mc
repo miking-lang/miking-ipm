@@ -14,11 +14,10 @@ type Model
 let printList = lam list. 
     map (lam x. print x) list
 
-let graphPrintDot = lam graph. lam v2str. lam l2str. lam isGraph.
+let graphPrintDot = lam graph. lam v2str. lam l2str. lam direction.
     let edges = graphEdges graph in
     let vertices = graphVertices graph in
-    let direction = "LR" in
-    let _ = print (if isGraph then "graph {" else "digraph {") in
+    let _ = print "graph {" in
     let _ = printList ["rankdir=", direction, ";\n"] in
     let _ = printList ["node [style=filled fillcolor=white shape=circle];"] in
     let _ = map 
@@ -28,7 +27,7 @@ let graphPrintDot = lam graph. lam v2str. lam l2str. lam isGraph.
         vertices in
     let _ = map
         (lam e. let _ = print (v2str e.0) in
-            let _ = print (if isGraph then " -- " else " -> ") in
+            let _ = print " -- " in
             let _ = print (v2str e.1) in
             let _ = print "[label=\"" in
             let _ = print (l2str e.2) in
@@ -36,17 +35,19 @@ let graphPrintDot = lam graph. lam v2str. lam l2str. lam isGraph.
         edges in
     let _ = print "}\n" in ()
 
-let modelPrintDot = lam model.
+let modelPrintDot = lam model. lam direction.
     match model with Graph(graph,v2str,l2str) then
-        graphPrintDot graph v2str l2str true
+        graphPrintDot graph v2str l2str direction
     else match model with Digraph(digraph,v2str,l2str) then 
+        -- Direction not working atm.
         digraphPrintDot digraph v2str l2str
     else match model with NFA(nfa,input,state2str,label2str) then
-        nfaPrintDot nfa state2str label2str
+        nfaPrintDot nfa state2str label2str direction
     else match model with DFA(dfa,input,state2str,label2str) then
-        dfaPrintDot dfa state2str label2str
+        dfaPrintDot dfa state2str label2str direction
     else match model with BTree(tree, node2str) then
         match tree with BTree(t) then
+            -- Direction not working atm.
             let _ = btreePrintDot t node2str in
             ()
         else "" 
