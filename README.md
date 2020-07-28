@@ -154,6 +154,9 @@ To create the visualizer, use this function:
 Where `data` is a list of models.
 
 # Creating files with the datatypes
+Before you can start converting your models to pdf and other formats, you need to
+install the graphviz package. Follow the instructions on <a href="https://graphviz.org/download/">graphviz.org</a>.
+
 Functions for writing the datatypes in dot are provided. Given the dot code, a command can be used to create a file with the datatype. Make sure that you include the model.mc file. 
 
 	include "path/to/model.mc"
@@ -260,6 +263,8 @@ This program creates both a NFA and a Binary tree and displays them.
 	]
 
 ## Printing to pdf
+
+
 The following code creates a directed graph and prints it as dot code. To do the same with any other model object, create your objects the same way as the examples above and call the modelPrintDot function with the object as argument.
 
 	mexpr 
