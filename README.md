@@ -163,7 +163,9 @@ Functions for writing the datatypes in dot are provided. Given the dot code, a c
 
 To write the dot code for some data of type `model`, use this command:
 
-	modelPrintDot "YOUR-DATA"
+	modelPrintDot "YOUR-DATA" "RENDER-DIRECTION"
+
+where "RENDER-DIRECTION" takes one of the following values "TB", "RL", "BT", "LR".
 
 This command then creates your new file:
 
