@@ -387,7 +387,6 @@ B /home/calin/.opam/default/lib/variantslib
 B /usr/lib/ocaml
 B /usr/lib/ocaml/threads
 B _build/default/.main.eobjs/byte
-B _build/default/cohttp_server/.cohttp_server.objs/byte
 S /home/calin/.opam/default/lib/astring
 S /home/calin/.opam/default/lib/async
 S /home/calin/.opam/default/lib/async/async_command
@@ -481,6 +480,9 @@ S /home/calin/.opam/default/lib/variantslib
 S /usr/lib/ocaml
 S /usr/lib/ocaml/threads
 S .
+<<<<<<< HEAD
 S cohttp_server
 >>>>>>> c028c80... cleaned up builds
+=======
+>>>>>>> 30c3a35... cleaned useless packages
 FLG -w @1..3@5..28@30..39@43@46..47@49..57@61..62-40 -strict-sequence -strict-formats -short-paths -keep-locs

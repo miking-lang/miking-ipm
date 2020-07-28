@@ -1,5 +1,4 @@
 open Cohttp_async
-open Cohttp_server
 
 type flag = { modified : bool ref};;
 let file_flag = {modified = ref true} ;;
@@ -17,7 +16,7 @@ let serve ~docroot ~index uri path =
       match stat.Unix.Stats.kind with
       | `Directory ->
          begin
-          let uri = Uri.with_path uri (path / index) in
+          let uri = Uri.with_path uri (String.concat "" [path; index]) in
           serve_file ~docroot ~uri
          end
       | `File -> serve_file ~docroot ~uri
