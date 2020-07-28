@@ -152,11 +152,28 @@ To create the visualizer, use this function:
 
 Where `data` is a list of models.
 
+# Creating files with the datatypes
+Functions for writing the datatypes in dot are provided. Given the dot code, a command can be used to create a file with the datatype. Make sure that you include the model.mc file. 
+
+	include "path/to/model.mc"
+
+To write the dot code for some data of type `model`, use this command:
+
+	model2dot "YOUR-DATA"
+
+This command then creates your new file:
+
+	dot  -"YOUR-FILETYPE" "NAME-OF-INPUT-FILE" -o "NAME-OF-OUTPUT-FILE"
+
+The filetype decides the type of file you are going to get. It can for example be -Tjpg. -Tps or -Tpdf. The input file will in this case be data-source.js. If you want to take the input directly without a file, the commands can also be piped:
+
+	mi "NAME-OF-CODE-FILE.mc" | dot  -"YOUR-FILETYPE" -o "NAME-OF-OUTPUT-FILE"
+
 # Examples
 
-There is a **test.mc** in the root folder of the project which already contains a DFA as a starting point. If you want to write your own, make sure to source the **gen.mc** properly:
+There is a **test.mc** in the root folder of the project which already contains a DFA as a starting point. If you want to write your own, make sure to source the **modelVisualizer.mc** properly:
 
-	include "path/to/gen.mc"
+	include "path/to/modelVisualizer.mc"
 
 ### This dfa  accepts strings of '1' and '0' that start with '1' and end with '2'.
 
@@ -189,8 +206,7 @@ There is a **test.mc** in the root folder of the project which already contains 
     DFA(dfa,"101110",string2string, char2string),
     -- not accepted by the DFA
     DFA(dfa,"1010001",string2string, char2string)
-	]
-
+	] 
 
 
 ### Different types: digraph and graph
@@ -242,7 +258,24 @@ This program creates both a NFA and a Binary tree and displays them.
     NFA(nfa, "102", string2string, char2string)
 	]
 
+## Printing to pdf
+The following code creates a directed graph and prints it as dot code. To do the same with any other model object, create your objects the same way as the examples above and call the model2dot function with the object as argument.
 
+	mexpr 
+	let char2string = (lam b. [b]) in
+
+	-- create your directed graph
+	let digraph = foldr (lam e. lam g. digraphAddEdge e.0 e.1 e.2 g) 
+	(foldr digraphAddVertex (digraphEmpty eqchar eqi) ['A','B','C','D','E']) 
+                [('A','B',2),('A','C',5),('B','C',2),('B','D',4),('C','D',5),('C','E',5),('E','D',2)] in
+  
+	let digraphModel = Digraph(digraph, char2string,int2string) in
+
+	model2dot digraphModel
+
+The following command runs the code, which is located in the file "test.mc", and creates a pdf file called "myDigraph.pdf" from the output:
+
+	mi test.mc | dot  -Tpdf -o myDigraph.pdf
 
 ## MIT License
 

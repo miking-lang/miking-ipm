@@ -179,7 +179,7 @@ let visualize = lam models.
 	        else match model with BTree(model, node2str) then
                 treeVisual model node2str
             else error "unknown type") models) in
-    print (concat "let data = {\"models\": [\n" (concat models "]\n}\n"))
+    print (foldl concat [] ["let data = {\"models\": [\n", models, "]\n}\n"])
                         
 mexpr
 let alfabeth = ['0','1','2'] in

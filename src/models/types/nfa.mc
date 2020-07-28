@@ -124,6 +124,36 @@ let nfaConstr = lam s. lam trans. lam alph. lam startS. lam accS. lam eqv. lam e
     foldl nfaAddTransition (foldl nfaAddState initNfa s) trans
     else {}
 
+let printList = lam list. 
+    map (lam x. print x) list
+    
+let nfaPrintDot = lam nfa. lam v2str. lam l2str. 
+    let eqv = getEqv nfa in
+    let edges = getTransitions nfa in
+    let vertices = getStates nfa in
+    let direction = "LR" in 
+    let startState = nfa.startState in
+    let acceptedStates = nfa.acceptStates in
+    let _ = print "digraph {" in
+    let _ = printList ["rankdir=", direction, ";\n"] in
+    let _ = printList ["node [style=filled fillcolor=white shape=circle];"] in
+    let _ = map 
+        (lam v. 
+            let _ = print (v2str v) in
+            print (if (any (lam x. eqv x v) acceptedStates) then "[shape=doublecircle];" else ";") ) 
+        vertices in
+    let _ = print "start [fontcolor = white color = white];" in
+    let _ = printList ["start -> ", startState, "[label=start];"] in
+    let _ = map
+        (lam e. let _ = print (v2str e.0) in
+            let _ = print " -> " in
+            let _ = print (v2str e.1) in
+            let _ = print "[label=\"" in
+            let _ = print (l2str e.2) in
+            print "\"];")
+        edges in
+    let _ = print "}\n" in 
+    ()
 
 mexpr
 let alphabet = ['0','1'] in

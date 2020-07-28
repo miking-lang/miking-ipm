@@ -46,6 +46,8 @@ let dfaConstr = lam s. lam trans. lam alph. lam startS. lam accS. lam eqv. lam e
 	if(err.0) then error "There are duplicate labels for same state outgoing transition at"
 	else nfaConstr s trans alph startS accS eqv eql
 
+let dfaPrintDot = nfaPrintDot 
+
 mexpr
 let alphabet = ['0','1'] in
 let states = [0,1,2] in
