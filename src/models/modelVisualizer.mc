@@ -13,7 +13,7 @@ let formatEdge = lam from. lam to. lam label.
 -- format vertices
 let formatVertices = lam vertices. lam vertex2str.
     foldl (lam output. lam vertex.
-        concat output (formatVertex (vertex2str (head vertices)))
+        concat output (formatVertex (vertex2str vertex))
     ) "" vertices
  
 -- format edges and squash edges between the same nodes.
