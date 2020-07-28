@@ -46,7 +46,4 @@ let myNfa = NFA(nfa, "102", string2string, char2string) in
 
 let myGraph = Graph(graph,int2string,string2string) in
 let myDigraph = Digraph(digraph, char2string,int2string) in
--- model2dot myGraph
- model2dot btree
---model2dot (digraphEdges digraph) (digraphVertices digraph) char2string int2string "LR" "digraph"
--- btree2dot btree
+ modelPrintDot myNfa
