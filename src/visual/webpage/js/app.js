@@ -36,19 +36,25 @@ function render() {
 }
 }
 
+render()
 
 
-function reloadCSS() {
-  const links = document.getElementsByTagName('data');
 
-  Array.from(links)
-    .forEach(link => {
-      const url = new URL(link.src, location.href);
-      url.searchParams.set('forceReload', Date.now());
-      link.src = url.src;
-    });
+function checkFlag() {
+    const http = new XMLHttpRequest();
+    const url='http://localhost:3030/js/flag.json';
+    http.open("GET", url);
+    http.send();
+
+    http.onreadystatechange = (e) => {
+	const response = JSON.parse(http.responseText);
+	if(response.flag == "yes"){
+	    location.reload();
+	    http.open("POST", url, true);
+	    http.send(JSON.stringify({flag: "no"}));
+	}
+    }
 }
 
+var i = setInterval("checkFlag();", 1500);
 
-render();
-var i = setInterval("reloadCSS();", 1000);

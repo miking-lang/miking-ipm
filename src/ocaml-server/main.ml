@@ -5,6 +5,42 @@ open Cohttp_lwt_unix
 type flag = { modified : bool ref};;
 let file_flag = {modified = ref true} ;;
 
+let modify_flag () =
+  let open Printf in
+  let file = "../visual/webpage/js/flag.json" in
+  let message = "{\"flag\": \"no\"}\n" in
+  let oc = open_out file in
+  fprintf oc "%s\n" message;
+  close_out oc;
+  ()
+
+let contains s1 s2 =
+    let re = Str.regexp_string s2 in
+    try ignore (Str.search_forward re s1 0); true
+    with Not_found -> false
+
+let check_if_specific_file_mod event =
+  let file_name = Sys.argv.(1)
+                  |> String.split_on_char '/'
+                  |> List.filter (fun s -> s <> "")
+                  |> List.rev
+                  |> List.hd
+  in
+  if contains event "Updated" && contains event file_name then
+     let _ = Sys.command (String.concat "" ["mi "; Sys.argv.(1);" > ../visual/webpage/js/data-source.js "]) in
+     let open Printf in
+     let file = "../visual/webpage/js/flag.json" in
+     let message = "{\"flag\": \"yes\"}\n" in
+     let oc = open_out file in
+     fprintf oc "%s\n" message;
+     close_out oc;
+     (file_flag.modified) := true;;
+     ()
+
+let decode_post uri () =
+  if contains (Uri.to_string uri) "js/flag.json" then
+      modify_flag ()
+     
 let serve_file ~docroot ~uri =
   let fname = Server.resolve_local_file ~docroot ~uri in
   Server.respond_file ~fname ()
@@ -37,6 +73,10 @@ let handler ~docroot ~index _ req _body =
   match Request.meth req with
   | (`GET | `HEAD)  ->
      serve ~docroot ~index uri path
+  | `POST ->
+     decode_post uri ();
+     Server.respond_string ~status:`Method_not_allowed
+       ~body:"Changed file" ()
   | _ ->
      Server.respond_string ~status:`Method_not_allowed
        ~body:"Method not allowed" ()
@@ -68,24 +108,6 @@ let parse_folder_to_file =
   |> List.rev
   |> String.concat "/"
 
-let contains s1 s2 =
-    let re = Str.regexp_string s2
-    in
-        try ignore (Str.search_forward re s1 0); true
-        with Not_found -> false
-
-let check_if_specific_file_mod event =
-  let file_name = Sys.argv.(1)
-                  |> String.split_on_char '/'
-                  |> List.filter (fun s -> s <> "")
-                  |> List.rev
-                  |> List.hd
-  in
-  if contains event "Updated" && contains event file_name then
-     let _ = Sys.command (String.concat "" ["mi "; Sys.argv.(1);" > ../visual/webpage/js/data-source.js "]) in
-     let _ = Sys.command("./refreshpage.sh") in
-    (file_flag.modified) := true;;
-    ()
 
 
 let rec listen msgBox=
