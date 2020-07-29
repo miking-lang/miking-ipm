@@ -60,7 +60,7 @@ visualize [
     -- accepted by the DFA
     DFA(dfa,"01111",string2string, char2string),
     -- accepted by the DFA
-    DFA(dfa,"101",string2string, char2string)
+    DFA(dfa,"10111",string2string, char2string)
     ]
 
 >>>>>>> eb6556b... workaround for auto-refresh

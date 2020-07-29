@@ -1,54 +1,63 @@
-open Cohttp_async
+open Lwt.Infix
+open Cohttp_lwt_unix
+
 
 type flag = { modified : bool ref};;
 let file_flag = {modified = ref true} ;;
 
 let serve_file ~docroot ~uri =
-  Server.resolve_local_file ~docroot ~uri
-  |> Server.respond_with_file
+  let fname = Server.resolve_local_file ~docroot ~uri in
+  Server.respond_file ~fname ()
 
 let serve ~docroot ~index uri path =
-  let open Async in
   let file_name = Server.resolve_local_file ~docroot ~uri in
-  try_with (fun () ->
-      Unix.stat file_name
-      >>= fun stat->
-      match stat.Unix.Stats.kind with
-      | `Directory ->
+  Lwt.catch (fun () ->
+      Lwt_unix.stat file_name
+      >>= fun stat ->
+      match stat.Unix.st_kind with
+      | S_DIR ->
          begin
-          let uri = Uri.with_path uri (String.concat "" [path; index]) in
-          serve_file ~docroot ~uri
+           let uri = Uri.with_path uri (String.concat ""[path; index]) in
+           serve_file ~docroot ~uri
          end
-      | `File -> serve_file ~docroot ~uri
-      | `Socket | `Block | `Fifo | `Char | `Link ->
-         Server.respond_string "Forbidden path or type\n"
-    )
-  >>= (function
-       | Ok res -> return res
-       | Error err -> raise err )
+      | S_REG ->
+         serve_file ~docroot ~uri
+      | _ ->
+         Server.respond_string ~status:`Forbidden
+           ~body:"Forbidden path" ()
+    ) (function
+      | _ -> Server.respond_string ~status:`Not_found
+               ~body:"Not found"
+               ())
 
-let handler ~docroot ~index ~body:_ _sock req =
+
+let handler ~docroot ~index _ req _body =
   let uri = Cohttp.Request.uri req in
   let path = Uri.path uri in
   match Request.meth req with
-  | (`GET | `HEAD) ->
-     serve ~docroot ~index uri path;
+  | (`GET | `HEAD)  ->
+     serve ~docroot ~index uri path
   | _ ->
-     Server.respond_string "Method not accepted\n"
+     Server.respond_string ~status:`Method_not_allowed
+       ~body:"Method not allowed" ()
 
-let run_server ()=
-  let open Async in
+
+
+let start_server () =
   let docroot = "../visual/webpage/." in
   let port = 3030 in
   let index = "index.html" in
-  Server.create
-    ~on_handler_error:(`Call (fun addr exn ->
-        Logs.err (fun f -> f "Error from %s" (Socket.Address.to_string addr));
-        Logs.err (fun f -> f "%s" @@ Base.Exn.to_string exn)))
-    (Tcp.Where_to_listen.of_port port)
-    (handler ~docroot ~index) >>= fun _serv ->
-  Deferred.never ()
+  let host = "::" in
+  let callback = handler ~docroot ~index in
+  let config = Server.make ~callback () in
+  let mode = `TCP (`Port port) in
+  Conduit_lwt_unix.init ~src:host ()
+  >>= fun ctx -> let ctx = Cohttp_lwt_unix.Net.init ~ctx () in
+                 Server.create ~ctx ~mode config
 
+
+open Fswatch
+open Lwt
 
 let parse_folder_to_file =
   Sys.argv.(1)
@@ -72,51 +81,32 @@ let check_if_specific_file_mod event =
                   |> List.rev
                   |> List.hd
   in
-  if contains event "modified" && contains event file_name then
-    let _ = Sys.command (String.concat "" ["mi "; Sys.argv.(1);" > ../visual/webpage/js/data-source.js "]) in
-    let _ = Sys.command("./refreshpage.sh") in
+  if contains event "Updated" && contains event file_name then
+     let _ = Sys.command (String.concat "" ["mi "; Sys.argv.(1);" > ../visual/webpage/js/data-source.js "]) in
+     let _ = Sys.command("./refreshpage.sh") in
     (file_flag.modified) := true;;
     ()
 
-let check_file_updates ()=
-  let inotify = Async_inotify.create (String.concat "" ["./"; parse_folder_to_file]) in
-  let open Async in
-  inotify >>= (fun (a , _) ->
-    let s = Async_inotify.stream a in
-    Async_kernel.Stream.iter' ~f:(fun ev -> Deferred.return (check_if_specific_file_mod (Async_inotify.Event.to_string ev) )) s
-  )
+
+let rec listen msgBox=
+  Lwt_mvar.take msgBox >>= fun events->
+  Array.iter (fun event->
+    check_if_specific_file_mod (Event.t_to_string event))
+    events;
+  flush stdout;
+  listen msgBox
+
+let main ()=
+  match init_library () with
+  | Status.FSW_OK->
+    let handle, msgBox= Fswatch_lwt.init_session Monitor.System_default in
+    add_path handle (String.concat "" ["./"; parse_folder_to_file]);
+    async (Fswatch_lwt.start_monitor handle);
+    listen msgBox
+  | err-> Lwt_io.eprintf "%s\n" (Status.t_to_string err)
 
 
-
-let run_server_and_check_for_file_updates _ () =
-  Async.Deferred.all_unit [check_file_updates (); run_server ()]
-
-
-
-exception Incorrect_Arguments of string
-let get_arg_cmd =
-  let open Printf in
-  if Array.length Sys.argv = 2 then
-    printf "%s\n" Sys.argv.(1)
-  else
-    raise (Incorrect_Arguments "Incorrect number of arguments")
-
-let init_data_source =
-  let _ = Sys.command (String.concat "" ["mi "; Sys.argv.(1);" > ../visual/webpage/js/data-source.js "]) in
-  ()
 let () =
   print_endline "Server running, listening on port 3030 for HTTP requests\n http://127.0.0.1:3030\n";
-  init_data_source;
-  get_arg_cmd;
-  let open Async_command in
-  run @@
-    begin
-      async_spec ~summary: "Run server"
-        Spec.(
-      empty
-      +> anon (maybe_with_default "." ("docroot" %: string))
-      ) run_server_and_check_for_file_updates;
-    end
-
-
+  Lwt_main.run (start_server () <&> main ())
 
