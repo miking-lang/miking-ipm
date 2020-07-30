@@ -25,14 +25,15 @@ undirected graphs, and electrical circuits.
 ### Getting Started
 
 Before you can start visualizing your models inside a web browser, you need to
-install the following Node package using NPM (Node Package Manager): browser-sync.
-Install it in the root directory of the project.
+install the following OCaml packages using **opam**: cohttp-lwt-unix, fswatch_lwt fswatch and str.
+You can use this command to install them all:
 
-	npm install browser-sync
+	opam install cohttp-lwt-unix fswatch_lwt fswatch str
 
 You can start the server for watching your file using this command and sourcing your **.mc** file (this would be if your file is in the root directory of the project):
-
-	node src/visual/boot.js path/to/your_file.mc
+	
+	cd src/ocaml-server/
+	dune exec ./main.exe path/to/source.mc
 
 This will prompt you to the port on your localhost on which the server is started, now if you modify and save the file which contains your models, it should generate a file called **data-source.js** and reflect the update in the browser immediately. The generated file will appear in the src/visual/webpage directory.
 
