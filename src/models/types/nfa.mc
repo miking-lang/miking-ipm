@@ -62,10 +62,11 @@ let nfaAddState =  lam nfa. lam state.
 -- Transitions between two states are represented by edges between vertices
 let nfaAddTransition = lam nfa. lam trans.
     let states = getStates nfa in
-    let from = match (find (lam x. (getEqv nfa) x (trans.0)) states) with Some s then s else "" in
-    let to = match (find (lam x. (getEqv nfa) x (trans.1)) states) with Some s then s else "" in
+    let from = trans.0 in
+    let to = trans.1 in
+    let label = trans.2 in
     {
-        graph = (digraphAddEdge from to trans.2 nfa.graph),
+        graph = (digraphAddEdge from to label nfa.graph),
         alphabet = nfa.alphabet,
         startState = nfa.startState,
         acceptStates = nfa.acceptStates
@@ -85,7 +86,7 @@ let nfaStateHasTransition = lam s. lam trans. lam lbl.
 let nfaNextStates = lam from. lam graph. lam lbl.
     let neighbors = digraphEdgesFrom from graph in
     let matches = filter (lam x. graph.eql x.2 lbl) neighbors in
-    let neighboringStates = map (lam x. match x.1 with {name=name,displayName=displayName} then name else x.1) matches in
+    let neighboringStates = map (lam x. x.1) matches in
     match matches with [] then
     error "No transition was found"
     else neighboringStates
@@ -124,15 +125,10 @@ let nfaMakeEdgeInputPath = lam currentState. lam input. lam nfa.
     else []
 end
 
-let stateEquality = lam eq. lam a. lam b.
-        let name_a = match a with {name = a1,displayName=_} then a1 else a in
-        let name_b = match b with {name= b1,displayName=_} then b1 else b in
-        if (eq name_a name_b) then true else false
-
 -- constructor for the NFA
 let nfaConstr = lam s. lam trans. lam alph. lam startS. lam accS. lam eqv. lam eql.
-    if nfaCheckValues trans s alph (stateEquality eqv) eql accS startS then
-    let emptyDigraph = digraphEmpty (stateEquality eqv) eql in
+    if nfaCheckValues trans s alph eqv eql accS startS then
+    let emptyDigraph = digraphEmpty eqv eql in
     let initNfa = {
         graph = emptyDigraph,
         alphabet = alph,

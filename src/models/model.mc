@@ -5,11 +5,16 @@ include "types/nfa.mc"
 -- Represents models that can be visualized and its associated data.
 -- Also provides toDot functions for all types defined below
 type Model
-    con Digraph : (Digraph,    vertex2str, edge2str ) -> Model
-    con DFA     : (DFA, input, state2str,  label2str) -> Model
-    con Graph   : (Graph,      vertex2str, edge2str ) -> Model
-    con NFA     : (NFA, input, state2str,  label2str) -> Model
-    con BTree   : (BTree, node2str) -> Model
+    con Digraph : (Digraph, vertex2str, edge2str,    displayNames) -> Model
+    con Digraph : (Digraph, vertex2str, edge2str                 ) -> Model
+    con DFA     : (DFA, input, state2str, label2str, displayNames) -> Model
+    con DFA     : (DFA, input, state2str, label2str              ) -> Model
+    con Graph : (Graph,  vertex2str, edge2str,       displayNames) -> Model
+    con Graph : (Graph,  vertex2str, edge2str                    ) -> Model
+    con NFA     : (NFA,input, state2str,  label2str, displayNames) -> Model
+    con NFA     : (NFA,input, state2str,  label2str              ) -> Model
+    con BTree   : (BTree,node2str,                   displayNames) -> Model
+    con BTree   : (BTree,node2str                                ) -> Model
 
 let printList = lam list. 
     map (lam x. print x) list

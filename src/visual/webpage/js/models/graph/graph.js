@@ -36,7 +36,7 @@ class Graph {
             rankdir=${this.rankDirection}
             node [${objectToString(this.nodeSettings)}]
             ${this.nodes.map(node =>
-                `${node.name} [id=${node.name} class="${this.name}-node" ${objectToString(node.settings)}]`
+                `${node.name} [id=${node.name} class="${this.name}-node" label="${node.displayName}"${objectToString(node.settings)}]`
             ).join("\n")}
             ${this.edges.map(edge =>
                 `${edge.from} ${this.type === `digraph` ? `->` : `--`} ${edge.to} [${edge.label ? `label=${edge.label}`:``} fontcolor=${edge.fontcolor} color=${edge.color}]`

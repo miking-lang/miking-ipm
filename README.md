@@ -255,7 +255,10 @@ This program displays a digraph and a graph on the same page.
 This program creates both a NFA and a Binary tree and displays them. 
 
 	mexpr 
+	let string2string = (lam x. x) in
+  	let char2string = (lam x. [x]) in
 	let stringEq = setEqual eqchar in
+	
 	let nfaAlphabet = ['0','1','2','3'] in
 	let nfaStates = ["a","b","c","d","e","f"] in
 	let nfaTransitions = [("a","b",'1'),("b","c",'0'),("c","d",'2'),("c","e",'2'),("d","a",'1'),("e","f",'1')] in
