@@ -44,14 +44,21 @@ function checkFlag() {
     const http = new XMLHttpRequest();
     const url='http://localhost:3030/js/flag.json';
     http.open("GET", url);
+    http.setRequestHeader("Access-Control-Allow-Origin", "*");
     http.send();
-
     http.onreadystatechange = (e) => {
-	const response = JSON.parse(http.responseText);
-	if(response.flag == "yes"){
+	const response = http.responseText;
+	console.log(response);
+	try{
+	const parsedJSON = JSON.parse(response);
+	if(parsedJSON.flag == 1){
 	    location.reload();
 	    http.open("POST", url, true);
-	    http.send(JSON.stringify({flag: "no"}));
+	    http.send("{\"flag\":0}");
+	}
+	}
+	catch (e){
+	    console.log(e);
 	}
     }
 }

@@ -8,7 +8,7 @@ let file_flag = {modified = ref true} ;;
 let modify_flag () =
   let open Printf in
   let file = "../visual/webpage/js/flag.json" in
-  let message = "{\"flag\": \"no\"}\n" in
+  let message = "{\"flag\": 0}\n" in
   let oc = open_out file in
   fprintf oc "%s\n" message;
   close_out oc;
@@ -30,7 +30,7 @@ let check_if_specific_file_mod event =
      let _ = Sys.command (String.concat "" ["mi "; Sys.argv.(1);" > ../visual/webpage/js/data-source.js "]) in
      let open Printf in
      let file = "../visual/webpage/js/flag.json" in
-     let message = "{\"flag\": \"yes\"}\n" in
+     let message = "{\"flag\": 1}\n" in
      let oc = open_out file in
      fprintf oc "%s\n" message;
      close_out oc;
