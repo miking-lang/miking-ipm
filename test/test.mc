@@ -19,7 +19,7 @@ mexpr
 	let btree = BTree (Node(2, Node(3, Nil (), Leaf 4), Leaf 5)) in
 
 	visualize [
-    BTree(btree, int2string,[(2,"hej")])
-    --NFA(nfa, "1021", string2string, char2string),
-    --NFA(nfa, "102", string2string, char2string)
+    BTree(btree, int2string,[(2,"root"),(3,"node"),(5,"node"),(4,"leaf")]),
+    NFA(nfa, "1021", string2string, char2string,[("a","start")]),
+    NFA(nfa, "102", string2string, char2string)
 	]
