@@ -10,7 +10,7 @@ let getDisplayName = lam name. lam displayNames. lam v2s.
                 else false
             else false
         ) displayNames) in
-    match vertex_display with (a,b) then b else name
+    match vertex_display with Some (a,b) then b else name
 
 -- format vertex
 let formatVertex = lam name. lam displayName. 
@@ -172,7 +172,7 @@ let graphVisual = lam model. lam displayNames. lam vertex2str. lam edge2str. lam
 -- format a tree to JS code for visualizing
 let treeVisual = lam model. lam node2str. lam displayNames.
     let nodes = formatBTreeStates model node2str "" displayNames in
-    let edges = formatBTreeEdges model node2str 0 "" displayNames in 
+    let edges = formatBTreeEdges model node2str "" displayNames in 
     formatGraph nodes edges "tree"
 
 -- make all models into string object
