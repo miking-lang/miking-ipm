@@ -75,12 +75,20 @@ There are no data type requirements, thus you would need to write equality funct
 
 * For example, if your states were integers and your labels were chars, you could do:
 
-
 		let eqv = lam s1. lam s2.
 			eqi s1 s2
 		let eql = lam s1. lam s2.
 			eqchar s1 s2
-			
+
+There is also the option to have a `displayName` for the states. These values must be strings, and have no affect on the DFA other than that when visualized the labels for the states will not be the names, but the displayNames. All names must be unique, but displayNames do not. In the examples above, all other values would be the same and the `name` for the state is used to reference it. To add displayNames, the states would be written as: 
+
+	let states = [
+		{name=X_1,displayName=Y_1},
+		{name=X_2,displayName=Y_2},
+		{name=X_3,displayName=Y_3}
+		...
+	]
+
 To construct a DFA use this function:
 
 	let your_dfa = dfaConstr states transitions
@@ -111,7 +119,6 @@ Where v, v1 and v2 are vertices, l is a label for an edge and g is the previous 
 
 ## This is how you would write your graph:
 A graph works the same was as the digraph, just replace `digraph` with `graph` in the functions.
-
 
 ## This is how you would write your binary tree:
 To create a binary tree the constructor BTree can be used.
@@ -181,8 +188,7 @@ There is a **test.mc** in the root folder of the project which already contains 
 
 	include "path/to/modelVisualizer.mc"
 
-### This dfa  accepts strings of '1' and '0' that start with '1' and end with '2'.
-
+### DFA with displayNames.
 
 	mexpr
 	let string2string = (lam b. b) in
@@ -191,24 +197,29 @@ There is a **test.mc** in the root folder of the project which already contains 
 
 	-- create your DFA
 	let alfabeth = ['0','1'] in
-	let states = ["s0","s1","s2"] in
+	let states = [
+		{name="s0",displayName="start state"},
+    {name="s1",displayName=""},
+    {name="s2",displayName=""},
+		{name="s3",displayName="accepted state"}] in
 	let transitions = [
 	("s0","s1",'1'),
 	("s1","s1",'1'),
 	("s1","s2",'0'),
 	("s2","s1",'1'),
-	("s2","s2",'0')
+	("s2","s3",'0'),
+  ("s3","s1",'1')
 	] in
 
 	let startState = "s0" in
-	let acceptStates = ["s2"] in
+	let acceptStates = ["s3"] in
 
 	let dfa = dfaConstr states transitions alfabeth startState acceptStates eqString eqchar in
 
 	visualize [
 		-- accepted by the DFA
-    DFA(dfa,"1000",string2string, char2string),
-    -- accepted by the DFA
+    DFA(dfa,"10010100",string2string, char2string),
+    -- not accepted by the DFA
     DFA(dfa,"101110",string2string, char2string),
     -- not accepted by the DFA
     DFA(dfa,"1010001",string2string, char2string)

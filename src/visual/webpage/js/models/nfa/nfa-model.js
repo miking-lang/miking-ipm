@@ -100,35 +100,35 @@ class NFAModel {
      * Returns whether the input was accepted by the NFA or not.
      */
     inputWasAccepted() {
-        return this.simulationIsFinished() && this.getConfigurationStatus() === 1
+        return this.simulationIsFinished() && this.getConfigurationStatus() === "accepted"
     }
 
     /**
      * Returns whether the input was rejected by the NFA or not.
      */
     inputWasNotAccepted() {
-        return this.simulationIsFinished() && this.getConfigurationStatus() === -2
+        return this.simulationIsFinished() && this.getConfigurationStatus() === "not accepted"
     }
 
     /**
      * Returns whether the NFA is stuck or not.
      */
     nfaGotStuck() {
-        return this.simulationIsFinished() && this.getConfigurationStatus() === -1
+        return this.simulationIsFinished() && this.getConfigurationStatus() === "stuck"
     }
 
     /**
      * Returns whether the given input was accepted by the current branch or not.
      */
     inputWasNotAcceptedByBranch() {
-        return this.getConfigurationStatus() === -1
+        return this.getConfigurationStatus() === "stuck"
     }
 
     /**
      * Returns whether the NFA is stuck at the current branch.
      */
     nfaBranchGotStuck() {
-        return this.isAtFinalInput() && this.getConfigurationStatus() === -2
+        return this.isAtFinalInput() && this.getConfigurationStatus() === "not accepted"
     }
 
     /**

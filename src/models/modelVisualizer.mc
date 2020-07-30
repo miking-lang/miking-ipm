@@ -3,8 +3,11 @@ include "map.mc"
 include "model.mc"
 
 -- format vertex
-let formatVertex = lam name.
-    foldl concat [] ["{\"name\":\"", name, "\"},\n"]
+let formatVertex = lam vertex. lam vertex2str.
+    match vertex with {name=name,displayName=displayName} then 
+        foldl concat [] ["{\"name\":\"", (vertex2str name) , "\", \"displayName\": \"",displayName,"\" },\n"]
+    else 
+        foldl concat [] ["{\"name\":\"", (vertex2str vertex), "\", ","\"displayName\": \"",(vertex2str vertex),"\" },\n"]
 
 -- format edge
 let formatEdge = lam from. lam to. lam label.
@@ -13,7 +16,7 @@ let formatEdge = lam from. lam to. lam label.
 -- format vertices
 let formatVertices = lam vertices. lam vertex2str.
     foldl (lam output. lam vertex.
-        concat output (formatVertex (vertex2str (head vertices)))
+        concat output (formatVertex vertex vertex2str)
     ) "" vertices
  
 -- format edges and squash edges between the same nodes.
@@ -33,7 +36,13 @@ end
 
 -- format all edges into printable string
 let formatEdges = lam edges. lam v2s. lam l2s. lam eqv.
-    let edges_string = map (lam x. (x.0,x.1,l2s x.2)) edges in
+    let edges_string = map (lam x. 
+        match x.0 with {name=n1,displayName=_} then 
+            match x.1 with {name=n2,displayName=_} then 
+                (n1,n2,l2s x.2)
+            else ""
+        else (x.0,x.1,l2s x.2)
+        ) edges in
     formatAndSquashEdges edges_string v2s eqv
         
 -- Formatting the states
@@ -49,7 +58,7 @@ let formatInputPath = lam path. lam state2string.
     foldl (lam output. lam elem.
         foldl concat [] [output,
             "{\"state\": \"",state2string elem.state,
-            "\",\"status\": ",int2string elem.status,
+            "\",\"status\": \"", elem.status, "\"",
             ",\"index\": ",int2string elem.index,"},\n"
         ]
     ) "" path

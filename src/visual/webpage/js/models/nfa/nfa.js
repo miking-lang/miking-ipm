@@ -47,7 +47,7 @@ class NFA {
             node [${objectToString(this.stateSettings)}]
             start [fontcolor = white color = white class="start-node"]
             ${this.states.map(state =>
-                `${state.name} [id=${state.name} class="${this.name}-node" ${objectToString(state.settings)}]`
+                `${state.name} [id=${state.name} class="${this.name}-node" label="${state.displayName}" ${objectToString(state.settings)}]`
             ).join("\n")}
             start -> ${this.startStateName} [label="start"]
             ${this.transitions.map(transition =>
