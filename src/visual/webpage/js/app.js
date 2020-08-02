@@ -42,9 +42,8 @@ render()
 
 function checkFlag() {
     const http = new XMLHttpRequest();
-    const url='http://127.0.0.1:3030/js/flag.json';
+    const url='/js/flag.json';
     http.open("GET", url);
-    http.send();
     http.onreadystatechange = (e) => {
 	const response = http.responseText;
 	try{
@@ -56,8 +55,10 @@ function checkFlag() {
 	}
 	}
 	catch (e){}
-    }
+    };
+    http.send();
+
 }
 
-var i = setInterval("checkFlag();", 1500);
+var i = setInterval(() => checkFlag() , 1500);
 

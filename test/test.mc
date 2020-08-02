@@ -43,6 +43,7 @@ let nfaAlphabet = ['0','1','2','3'] in
 	-- create your Binary Tree
 	let btree = BTree (Node(2, Node(3, Nil (), Leaf 4), Leaf 5)) in
 visualize [
+<<<<<<< HEAD
 	-- accepted by the DFA
 	DFA(dfa,"1001010",string2string, char2string,[("s0","start state"),("s3","accept state")]),
 	-- not accepted by the DFA
@@ -55,3 +56,11 @@ visualize [
 	NFA(nfa, "1021", string2string, char2string,[]),
 	NFA(nfa, "102", string2string, char2string,[])
 ]
+=======
+    -- accepted by the DFA
+    DFA(dfa,"1101110111",string2string, char2string),
+    -- accepted by the DFA
+    DFA(dfa,"1111010111",string2string, char2string)
+    ]
+
+>>>>>>> 9fefd32... ocaml-server: relative path for no cross-domain error
