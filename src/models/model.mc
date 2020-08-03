@@ -6,15 +6,10 @@ include "types/nfa.mc"
 -- Also provides toDot functions for all types defined below
 type Model
     con Digraph : (Digraph, vertex2str, edge2str,    displayNames) -> Model
-    con Digraph : (Digraph, vertex2str, edge2str                 ) -> Model
     con DFA     : (DFA, input, state2str, label2str, displayNames) -> Model
-    con DFA     : (DFA, input, state2str, label2str              ) -> Model
     con Graph : (Graph,  vertex2str, edge2str,       displayNames) -> Model
-    con Graph : (Graph,  vertex2str, edge2str                    ) -> Model
     con NFA     : (NFA,input, state2str,  label2str, displayNames) -> Model
-    con NFA     : (NFA,input, state2str,  label2str              ) -> Model
     con BTree   : (BTree,node2str,                   displayNames) -> Model
-    con BTree   : (BTree,node2str                                ) -> Model
 
 let printList = lam list. 
     map (lam x. print x) list
@@ -41,16 +36,16 @@ let graphPrintDot = lam graph. lam v2str. lam l2str. lam direction.
     let _ = print "}\n" in ()
 
 let modelPrintDot = lam model. lam direction.
-    match model with Graph(graph,v2str,l2str) then
+    match model with Graph(graph,v2str,l2str,_) then
         graphPrintDot graph v2str l2str direction
-    else match model with Digraph(digraph,v2str,l2str) then 
+    else match model with Digraph(digraph,v2str,l2str,_) then 
         -- Direction not working atm.
         digraphPrintDot digraph v2str l2str
-    else match model with NFA(nfa,input,state2str,label2str) then
+    else match model with NFA(nfa,input,state2str,label2str,_) then
         nfaPrintDot nfa state2str label2str direction
-    else match model with DFA(dfa,input,state2str,label2str) then
+    else match model with DFA(dfa,input,state2str,label2str,_) then
         dfaPrintDot dfa state2str label2str direction
-    else match model with BTree(tree, node2str) then
+    else match model with BTree(tree, node2str,_) then
         match tree with BTree(t) then
             -- Direction not working atm.
             let _ = btreePrintDot t node2str in
@@ -65,7 +60,7 @@ let transitions = [("a","b",'1'),("b","c",'0'),("c","a",'1')] in
 let startState = "a" in
 let acceptStates = ["a", "c"] in
 let dfa = dfaConstr states transitions alfabeth startState acceptStates (setEqual eqchar) eqchar in
-let model = DFA(dfa, "1011", lam b. b, lam b. [b]) in 
-utest match model with DFA(d,i,s2s,t2s) then i else "" with "1011" in
-utest match model with DFA(d,i,s2s,t2s) then d.acceptStates else "" with ([(['a']),(['c'])]) in 
+let model = DFA(dfa, "1011", lam b. b, lam b. [b],[]) in 
+utest match model with DFA(d,i,s2s,t2s,[]) then i else "" with "1011" in
+utest match model with DFA(d,i,s2s,t2s,[]) then d.acceptStates else "" with ([(['a']),(['c'])]) in 
 ()

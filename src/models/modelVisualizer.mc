@@ -181,24 +181,14 @@ let visualize = lam models.
         map (lam model. 
             match model with Digraph(model,vertex2str,edge2str,displayNames) then
                 graphVisual model displayNames vertex2str edge2str "digraph"
-            else match model with Digraph(model,vertex2str,edge2str) then
-                graphVisual model [] vertex2str edge2str "digraph"
             else match model with DFA(model,input,state2str,label2str,displayNames) then
                 dfaVisual model input state2str label2str "dfa" displayNames
-            else match model with DFA(model,input,state2str,label2str) then
-                dfaVisual model input state2str label2str "dfa" []
             else match model with Graph(model,vertex2str,edge2str,displayNames) then
                 graphVisual model displayNames vertex2str edge2str "graph"
-            else match model with Graph(model,vertex2str,edge2str) then
-                graphVisual model [] vertex2str edge2str "graph"
             else match model with NFA(model,input,state2str,label2str,displayNames) then
                 nfaVisual model input state2str label2str "nfa" displayNames
-            else match model with NFA(model,input,state2str,label2str) then
-                nfaVisual model input state2str label2str "nfa" []
             else match model with BTree(model, node2str,displayName) then
                 treeVisual model node2str displayName
-	        else match model with BTree(model, node2str) then
-                treeVisual model node2str []
             else error "unknown type") models) in
     print (foldl concat [] ["let data = {\"models\": [\n", models, "]\n}\n"])
                         
@@ -210,5 +200,5 @@ let startState = 1 in
 let acceptStates = [1] in
 let input = "010" in
 let newDfa = dfaConstr states transitions alfabeth startState acceptStates eqi eqchar in
-let model = DFA(newDfa, input, int2string, lam b. [b]) in
+let model = DFA(newDfa, input, int2string, lam b. [b],[]) in
 visualize [model]

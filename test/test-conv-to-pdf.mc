@@ -30,7 +30,7 @@ let graph = foldr (lam e. lam g. graphAddEdge e.0 e.1 e.2 g)
               (foldr graphAddVertex (graphEmpty eqi eqString) [1,2,3,4]) 
               [(1,2,"g"),(3,2,"a"),(1,3,""),(3,4,"")] in
 
-let btree =  BTree(BTree (Node(2, Node(3, Nil (), Leaf 4), Leaf 5)),int2string) in
+let btree =  BTree(BTree (Node(2, Node(3, Nil (), Leaf 4), Leaf 5)),int2string,[]) in
 
 -- create your NFA
 let nfaAlphabet = ['0','1','2','3'] in
@@ -39,8 +39,8 @@ let nfaTransitions = [("a","b",'1'),("b","c",'0'),("c","d",'2'),("c","e",'2'),("
 let nfaStartState = "a" in
 let nfaAcceptStates = ["a"] in
 let nfa = nfaConstr nfaStates nfaTransitions nfaAlphabet nfaStartState nfaAcceptStates (setEqual eqchar) eqchar in
-let myNfa = NFA(nfa, "102", string2string, char2string) in
+let myNfa = NFA(nfa, "102", string2string, char2string,[]) in
 
-let myGraph = Graph(graph,int2string,string2string) in
-let myDigraph = Digraph(digraph, char2string,int2string) in
+let myGraph = Graph(graph,int2string,string2string‚[]) in
+let myDigraph = Digraph(digraph, char2string,int2string,[]) in
   modelPrintDot myDigraph "LR"

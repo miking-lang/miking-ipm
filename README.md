@@ -130,21 +130,21 @@ The model constructors for the types are:
 
 * DFA 
 
-  `DFA(dfa,input, state2string, label2string)`
+  `DFA(dfa,input, state2string, label2string,[])`
 * NFA 
 
-  `NFA(nfa,input, state2string, label2string)`
+  `NFA(nfa,input, state2string, label2string,[])`
 * Digraph : 
     
-	`Digraph(digraph, vertex2string,label2string),`
+	`Digraph(digraph, vertex2string,label2string,[]),`
 * Graph 
 
-  `Graph(graph, vertex2string,label2string)`
+  `Graph(graph, vertex2string,label2string,[])`
 
 
 * BTree   
 
-  `BTree (btree,node2string)`
+  `BTree (btree,node2string,[])`
 
 To create the visualizer, use this function:
 
@@ -157,6 +157,8 @@ There is also the option to define a display name for any of the nodes when visu
   `DFA(dfa, input, state2string, label2string, displayNames)`
 
 Where displayNames is a list of touples containing the nodes that should have different display names and their new labels.
+
+**Note: this does not work with file conversion at the moment. 
 
 # Creating files with the datatypes
 Before you can start converting your models to pdf and other formats, you need to
@@ -202,7 +204,7 @@ There is a **test.mc** in the root folder of the project which already contains 
 	("s1","s2",'0'),
 	("s2","s1",'1'),
 	("s2","s3",'0'),
-  ("s3","s1",'1')
+	("s3","s1",'1')
 	] in
 
 	let startState = "s0" in
@@ -214,9 +216,9 @@ There is a **test.mc** in the root folder of the project which already contains 
 		-- accepted by the DFA
     DFA(dfa,"10010100",string2string, char2string,[("s0","start state"),("s3","accept state")]),
     -- not accepted by the DFA
-    DFA(dfa,"101110",string2string, char2string),
+    DFA(dfa,"101110",string2string, char2string,[]),
     -- not accepted by the DFA
-    DFA(dfa,"1010001",string2string, char2string)
+    DFA(dfa,"1010001",string2string, char2string,[])
 	] 
 
 
@@ -239,8 +241,8 @@ This program displays a digraph and a graph on the same page.
 	(foldr graphAddVertex (graphEmpty eqi eqString) [1,2,3,4]) [(1,2,""),(3,2,""),(1,3,""),(3,4,"")] in
 
 	visualize [
-	Digraph(digraph, char2string,int2string),
-    Graph(graph,int2string,string2string)
+	Digraph(digraph, char2string,int2string,[]),
+    Graph(graph,int2string,string2string,[])
 	]
 
 
@@ -267,9 +269,9 @@ This program creates both a NFA and a Binary tree and displays them.
 	let btree = BTree (Node(2, Node(3, Nil (), Leaf 4), Leaf 5)) in
 
 	visualize [
-    BTree(btree, int2string,[(2,"Two"),(3,"Three"),(4,"Four"),(5,"Five")]),
-    NFA(nfa, "1021", string2string, char2string),
-    NFA(nfa, "102", string2string, char2string)
+    BTree(btree, int2string,[(2,"Two"),(3,"Three"),(4,"Four"),(5,"Five")],[]),
+    NFA(nfa, "1021", string2string, char2string,[]),
+    NFA(nfa, "102", string2string, char2string,[])
 	]
 
 ## Printing to pdf
@@ -285,9 +287,9 @@ The following code creates a directed graph and prints it as dot code. To do the
 	(foldr digraphAddVertex (digraphEmpty eqchar eqi) ['A','B','C','D','E']) 
                 [('A','B',2),('A','C',5),('B','C',2),('B','D',4),('C','D',5),('C','E',5),('E','D',2)] in
   
-	let digraphModel = Digraph(digraph, char2string,int2string) in
+	let digraphModel = Digraph(digraph, char2string,int2string,[]) in
 
-	modelPrintDot digraphModel
+	modelPrintDot digraphModel "LR"
 
 The following command runs the code, which is located in the file "test.mc", and creates a pdf file called "myDigraph.pdf" from the output:
 
