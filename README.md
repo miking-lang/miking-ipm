@@ -80,14 +80,7 @@ There are no data type requirements, thus you would need to write equality funct
 		let eql = lam s1. lam s2.
 			eqchar s1 s2
 
-There is also the option to have a `displayName` for the states. These values must be strings, and have no affect on the DFA other than that when visualized the labels for the states will not be the names, but the displayNames. All names must be unique, but displayNames do not. In the examples above, all other values would be the same and the `name` for the state is used to reference it. To add displayNames, the states would be written as: 
 
-	let states = [
-		{name=X_1,displayName=Y_1},
-		{name=X_2,displayName=Y_2},
-		{name=X_3,displayName=Y_3}
-		...
-	]
 
 To construct a DFA use this function:
 
@@ -135,7 +128,6 @@ To visualize any of the types defined above they need to be of type model. **toS
 
 The model constructors for the types are:
 
-
 * DFA 
 
   `DFA(dfa,input, state2string, label2string)`
@@ -159,6 +151,12 @@ To create the visualizer, use this function:
 	visualize data
 
 Where `data` is a list of models.
+
+There is also the option to define a display name for any of the nodes when visualizing any of the datatypes defined above. These values must be strings, and have no affect on the model other than that when visualized the labels for the states will not be the names used in the model, but the display names. All names used in the model must be unique, but display names do not. The display names are defined by a list of touples `(a,b)`, where `a` is the name of the node that is used in the model and `b` is the string that will be shown as the label instead. To use the display names, the list will be added to the model constructor as a argument. For example, if you want to have display names for a DFA, the constructor would be:
+
+  `DFA(dfa, input, state2string, label2string, displayNames)`
+
+Where displayNames is a list of touples containing the nodes that should have different display names and their new labels.
 
 # Creating files with the datatypes
 Before you can start converting your models to pdf and other formats, you need to
@@ -188,7 +186,7 @@ There is a **test.mc** in the root folder of the project which already contains 
 
 	include "path/to/modelVisualizer.mc"
 
-### DFA with displayNames.
+### DFA with display names.
 
 	mexpr
 	let string2string = (lam b. b) in
@@ -197,11 +195,7 @@ There is a **test.mc** in the root folder of the project which already contains 
 
 	-- create your DFA
 	let alfabeth = ['0','1'] in
-	let states = [
-		{name="s0",displayName="start state"},
-    {name="s1",displayName=""},
-    {name="s2",displayName=""},
-		{name="s3",displayName="accepted state"}] in
+	let states = ["s0","s1","s2","s3"] in
 	let transitions = [
 	("s0","s1",'1'),
 	("s1","s1",'1'),
@@ -218,7 +212,7 @@ There is a **test.mc** in the root folder of the project which already contains 
 
 	visualize [
 		-- accepted by the DFA
-    DFA(dfa,"10010100",string2string, char2string),
+    DFA(dfa,"10010100",string2string, char2string,[("s0","start state"),("s3","accept state")]),
     -- not accepted by the DFA
     DFA(dfa,"101110",string2string, char2string),
     -- not accepted by the DFA
@@ -273,7 +267,7 @@ This program creates both a NFA and a Binary tree and displays them.
 	let btree = BTree (Node(2, Node(3, Nil (), Leaf 4), Leaf 5)) in
 
 	visualize [
-    BTree(btree, int2string),
+    BTree(btree, int2string,[(2,"Two"),(3,"Three"),(4,"Four"),(5,"Five")]),
     NFA(nfa, "1021", string2string, char2string),
     NFA(nfa, "102", string2string, char2string)
 	]
