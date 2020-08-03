@@ -1,5 +1,6 @@
 include "../src/models/modelVisualizer.mc"
 
+
 mexpr
 let string2string = (lam b. b) in
 let eqString = setEqual eqchar in
@@ -35,15 +36,13 @@ let nfaAlphabet = ['0','1','2','3'] in
 	let nfaStates = ["a","b","c","d","e","f"] in
 	let nfaTransitions = [("a","b",'1'),("b","c",'0'),("c","d",'2'),("c","e",'2'),("d","a",'1'),("e","f",'1')] in
 	let nfaStartState = "a" in
-	let nfaAcceptStates = ["a"] in
-	
+	let nfaAcceptStates = ["a"] in	
 	-- create your NFA
 	let nfa = nfaConstr nfaStates nfaTransitions nfaAlphabet nfaStartState nfaAcceptStates eqString eqchar in
 
 	-- create your Binary Tree
 	let btree = BTree (Node(2, Node(3, Nil (), Leaf 4), Leaf 5)) in
 visualize [
-<<<<<<< HEAD
 	-- accepted by the DFA
 	DFA(dfa,"1001010",string2string, char2string,[("s0","start state"),("s3","accept state")]),
 	-- not accepted by the DFA
@@ -56,11 +55,3 @@ visualize [
 	NFA(nfa, "1021", string2string, char2string,[]),
 	NFA(nfa, "102", string2string, char2string,[])
 ]
-=======
-    -- accepted by the DFA
-    DFA(dfa,"1101110111",string2string, char2string),
-    -- accepted by the DFA
-    DFA(dfa,"1111010111",string2string, char2string)
-    ]
-
->>>>>>> 9fefd32... ocaml-server: relative path for no cross-domain error

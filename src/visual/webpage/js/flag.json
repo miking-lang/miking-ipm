@@ -1,3 +1,10 @@
+<<<<<<< HEAD
 
 {"flag": 0}
 
+=======
+{
+ 	"modifiedByTheServer": 0,
+ 	 "modifiedByTheClient": 0
+}
+>>>>>>> d8403e0... transformed data to JSON, added id to models
