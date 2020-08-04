@@ -55,3 +55,8 @@ visualize [
 	NFA(nfa, "1021", string2string, char2string,[]),
 	NFA(nfa, "102", string2string, char2string,[])
 ]
+
+
+
+
+
