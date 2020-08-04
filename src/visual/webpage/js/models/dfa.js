@@ -22,35 +22,50 @@ class DFA {
         this.rankDirection = rankDirection
         this.nodeSettings = nodeSettings
         this.startNodeID = startID
+        this.acceptedIDs = acceptedIDs
+        this.colors = {active: "green", white: "white", black:"black", warning:"red3"}
+        // Init nodes
         this.nodes = nodes.map(node => {
             node.settings = node.settings 
                                 ? node.settings : {}
-            if (acceptedIDs.includes(node.id))
+            if (this.isAcceptedState(node.id))
                 node.settings.shape = "doublecircle"
             return node
         })
-        this.transitions = transitions
-        this.activeNodeID = startID
-        this.colors = {active: "green", white: "white", black:"black"}
+        // Init transitions
+        this.transitions = transitions.map(transition => {
+            transition.fontcolor = this.colors.black
+            return transition
+        })
         this.makeTransition(startID)
+    }
+
+    /**
+     * Returns whether the given node id belongs to one of the accepted id:s
+     * of the DFA or not.
+     * @param {string} nodeID The node id to check.
+     */
+    isAcceptedState(nodeID) {
+        return this.acceptedIDs.includes(nodeID)
     }
 
     /**
      * Translates the given object to a space separated string.
      * @param {object} attributes An object with attributes of primitive type.
-     * @returns The translated string.
+     * @returns {string} The translated string.
      */
-    objectToString = attributes => 
-        Object.keys(attributes).map(key =>
+    objectToString(attributes) { 
+        return Object.keys(attributes).map(key =>
             `${key} = ${attributes[key]}`
         ).join(" ")
+    }
         
     /**
      * Translates the DFA object to dot syntax.
      * @returns {string} The DFA object in dot syntax.
      */
-    toDot = () => 
-        `digraph {
+    toDot() { 
+        return `digraph {
             rankdir=${this.rankDirection}
             node [${this.objectToString(this.nodeSettings)}]
             start [fontcolor = white color = white class="start-node"]
@@ -59,56 +74,62 @@ class DFA {
             ).join("\n")}
             start -> ${this.startNodeID} [label="start"]
             ${this.transitions.map(transition =>
-                `${transition.from} -> ${transition.to} [label=${transition.label}]`
+                `${transition.from} -> ${transition.to} [label=${transition.label} fontcolor=${transition.fontcolor} color=${transition.color}]`
             ).join("\n")}
         }`
-
-    /**
-     * Updates the state of the DFA by changing the active node.
-     * @param {string} toID The node id to transition to.
-     */
-    makeTransition = toID => {
-        this.activeNodeID = toID
-        this.updateNodesColor()
     }
 
     /**
-     * Sets the active color to the given value.
-     * @param {string} to The color to set
+     * Updates the state of the DFA by changing the active node and coloring 
+     * nodes and transitions.
+     * @param {string} activeNodeID The id of the node to be visualized as active.
+     * @param {string} previousNodeID The id of the previous node.
      */
-    setActiveNodeColor = to => {
-        this.getActiveNode().settings.fillcolor = to
-        this.colors.active = to
-    }
-
-    /**
-     * Update the DFA to the new state by a given transition.
-     * @param {Transition} transition The transition to accomplish.
-     */
-    updateState = transition =>
-        // TEMPORARY CODE
-        this.makeTransition(this.transitions.find(trans => 
-            this.activeNodeID === trans.from && transition === trans.label
-        ).to)
-
-    /**
-     * Updates the color of the nodes.
-     * @param {Node} activeNodeID The id of the node to be visualized as active.
-     */
-    updateNodesColor = () =>
+    makeTransition(activeNodeID, previousNodeID) {
         this.nodes.map(node => {
-            node.settings.fillcolor = this.activeNodeID === node.id
+            node.settings.fillcolor = activeNodeID === node.id
                                        ? this.colors.active
                                        : this.colors.white
-            node.settings.fontcolor = this.activeNodeID === node.id
+            node.settings.fontcolor = activeNodeID === node.id
                                        ? this.colors.white
                                        : this.colors.black
         })
+        this.updateTransitionsColor(activeNodeID, previousNodeID)
+    }
+
+    /**
+     * Changes the color to warning for the node associated with the given node id.
+     * @param {int} The id of the node to change.
+     */
+    setNodeColorToWarningByID(previousNodeID) {
+        this.getNodeByID(previousNodeID).settings.fillcolor = this.colors.warning
+        this.updateTransitionsColor()
+    }
+
+    /**
+     * Updates the colors of the transitions. Colors the previous transition to 
+     * the active color.
+     * @param {string} activeNodeID The id of the active node.
+     * @param {string} previousNodeID The id of the previous node.
+     */
+    updateTransitionsColor(activeNodeID, previousNodeID) {
+        this.transitions.map(transition => {
+            let isPreviousTransition = transition.from === previousNodeID && transition.to === activeNodeID
+            
+            transition.color = isPreviousTransition
+                                ? this.colors.active
+                                : this.colors.black
+            transition.fontcolor = isPreviousTransition
+                                ? this.colors.active
+                                : this.colors.black
+        })
+    }
 
     /*              GETTERS               */
     /**
-     * Gets the active node of the DFA.
+     * Gets a DFA node by id.
      */
-    getActiveNode = () =>
-        this.nodes.find(node => node.id === this.activeNodeID)
+    getNodeByID(id) {
+        return this.nodes.find(node => node.id === id)
+    }
 }

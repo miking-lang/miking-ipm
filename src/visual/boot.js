@@ -18,47 +18,34 @@ if(myArgs.length > 1 || myArgs.length == 0){
 var sourceFile = myArgs[0];
 
 //Specify the path to the miking executable in this variable:
-
-
-//Compile the code first time
-exec("mi " + sourceFile + ' > ' + __dirname +'/webpage/js/data-source.js', (error, stdout, stderr) => {
-    if (error) {
-        console.log(`error: ${error.message}`);
-        return;
-    }
-    if (stderr) {
-        console.log(`stderr: ${stderr}`);
-        return;
-    }
-});
-
-/** ::::TEMPORARY CHANGE MADE HERE:::: */
-//Temporary: Create a JS source file displaying the JS object
-const updateJS = graph =>
-    fs.writeFile('webpage/js/data-source.js', topComment+graph, function (err) {
-        if (err) throw err;
+//Compile the code
+function compile_fun() {
+    exec("mi " + sourceFile + ' > ' + __dirname +'/webpage/js/data-source.js', (error, stdout, stderr) => {
+	if (error) {
+	    fs.readFile(__dirname +'/webpage/js/data-source.js', function(err, buf) {
+		fs.writeFile(__dirname +'/webpage/js/data-source.js',
+			     "let inputModel = '" + buf.toString().replace(/(\r\n|\n|\r)/gm, "")
+			     + "';" , function (err) {if (err) return console.log(err);});});return;}
+	if (stderr) {
+            console.log(`stderr: ${stderr}`);
+            return;
+	}
     });
+}
+
+
+
+compile_fun();
+
 
 // Inital render of graph
-//updateJS(graph);
 
 fs.watchFile(sourceFile, { interval: 1000 }, (curr, prev) => {
     console.log(`${sourceFile} file Changed`);
     //Re-extract the AST -> JSON from the MCore model to a JSON file and recompile the JS
+    compile_fun();
 
-    exec("mi " + sourceFile + ' > ' + __dirname +'/webpage/js/data-source.js', (error, stdout, stderr) => {
-    if (error) {
-        console.log(`error: ${error.message}`);
-        return;
-    }
-    if (stderr) {
-        console.log(`stderr: ${stderr}`);
-        return;
-    }
 });
-    
-});
-/** ::::TEMPORARY CHANGE MADE HERE:::: */
 
 
 //This is being displayed on the browser: use index.html for the moment
