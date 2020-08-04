@@ -43,7 +43,7 @@ let getTransitions = lam nfa.
 let nfaCheckLabels = lam graph. lam alph. lam eql.
     all (lam x. (any (lam y. eql x.2 y) alph)) graph
 
--- check that values are accaptable for the NFA
+-- check that values are acceptable for the NFA
 let nfaCheckValues = lam trans. lam s. lam alph. lam eqv. lam eql. lam accS. lam startS.
     if not (nfaCheckLabels trans alph eql) then error "Some labels are not in the defined alphabet" 
         else if not (setIsSubsetEq eqv accS s) then error "Some accepted states do not exist" 
@@ -71,6 +71,7 @@ let nfaAddTransition = lam nfa. lam trans.
         startState = nfa.startState,
         acceptStates = nfa.acceptStates
     }
+
 
 -- returns true if state s is an accepted state in the nfa
 let nfaIsAcceptedState = lam s. lam nfa. 
