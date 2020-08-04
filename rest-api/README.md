@@ -149,7 +149,9 @@ body: {
   "values" : [
     {
       "node-id" : 4,
-      "label" : "Initial"
+      "properties" : {
+        "label" : "Initial"
+      }
     }
   ]
 }
