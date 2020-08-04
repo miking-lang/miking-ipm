@@ -93,7 +93,7 @@ A NFA works the same as a DFA, just replace "dfa" with "nfa". The transitions la
 
 ## This is how you would write your directed graph:
 
-To start, create a empty digraph. This can be done with:
+To start, create an empty digraph. This can be done with:
 	
 	digraphEmpty eqv eql
 
@@ -152,11 +152,11 @@ To create the visualizer, use this function:
 
 Where `data` is a list of models.
 
-There is also the option to define a display name for any of the nodes when visualizing any of the datatypes defined above. These values must be strings, and have no affect on the model other than that when visualized the labels for the states will not be the names used in the model, but the display names. All names used in the model must be unique, but display names do not. The display names are defined by a list of touples `(a,b)`, where `a` is the name of the node that is used in the model and `b` is the string that will be shown as the label instead. To use the display names, the list will be added to the model constructor as a argument. For example, if you want to have display names for a DFA, the constructor would be:
+There is also the option to define a display name for any of the nodes when visualizing any of the datatypes defined above. These values must be strings, and have no affect on the model other than that when visualized the labels for the states will not be the names used in the model, but the display names. All names used in the model must be unique, but display names do not. The display names are defined by a list of tuples `(a,b)`, where `a` is the name of the node that is used in the model and `b` is the string that will be shown as the label instead. To use the display names, the list will be added to the model constructor as a argument. For example, if you want to have display names for a DFA, the constructor would be:
 
   `DFA(dfa, input, state2string, label2string, displayNames)`
 
-Where displayNames is a list of touples containing the nodes that should have different display names and their new labels.
+Where displayNames is a list of tuples containing the nodes that should have different display names and their new labels.
 
 **Note: this does not work with file conversion at the moment. 
 
@@ -253,7 +253,7 @@ This program creates both a NFA and a Binary tree and displays them.
 	mexpr 
 	let string2string = (lam x. x) in
   	let char2string = (lam x. [x]) in
-	let stringEq = setEqual eqchar in
+	let eqString = setEqual eqchar in
 	
 	let nfaAlphabet = ['0','1','2','3'] in
 	let nfaStates = ["a","b","c","d","e","f"] in
@@ -262,7 +262,7 @@ This program creates both a NFA and a Binary tree and displays them.
 	let nfaAcceptStates = ["a"] in
 	
 	-- create your NFA
-	let nfa = nfaConstr nfaStates nfaTransitions nfaAlphabet nfaStartState nfaAcceptStates stringEq eqchar in
+	let nfa = nfaConstr nfaStates nfaTransitions nfaAlphabet nfaStartState nfaAcceptStates eqString eqchar in
 
 
 	-- create your Binary Tree

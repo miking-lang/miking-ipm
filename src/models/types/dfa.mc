@@ -6,14 +6,12 @@ include "nfa.mc"
 -- construct function (dfaConstr).
 
 -- States are represented by a vertex in a directed graph.
--- They are unique integers, there cannot be two states
+-- They are unique values, there cannot be two states
 -- whose value of the equality function is true.
 
 -- transitions are represented as edges in a directed graph
--- (digraph), where the vertices are states. All labels for
--- the transitions are chars. All labels between two states
+-- (digraph), where the vertices are states. All labels between two states
 -- also has to be unique. 
-
 
 -- adds syntactic sugar for DFA type
 type DFA = NFA
@@ -58,25 +56,25 @@ let acceptStates = [2] in
 let newDfa = dfaConstr states transitions alphabet startState acceptStates eqi eqchar in
 -- Not accepted
 utest nfaMakeInputPath (negi 1) newDfa.startState "1011" newDfa with
-    [{status = 0,state = 0,index = negi 1},
-    {status = 0,state = 1,index = 0},
-    {status = 0,state = 2,index = 1},
-    {status = 0,state = 1,index = 2},
-    {status = negi 2,state = 1,index = 3}] in
+    [{status = "",state = 0,index = negi 1},
+    {status = "",state = 1,index = 0},
+    {status = "",state = 2,index = 1},
+    {status = "",state = 1,index = 2},
+    {status = "not accepted",state = 1,index = 3}] in
 -- Accepted
 utest nfaMakeInputPath (negi 1) newDfa.startState "10110" newDfa with
-    [{status = 0,state = 0,index = negi 1},
-    {status = 0,state = 1,index = 0},
-    {status = 0,state = 2,index = 1},
-    {status = 0,state = 1,index = 2},
-    {status = 0,state = 1,index = 3},
-    {status = 1,state = 2,index = 4}] in
+    [{status = "",state = 0,index = negi 1},
+    {status = "",state = 1,index = 0},
+    {status = "",state = 2,index = 1},
+    {status = "",state = 1,index = 2},
+    {status = "",state = 1,index = 3},
+    {status = "accepted",state = 2,index = 4}] in
 -- Invalid transition
 utest nfaMakeInputPath (negi 1) newDfa.startState "0110" newDfa with
-    [{status = negi 1,state = 0,index = negi 1}] in
+    [{status = "stuck",state = 0,index = negi 1}] in
 -- Input of length 0
 utest nfaMakeInputPath (negi 1) newDfa.startState "" newDfa with 
-    [{status = negi 2, state = 0, index = negi 1}] in
+    [{status = "not accepted", state = 0, index = negi 1}] in
 ()
 
 

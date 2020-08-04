@@ -72,7 +72,7 @@ let nfaAddTransition = lam nfa. lam trans.
         acceptStates = nfa.acceptStates
     }
 
--- returns true if state s is a accapted state in the nfa
+-- returns true if state s is an accepted state in the nfa
 let nfaIsAcceptedState = lam s. lam nfa. 
     setMem nfa.graph.eqv s nfa.acceptStates
 
