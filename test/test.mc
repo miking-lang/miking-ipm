@@ -44,7 +44,7 @@ let nfaAlphabet = ['0','1','2','3'] in
 	let btree = BTree (Node(2, Node(3, Nil (), Leaf 4), Leaf 5)) in
 visualize [
 	-- accepted by the DFA
-	DFA(dfa,"10010100",string2string, char2string,[("s0","start state"),("s3","accept state")]),
+	DFA(dfa,"1001010",string2string, char2string,[("s0","start state"),("s3","accept state")]),
 	-- not accepted by the DFA
 	DFA(dfa,"101110",string2string, char2string,[]),
 	-- not accepted by the DFA

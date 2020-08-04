@@ -163,7 +163,7 @@ let nfaPrintDotWithStates = lam nfa. lam v2str. lam l2str. lam direction. lam ac
     let eqEdge = (lam a. lam b. if and (eqv a.0 b.0) (eqv a.1 b.1) then true else false) in
     let _ = map
         (lam e. 
-            --let _ =  if (lti (negi 1) steps) then 
+	   --let _ =  if (lti (negi 1) steps) then 
             --    (
             --    if (eqEdge (e.0,e.1) finalEdge) then print "edge [color=darkgreen style=bold];\n"
             --    else if (setMem eqEdge (e.0,e.1) path) then print "edge [color= black style=bold];\n"

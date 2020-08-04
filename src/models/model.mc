@@ -35,6 +35,51 @@ let graphPrintDot = lam graph. lam v2str. lam l2str. lam direction.
         edges in
     let _ = print "}\n" in ()
 
+
+let printList = lam list. 
+    map (lam x. print x) list
+
+let nfaPrintDotWithStates = lam nfa. lam v2str. lam l2str. lam direction. lam activeState.
+    let eqv = getEqv nfa in
+    let edges = getTransitions nfa in
+    let vertices = getStates nfa in
+    let _ = print "digraph {" in
+    let _ = printList ["rankdir=", direction, ";\n"] in
+    let _ = printList ["node [style=filled fillcolor=white shape=circle];"] in
+    let _ = map 
+        (lam v. 
+            let _ = print (v2str v) in
+            let dbl = (if (any (lam x. eqv x v) nfa.acceptStates) then "shape=doublecircle " else "") in
+            let active = match activeState with () then "" else (
+                if (eqv v activeState) then "fillcolor=darkgreen color=darkgreen fontcolor = white" else ""
+            ) in
+            printList ["[", dbl, active, "];"])
+        vertices in
+    let _ = print "start [fontcolor = white color = white];\n" in
+    let _ = printList ["start -> ", nfa.startState, "[label=start];"] in
+    let eqEdge = (lam a. lam b. if and (eqv a.0 b.0) (eqv a.1 b.1) then true else false) in
+    let _ = map
+        (lam e. 
+	   --let _ =  if (lti (negi 1) steps) then 
+            --    (
+            --    if (eqEdge (e.0,e.1) finalEdge) then print "edge [color=darkgreen style=bold];\n"
+            --    else if (setMem eqEdge (e.0,e.1) path) then print "edge [color= black style=bold];\n"
+            --    else print "edge [color=black style=dashed];\n"
+            --) else "" in
+            let _ = print (v2str e.0) in
+            let _ = print " -> " in
+            let _ = print (v2str e.1) in
+            let _ = print "[label=\"" in
+            let _ = print (l2str e.2) in
+            print "\"];")
+        edges in
+    let _ = print "}\n" in ()
+
+let nfaPrintDot = lam nfa. lam v2str. lam l2str. lam direction.
+    nfaPrintDotWithStates nfa v2str l2str direction ()
+
+let dfaPrintDot = nfaPrintDot
+
 let modelPrintDot = lam model. lam direction.
     match model with Graph(graph,v2str,l2str,_) then
         graphPrintDot graph v2str l2str direction
@@ -52,6 +97,7 @@ let modelPrintDot = lam model. lam direction.
             ()
         else "" 
     else ""
+
 
 mexpr
 let alfabeth = ['0','1'] in
