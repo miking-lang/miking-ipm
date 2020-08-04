@@ -49,34 +49,33 @@ This environment supports the datatypes of type _model_. Right now this includes
 
 Starting State:
 
-	let startState = X_i
+	let startState = "s0"
 
 States:
 
-	let states = [X_1,X_2,X_3,...]
+	let states = ["s0","s1","s2"]
 
 Labels:
 
-	let alfabeth = [L_1, L_2,..]
+	let alfabeth = ['0','1']
 
 Transitions:
 
-	let transitions = [(X_i,X_j,L_h),...]
+	let transitions = [("s0","s1",'1'),("s1","s1",'1'),("s1","s2",'0')]
 
 Accepted States:
 
-	let acceptStates = [X_i,X_j,...]
+	let acceptStates = ["s1"]
 	
 To visualize the DFA in action, please write your input in the form of an array of labels as follows:
 
-	let input = [L_1,L_1,L_2,L_1,...]
+	let input = "11"
 	
 There are no data type requirements, thus you would need to write equality functions for the states (eqv) and labels (eql) (X and L in the above examples). The equality functions get 2 inputs and returns either **true** or **false** (true if the two states/labels are equal and false otherwise). 
 
 * For example, if your states were integers and your labels were chars, you could do:
 
-		let eqv = lam s1. lam s2.
-			eqi s1 s2
+		let eqv = setEqual eqchar
 		let eql = lam s1. lam s2.
 			eqchar s1 s2
 
@@ -116,7 +115,9 @@ A graph works the same was as the digraph, just replace `digraph` with `graph` i
 ## This is how you would write your binary tree:
 To create a binary tree the constructor BTree can be used.
 
-	BTree (Node(value, Nil()/Node()/Leaf(),Nil()/Node()/Leaf())) 
+	BTree (Node(2, Node(3, Nil (), Leaf 4), Leaf 5)) 
+	
+Here, the main wrapper object would be a BTree to start with. The following can have 3 types: Node, Leaf or Nil. The BTree wraps a Node that has 3 sub-objects, starting with a value and 2 other objects, arbitrary picked from the same 3 above mentioned, in this example, one is another Node and the other is a Leaf.
 
 ## Visualizing the data
 To visualize any of the types defined above they need to be of type model. **toString**  functions are also required. These **toString** functions returns a string that represents the type you are modelling. For example, if you had a graph with vertices of type integer and labels of type character, the toString methods would be:
@@ -131,18 +132,20 @@ The model constructors for the types are:
 * DFA 
 
   `DFA(dfa,input, state2string, label2string,[])`
+  
 * NFA 
 
   `NFA(nfa,input, state2string, label2string,[])`
+  
 * Digraph : 
     
 	`Digraph(digraph, vertex2string,label2string,[]),`
+	
 * Graph 
 
   `Graph(graph, vertex2string,label2string,[])`
 
-
-* BTree   
+* BTree
 
   `BTree (btree,node2string,[])`
 
