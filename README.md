@@ -79,8 +79,6 @@ There are no data type requirements, thus you would need to write equality funct
 		let eql = lam s1. lam s2.
 			eqchar s1 s2
 
-
-
 To construct a DFA use this function:
 
 	let your_dfa = dfaConstr states transitions
@@ -94,7 +92,7 @@ A NFA works the same as a DFA, just replace "dfa" with "nfa". The transitions la
 
 To start, create an empty digraph. This can be done with:
 	
-	digraphEmpty eqv eql
+	digraphEmpty eqchar eqi
 
 There are no data type requirements, thus you would need to write equality functions for the vertices (eqv) and labels (eql). The equality functions get 2 inputs and returns either **true** or **false** (true if the two states/labels are equal and false otherwise). 
 
@@ -107,7 +105,9 @@ To add vertexes and edges to the graph use these commands:
 	digraphAddVertex v g
 	digraphAddEdge v1 v2 l g
 
-Where v, v1 and v2 are vertices, l is a label for an edge and g is the previous digraph. 
+Where v, v1 and v2 are vertices, l is a label for an edge and g is the previous digraph. If you for example want the nodes 'A' and 'B' with a transition with from 'A' to 'B' with label 0, you would write:
+
+	digraphAddEdge 'A' 'B' 0 (digraphAddVertex 'B' (digraphAddVertex 'A' empty))
 
 ## This is how you would write your graph:
 A graph works the same was as the digraph, just replace `digraph` with `graph` in the functions.
@@ -127,41 +127,37 @@ To visualize any of the types defined above they need to be of type model. **toS
 		let label2string = lam s.
 			char2string s
 
+There is also the option to define a display name for any of the nodes when visualizing any of the datatypes defined above. These values must be strings, and have no affect on the model other than that when visualized the labels for the states will not be the names used in the model, but the display names. All names used in the model must be unique, but display names do not. The display names are defined by a list of tuples `(a,b)`, where `a` is the name of the node that is used in the model and `b` is the string that will be shown as the label instead. 
+
+** Note: this does not work with file conversion at the moment. 
+
 The model constructors for the types are:
 
 * DFA 
 
-  `DFA(dfa,input, state2string, label2string,[])`
+  `DFA(dfa,input, state2string, label2string,displayNames)`
   
 * NFA 
 
-  `NFA(nfa,input, state2string, label2string,[])`
+  `NFA(nfa,input, state2string, label2string,displayNames)`
   
 * Digraph : 
     
-	`Digraph(digraph, vertex2string,label2string,[]),`
+	`Digraph(digraph, vertex2string,label2string,displayNames),`
 	
 * Graph 
 
-  `Graph(graph, vertex2string,label2string,[])`
+  `Graph(graph, vertex2string,label2string,displayNames)`
 
 * BTree
 
-  `BTree (btree,node2string,[])`
+  `BTree (btree,node2string,displayNames)`
 
 To create the visualizer, use this function:
 
 	visualize data
 
 Where `data` is a list of models.
-
-There is also the option to define a display name for any of the nodes when visualizing any of the datatypes defined above. These values must be strings, and have no affect on the model other than that when visualized the labels for the states will not be the names used in the model, but the display names. All names used in the model must be unique, but display names do not. The display names are defined by a list of tuples `(a,b)`, where `a` is the name of the node that is used in the model and `b` is the string that will be shown as the label instead. To use the display names, the list will be added to the model constructor as a argument. For example, if you want to have display names for a DFA, the constructor would be:
-
-  `DFA(dfa, input, state2string, label2string, displayNames)`
-
-Where displayNames is a list of tuples containing the nodes that should have different display names and their new labels.
-
-**Note: this does not work with file conversion at the moment. 
 
 # Creating files with the datatypes
 Before you can start converting your models to pdf and other formats, you need to
@@ -296,7 +292,7 @@ The following code creates a directed graph and prints it as dot code. To do the
 
 The following command runs the code, which is located in the file "test.mc", and creates a pdf file called "myDigraph.pdf" from the output:
 
-	mi test.mc | dot  -Tpdf -o myDigraph.pdf
+	mi test.mc | dot  -Tpdf -o graph.pdf
 
 ## MIT License
 

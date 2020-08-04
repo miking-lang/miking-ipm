@@ -17,7 +17,7 @@ let btreeEdgesPrintDot = lam tree. lam from. lam node2str.
         let _ = map (lam x. print x) [(node2str from), "->" ,(node2str n.0),"\n"] in 
         let _ = btreeEdgesPrintDot n.1 n.0 node2str in
         let _ = btreeEdgesPrintDot n.2 n.0 node2str in ()
-    else match tree with Nil () then ""
+    else match tree with Nil () then let _ = print "C [ label = \"C\", style = invis ];" in let _ = print (node2str from)  in print " ->  C [ style = invis ]\n"
     else match tree with Leaf v then
         let _ = map (lam x. print x) [(node2str from), "->" ,(node2str v),"\n"] in ()
     else ""

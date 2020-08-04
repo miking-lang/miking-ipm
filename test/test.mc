@@ -51,7 +51,7 @@ visualize [
 	DFA(dfa,"1010001",string2string, char2string,[]),
 	Digraph(digraph, char2string,int2string,[]),
 	Graph(graph,int2string,string2string,[]),
-	BTree(btree, int2string,[(2,"Two"),(3,"Three"),(4,"Four"),(5,"Five")],[]),
+	BTree(btree, int2string,[(2,"Two"),(3,"Three"),(4,"Four"),(5,"Five")]),
 	NFA(nfa, "1021", string2string, char2string,[]),
 	NFA(nfa, "102", string2string, char2string,[])
 ]

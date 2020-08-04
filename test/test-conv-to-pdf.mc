@@ -21,16 +21,16 @@ let startState = "s0" in
 let acceptStates = ["s2"] in
 
 let dfa = dfaConstr states transitions alphabet startState acceptStates eqString eqchar in
-let myDfa = DFA(dfa, "101", string2string, char2string) in
+let myDfa = DFA(dfa, "101", string2string, char2string,[]) in
 
 let digraph = foldr (lam e. lam g. digraphAddEdge e.0 e.1 e.2 g) 
                 (foldr digraphAddVertex (digraphEmpty eqchar eqi) ['A','B','C','D','E','F']) 
                 [('A','B',2),('A','C',5),('B','C',2),('B','D',4),('C','D',5),('C','E',5)] in
 let graph = foldr (lam e. lam g. graphAddEdge e.0 e.1 e.2 g) 
               (foldr graphAddVertex (graphEmpty eqi eqString) [1,2,3,4]) 
-              [(1,2,"g"),(3,2,"a"),(1,3,""),(3,4,"")] in
+              [(1,2,"g"),(1,2,"w"),(3,2,"a"),(1,3,""),(3,4,"")] in
 
-let btree =  BTree(BTree (Node(2, Node(3, Nil (), Leaf 4), Leaf 5)),int2string,[]) in
+let btree =  BTree(BTree (Node(2, Node(3, Node(4, Nil(), Leaf 7),Nil ()), Leaf 5)),int2string,[]) in
 
 -- create your NFA
 let nfaAlphabet = ['0','1','2','3'] in
@@ -41,6 +41,6 @@ let nfaAcceptStates = ["a"] in
 let nfa = nfaConstr nfaStates nfaTransitions nfaAlphabet nfaStartState nfaAcceptStates (setEqual eqchar) eqchar in
 let myNfa = NFA(nfa, "102", string2string, char2string,[]) in
 
-let myGraph = Graph(graph,int2string,string2string‚[]) in
 let myDigraph = Digraph(digraph, char2string,int2string,[]) in
-  modelPrintDot myDigraph "LR"
+let myGraph = Graph(graph, int2string,string2string,[]) in
+modelPrintDot btree "LR"
