@@ -9,7 +9,7 @@ let getDisplayName = lam name. lam displayNames. lam v2s.
                 if setEqual eqchar (v2s a) name then true
                 else false
             else false
-        ) displayNames) in
+	    ) displayNames) in
     match vertex_display with Some (a,b) then b else name
 
 -- format vertex
@@ -51,11 +51,11 @@ end
 let formatEdgeHead = lam from. lam to. lam label.
     strJoin "" ["{\"from\": \"", from, "\", \"to\": \"" , to, "\", \"label\": \"" , label , "\"}\n"]
 
-
 -- format all edges into printable string
 let formatEdges = lam edges. lam v2s. lam l2s. lam eqv.
     let edges_string = map (lam x. (x.0,x.1,l2s x.2)) (tail edges) in
     concat (formatEdgeHead (v2s (head edges).0) (v2s (head edges).1) (l2s (head edges).2)) (formatAndSquashEdges edges_string v2s eqv)
+
 -- Formatting the states
 let formatStates = lam states. lam state2str. lam eqv. lam displayNames.
     formatVertices states state2str eqv displayNames
@@ -107,7 +107,7 @@ let formatBTreeStates = lam btree. lam n2s. lam output. lam displayNames.
         let output = formatBTreeStates n.2 n2s output displayNames in
         output
 	else
-        let output =  strJoin "," [output, formatVertex (n2s n.0) (getDisplayName (n2s n.0) displayNames n2s)] in 
+        let output =  strJoin "," [output, formatVertex (n2s n.0) (getDisplayName (n2s n.0) displayNames n2s)] in
         let output = formatBTreeStates n.1 n2s output displayNames in 
         let output = formatBTreeStates n.2 n2s output displayNames in
         output
