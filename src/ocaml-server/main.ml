@@ -12,7 +12,7 @@ let contains s1 s2 =
 
 let modify_flag () =
   let open Printf in
-  let file = "../visual/webpage/js/flag.json" in
+  let file = "../webpage/js/flag.json" in
   let message = "{\n \t\"modifiedByTheServer\": 0,\n \t \"modifiedByTheClient\": 0\n}" in
   let oc = open_out file in
   fprintf oc "%s\n" message;
@@ -27,9 +27,9 @@ let check_if_specific_file_mod event =
                   |> List.hd
   in
   if contains event "Updated" && contains event file_name then
-     let _ = Sys.command (String.concat "" ["mi "; Sys.argv.(1);" > ../visual/webpage/js/data-source.json "]) in
+     let _ = Sys.command (String.concat "" ["mi "; Sys.argv.(1);" > ../webpage/js/data-source.json "]) in
      let open Printf in
-     let file = "../visual/webpage/js/flag.json" in
+     let file = "../webpage/js/flag.json" in
      let message = "{\n \t\"modifiedByTheServer\": 1,\n \t \"modifiedByTheClient\": 0\n}" in
      let oc = open_out file in
      fprintf oc "%s\n" message;
@@ -38,7 +38,7 @@ let check_if_specific_file_mod event =
   else
     if contains event "Updated" && contains event "data-source.json" then
       let open Yojson.Basic.Util in
-      let flag_json = Yojson.Basic.from_file "./../visual/webpage/js/flag.json" in
+      let flag_json = Yojson.Basic.from_file "./../webpage/js/flag.json" in
       let modifiedByTheClient = flag_json |> member "modifiedByTheClient" |> to_int in
       if modifiedByTheClient = 1 then
         (* Get the ID of the modified model *)
@@ -93,7 +93,7 @@ let handler ~docroot ~index _ req _body =
 
 
 let start_server () =
-  let docroot = "../visual/webpage/." in
+  let docroot = "../webpage/." in
   let port = 3030 in
   let index = "index.html" in
   let host = "::" in
@@ -140,7 +140,7 @@ let data_updates () =
   match init_library () with
   | Status.FSW_OK->
     let handle, msgBox= Fswatch_lwt.init_session Monitor.System_default in
-    add_path handle "./../visual/webpage/js/.";
+    add_path handle "./../webpage/js/.";
     async (Fswatch_lwt.start_monitor handle);
     listen msgBox
   | err-> Lwt_io.eprintf "%s\n" (Status.t_to_string err)
@@ -148,6 +148,6 @@ let data_updates () =
 
 let () =
   print_endline "Server running, listening on port 3030 for HTTP requests\n http://127.0.0.1:3030\n";
-  let _ = Sys.command (String.concat "" ["mi "; Sys.argv.(1);" > ../visual/webpage/js/data-source.json "]) in
+  let _ = Sys.command (String.concat "" ["mi "; Sys.argv.(1);" > ../webpage/js/data-source.json "]) in
   Lwt_main.run (start_server () <&> source_updates () <&> data_updates ())
 
