@@ -25,10 +25,14 @@ undirected graphs, and electrical circuits.
 ### Getting Started
 
 Before you can start visualizing your models inside a web browser, you need to
-install the following OCaml packages using **opam**: cohttp-lwt-unix, fswatch_lwt fswatch and str.
+install the following OCaml packages using **opam**: cohttp-lwt-unix, fswatch_lwt and fswatch.
 You can use this command to install them all:
 
 	opam install cohttp-lwt-unix fswatch_lwt fswatch
+
+** Note: mac users might need to install fswatch with homebrew first:
+
+	brew install fswatch
 
 You can start the server for watching your file using this command and sourcing your **.mc** file (this would be if your file is in the root directory of the project):
 	
