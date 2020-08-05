@@ -6,14 +6,13 @@ include "model.mc"
 let getDisplayName = lam name. lam displayNames. lam v2s.
     let vertex_display = (find (lam v. 
             match v with (a,b) then 
-                if setEqual eqchar (v2s a) name then true
-                else false
+                setEqual eqchar (v2s a) name
             else false
 	    ) displayNames) in
     match vertex_display with Some (a,b) then b else name
 
 -- format vertex
-let formatVertex = lam name. lam displayName. 
+let formatVertex = lam name. lam displayName.
     foldl concat [] ["{\"name\":\"", name, "\", \"displayName\": \"",displayName,"\" }\n"]
 
 -- format edge
@@ -88,62 +87,6 @@ let formatInput = lam input. lam label2str.
         foldl concat [] [output,",\"" ,label2str elem, "\""]
     ) "" (tail input))
 
--- Traversing the tree to format the states
-recursive
-let formatBTreeStates = lam btree. lam n2s. lam output. lam displayNames.
-    match btree with BTree t then
-        formatBTreeStates t n2s "" displayNames
-    else match btree with Nil () then
-        output
-    else match btree with Leaf v then
-    if(setEqual eqchar output "") then
-    formatVertex (n2s v) (getDisplayName (n2s v) displayNames n2s)
-    else
-    strJoin "," [output, formatVertex (n2s v) (getDisplayName (n2s v) displayNames n2s)]
-    else match btree with Node n then
-        if (setEqual eqchar "" output) then
-	let output = formatVertex (n2s n.0) (getDisplayName (n2s n.0) displayNames n2s) in 
-        let output = formatBTreeStates n.1 n2s output displayNames in 
-        let output = formatBTreeStates n.2 n2s output displayNames in
-        output
-	else
-        let output =  strJoin "," [output, formatVertex (n2s n.0) (getDisplayName (n2s n.0) displayNames n2s)] in
-        let output = formatBTreeStates n.1 n2s output displayNames in 
-        let output = formatBTreeStates n.2 n2s output displayNames in
-        output
-    else "Error, incorrect binary tree"
-end
-
--- Traversing the tree to format the transitions (edges)
-recursive
-let formatBTreeEdges = lam btree. lam n2s. lam from. lam output.
-    match btree with BTree t then
-        match t with Node n then
-            let output = formatBTreeEdges n.1 n2s n.0 "" in
-            formatBTreeEdges n.2 n2s n.0 output
-        else ""
-    else match btree with Nil () then
-        output
-    else match btree with Leaf v then
-    	 if (setEqual eqchar "" output) then
-	 formatEdge (n2s from) (n2s v)
-	 else
-	 strJoin "," [output , formatEdge (n2s from) (n2s v) ""]	
-    else match btree with Node n then
-    	 if(setEqual eqchar "" output) then
-        let output = formatEdge (n2s from) (n2s n.0) "" in
-        let output = formatBTreeEdges n.1 n2s n.0 output in
-        let output = formatBTreeEdges n.2 n2s n.0 output in
-        output
-	else
-	let output = strJoin "," [output, formatEdge (n2s from) (n2s n.0) ""] in
-        let output = formatBTreeEdges n.1 n2s n.0 output in
-        let output = formatBTreeEdges n.2 n2s n.0 output in
-        output
-
-    else "Wrong input"
-end
-
 -- (any (lam x. or (eqchar x '{') (eqchar x '[')) first)
 -- format NFA to JS code for visualizing
 let nfaVisual = lam nfa. lam input. lam s2s. lam l2s. lam nfaType. lam displayNames. lam id.
@@ -160,10 +103,10 @@ let nfaVisual = lam nfa. lam input. lam s2s. lam l2s. lam nfaType. lam displayNa
         "},\n ",
         "\"model\" : {\n ",
             "\"states\" : [\n",
-            (formatStates (getStates nfa) s2s (getEqv nfa) displayNames),
+            (formatStates (nfaStates nfa) s2s (nfaGetEqv nfa) displayNames),
             "],\n ",
             "\"transitions\" : [\n",
-            (formatTransitions (getTransitions nfa) s2s l2s (getEqv nfa)),
+            (formatTransitions (nfaTransitions nfa) s2s l2s (nfaGetEqv nfa)),
             "], \n ",
             "\"startState\" : \"", (s2s nfa.startState),"\",\n ",
             "\"acceptedStates\" : [",
@@ -178,15 +121,15 @@ let dfaVisual = nfaVisual
 -- format a graph to JS code
 let formatGraph = lam nodes. lam edges. lam graphType. lam id.
     foldl concat [] ["{\n\"type\" : \"",
-	graphType,
-	"\",\n \"id\" : ",
-	int2string id,
-	",\n",
-	" \"model\" : {\n \"nodes\" : [\n",
-	nodes ,
-	"],\n \"edges\" : [\n",
-	edges,
-	"] \n }\n}"
+        graphType,
+        "\",\n \"id\" : ",
+        int2string id,
+        ",\n",
+        " \"model\" : {\n \"nodes\" : [\n",
+        nodes ,
+        "],\n \"edges\" : [\n",
+        edges,
+        "] \n }\n}"
 	]
 
 -- format a graph to JS code for visualizing
@@ -196,10 +139,12 @@ let graphVisual = lam model. lam displayNames. lam vertex2str. lam edge2str. lam
     formatGraph nodes edges graphType id
 
 -- format a tree to JS code for visualizing
-let treeVisual = lam model. lam node2str. lam displayNames. lam id.
-    let nodes = formatBTreeStates model node2str "" displayNames in
-    let edges = formatBTreeEdges model node2str "" displayNames in 
-    formatGraph nodes edges "tree" id
+let treeVisual = lam model. lam v2str. lam displayNames. lam id.
+    let eqv = model.eqv in
+    let vertices = formatVertices (treeVertices model) v2str eqv displayNames in
+    let edges = map (lam e. formatEdge (v2str e.0) (v2str e.1) e.2) (treeEdges model ()) in
+    let edges = foldl (lam edges. lam e. strJoin "," [edges, e]) (head edges) (tail edges) in
+    formatGraph vertices edges "tree" id
 
 -- make all models into string object
 let visualize = lam models.
@@ -210,27 +155,28 @@ let visualize = lam models.
 	    let model = model_tup.0 in
 	    let id = model_tup.1 in
 	    match model with Digraph(model,vertex2str,edge2str,displayNames) then
-                graphVisual model displayNames vertex2str edge2str "digraph" id
+            graphVisual model displayNames vertex2str edge2str "digraph" id
 	    else match model with Digraph(model,vertex2str,edge2str) then
-                graphVisual model [] vertex2str edge2str "digraph" id
-            else match model with DFA(model,input,state2str,label2str,displayNames) then
-                dfaVisual model input state2str label2str "dfa" displayNames id
-            else match model with DFA(model,input,state2str,label2str) then
-                dfaVisual model input state2str label2str "dfa" [] id
-            else match model with Graph(model,vertex2str,edge2str,displayNames) then
-                graphVisual model displayNames vertex2str edge2str "graph" id
-            else match model with Graph(model,vertex2str,edge2str) then
-                graphVisual model [] vertex2str edge2str "graph" id
-            else match model with NFA(model,input,state2str,label2str,displayNames) then
-                nfaVisual model input state2str label2str "nfa" displayNames id
-            else match model with NFA(model,input,state2str,label2str) then
-                nfaVisual model input state2str label2str "nfa" [] id
-            else match model with BTree(model, node2str,displayName) then
-                treeVisual model node2str displayName id
-	        else match model with BTree(model, node2str) then
-                treeVisual model node2str [] id
-            else error "unknown type") models) in
-	    print (foldl concat [] ["{\"models\": [\n", models, "]\n}\n"])
+            graphVisual model [] vertex2str edge2str "digraph" id
+        else match model with DFA(model,input,state2str,label2str,displayNames) then
+            dfaVisual model input state2str label2str "dfa" displayNames id
+        else match model with DFA(model,input,state2str,label2str) then
+            dfaVisual model input state2str label2str "dfa" [] id
+        else match model with Graph(model,vertex2str,edge2str,displayNames) then
+            graphVisual model displayNames vertex2str edge2str "graph" id
+        else match model with Graph(model,vertex2str,edge2str) then
+            graphVisual model [] vertex2str edge2str "graph" id
+        else match model with NFA(model,input,state2str,label2str,displayNames) then
+            nfaVisual model input state2str label2str "nfa" displayNames id
+        else match model with NFA(model,input,state2str,label2str) then
+            nfaVisual model input state2str label2str "nfa" [] id
+        else match model with BTree(model, node2str,displayName) then
+            treeVisual model node2str displayName id
+        else match model with BTree(model, node2str) then
+            treeVisual model node2str [] id
+        else error "unknown type") models
+    ) in
+    print (foldl concat [] ["{\"models\": [\n", models, "]\n}\n"])
                         
 mexpr
 let alfabeth = ['0','1','2'] in

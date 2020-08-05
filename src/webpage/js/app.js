@@ -4,7 +4,6 @@ function render() {
     fetch('js/data-source.json')
 	.then(response => response.text())
 	.then((data) => {
-	    console.log(data);
 	    let data_models = JSON.parse(data);
 	     if (data_models.models) {
 	const root = document.body.querySelector("#app");
@@ -32,9 +31,7 @@ function render() {
         }
     })
 } else {
-    console.log(data_models);
-    var paragraph = document.getElementById("error-container");
-    paragraph.textContent += data_models;
+    document.getElementById("error-container").textContent += data_models;
 }
 	})
 

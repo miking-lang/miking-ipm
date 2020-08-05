@@ -33,15 +33,17 @@ let graph = foldr (lam e. lam g. graphAddEdge e.0 e.1 e.2 g)
 (foldr graphAddVertex (graphEmpty eqi eqString) [1,2,3,4]) [(1,2,""),(3,2,""),(1,3,""),(3,4,"")] in
 
 let nfaAlphabet = ['0','1','2','3'] in
-	let nfaStates = ["a","b","c","d","e","f"] in
-	let nfaTransitions = [("a","b",'1'),("b","c",'0'),("c","d",'2'),("c","e",'2'),("d","a",'1'),("e","f",'1')] in
-	let nfaStartState = "a" in
-	let nfaAcceptStates = ["a"] in	
-	-- create your NFA
-	let nfa = nfaConstr nfaStates nfaTransitions nfaAlphabet nfaStartState nfaAcceptStates eqString eqchar in
+let nfaStates = ["a","b","c","d","e","f"] in
+let nfaTransitions = [("a","b",'1'),("b","c",'0'),("c","d",'2'),("c","e",'2'),("d","a",'1'),("e","f",'1')] in
+let nfaStartState = "a" in
+let nfaAcceptStates = ["a"] in	
 
-	-- create your Binary Tree
-	let btree = BTree (Node(2, Node(3, Nil (), Leaf 4), Leaf 5)) in
+-- create your NFA
+let nfa = nfaConstr nfaStates nfaTransitions nfaAlphabet nfaStartState nfaAcceptStates eqString eqchar in
+
+-- create your BTree
+let btree = btreeConstr (Node(2, Node(3, Nil (), Leaf 4), Leaf 5)) eqi in
+
 visualize [
 	-- accepted by the DFA
 	DFA(dfa,"1001010",string2string, char2string,[("s0","start state"),("s3","accept state")]),
