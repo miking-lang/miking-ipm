@@ -28,7 +28,7 @@ Before you can start visualizing your models inside a web browser, you need to
 install the following OCaml packages using **opam**: cohttp-lwt-unix, fswatch_lwt fswatch and str.
 You can use this command to install them all:
 
-	opam install cohttp-lwt-unix fswatch_lwt fswatch str
+	opam install cohttp-lwt-unix fswatch_lwt fswatch
 
 You can start the server for watching your file using this command and sourcing your **.mc** file (this would be if your file is in the root directory of the project):
 	

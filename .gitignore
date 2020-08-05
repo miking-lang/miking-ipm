@@ -9,3 +9,4 @@ node_modules/*
 src/model/dfaModel.mc
 package-lock.json
 src/ocaml-server/_build/*
+src/webpage/js/data-source.json

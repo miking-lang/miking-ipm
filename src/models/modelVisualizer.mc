@@ -206,19 +206,6 @@ let visualize = lam models.
     let ids = mapi (lam i. lam x. i) models in
     let models = zipWith (lam x. lam y. (x,y)) models ids in
     let models = strJoin ",\n" (
-<<<<<<< HEAD
-        map (lam model. 
-            match model with Digraph(model,vertex2str,edge2str,displayNames) then
-                graphVisual model displayNames vertex2str edge2str "digraph"
-            else match model with DFA(model,input,state2str,label2str,displayNames) then
-                dfaVisual model input state2str label2str "dfa" displayNames
-            else match model with Graph(model,vertex2str,edge2str,displayNames) then
-                graphVisual model displayNames vertex2str edge2str "graph"
-            else match model with NFA(model,input,state2str,label2str,displayNames) then
-                nfaVisual model input state2str label2str "nfa" displayNames
-            else match model with BTree(model, node2str,displayName) then
-                treeVisual model node2str displayName
-=======
         map (lam model_tup.
 	    let model = model_tup.0 in
 	    let id = model_tup.1 in
@@ -242,7 +229,6 @@ let visualize = lam models.
                 treeVisual model node2str displayName id
 	        else match model with BTree(model, node2str) then
                 treeVisual model node2str [] id
->>>>>>> d8403e0... transformed data to JSON, added id to models
             else error "unknown type") models) in
 	    print (foldl concat [] ["{\"models\": [\n", models, "]\n}\n"])
                         
