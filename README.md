@@ -214,7 +214,7 @@ To write the dot code for some data of type `model`, use one of these commands:
 
 -	`modelPrintDotWithOptions "YOUR-DATA" "RENDER-DIRECTION" ["OPTIONS"]`
 
-	Which allows you to enter settings for the nodes. _["OPTIONS"]`_ is a seqence of two element tuples, the first element refers to the name of the vertex, the second should be a string with custom graphviz settings.
+	Which allows you to enter settings for the nodes. _["OPTIONS"]`_ is a seqence of two element tuples, the first element refers to the name of the vertex, the second should be a string with space separated custom graphviz settings. The different settings could be found in the documentation at <a href="https://graphviz.org/documentation/">graphviz.org</a>.
 
 - `modelPrintDotSimulateTo "YOUR-DATA" "STEPS" "RENDER-DIRECTION" ["OPTIONS"]`
 	
