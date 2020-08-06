@@ -5,7 +5,6 @@
 include "../src/models/modelVisualizer.mc"
 
 
-
 mexpr
 -- Define functions to display your States and Labels and equality checks for States and Labels
 let string2string = (lam b. b) in
@@ -32,4 +31,4 @@ let nfa = nfaConstr nfaStates nfaTransitions nfaAlphabet nfaStartState nfaAccept
 visualize [
 	NFA(nfa, "1021", string2string, char2string,[]),
 	NFA(nfa, "102", string2string, char2string,[])
-	]
+]

@@ -1,0 +1,231 @@
+{"models": [
+{
+ "type" : "dfa",
+ "id" : 0,
+"simulation" : {
+ "input" : ["1","0","0","1","0","1","0"],
+ "configurations" : [
+{"state": "s0","status": "","index": -1}
+,{"state": "s1","status": "","index": 0}
+,{"state": "s2","status": "","index": 1}
+,{"state": "s3","status": "","index": 2}
+,{"state": "s1","status": "","index": 3}
+,{"state": "s2","status": "","index": 4}
+,{"state": "s1","status": "","index": 5}
+,{"state": "s2","status": "not accepted","index": 6}
+]
+},
+ "model" : {
+ "states" : [
+{"name":"s0", "displayName": "start state" }
+,{"name":"s1", "displayName": "s1" }
+,{"name":"s2", "displayName": "s2" }
+,{"name":"s3", "displayName": "accept state" }
+],
+ "transitions" : [
+{"from": "s0", "to": "s1", "label": "1"}
+,{"from": "s1", "to": "s1", "label": "1"}
+,{"from": "s1", "to": "s2", "label": "0"}
+,{"from": "s2", "to": "s1", "label": "1"}
+,{"from": "s2", "to": "s3", "label": "0"}
+,{"from": "s3", "to": "s1", "label": "1"}
+], 
+ "startState" : "s0",
+ "acceptedStates" : ["s3"]
+}
+},
+{
+ "type" : "dfa",
+ "id" : 1,
+"simulation" : {
+ "input" : ["1","0","1","1","1","0"],
+ "configurations" : [
+{"state": "s0","status": "","index": -1}
+,{"state": "s1","status": "","index": 0}
+,{"state": "s2","status": "","index": 1}
+,{"state": "s1","status": "","index": 2}
+,{"state": "s1","status": "","index": 3}
+,{"state": "s1","status": "","index": 4}
+,{"state": "s2","status": "not accepted","index": 5}
+]
+},
+ "model" : {
+ "states" : [
+{"name":"s0", "displayName": "s0" }
+,{"name":"s1", "displayName": "s1" }
+,{"name":"s2", "displayName": "s2" }
+,{"name":"s3", "displayName": "s3" }
+],
+ "transitions" : [
+{"from": "s0", "to": "s1", "label": "1"}
+,{"from": "s1", "to": "s1", "label": "1"}
+,{"from": "s1", "to": "s2", "label": "0"}
+,{"from": "s2", "to": "s1", "label": "1"}
+,{"from": "s2", "to": "s3", "label": "0"}
+,{"from": "s3", "to": "s1", "label": "1"}
+], 
+ "startState" : "s0",
+ "acceptedStates" : ["s3"]
+}
+},
+{
+ "type" : "dfa",
+ "id" : 2,
+"simulation" : {
+ "input" : ["1","0","1","0","0","0","1"],
+ "configurations" : [
+{"state": "s0","status": "","index": -1}
+,{"state": "s1","status": "","index": 0}
+,{"state": "s2","status": "","index": 1}
+,{"state": "s1","status": "","index": 2}
+,{"state": "s2","status": "","index": 3}
+,{"state": "s3","status": "stuck","index": 4}
+]
+},
+ "model" : {
+ "states" : [
+{"name":"s0", "displayName": "s0" }
+,{"name":"s1", "displayName": "s1" }
+,{"name":"s2", "displayName": "s2" }
+,{"name":"s3", "displayName": "s3" }
+],
+ "transitions" : [
+{"from": "s0", "to": "s1", "label": "1"}
+,{"from": "s1", "to": "s1", "label": "1"}
+,{"from": "s1", "to": "s2", "label": "0"}
+,{"from": "s2", "to": "s1", "label": "1"}
+,{"from": "s2", "to": "s3", "label": "0"}
+,{"from": "s3", "to": "s1", "label": "1"}
+], 
+ "startState" : "s0",
+ "acceptedStates" : ["s3"]
+}
+},
+{
+"type" : "digraph",
+ "id" : 3,
+ "model" : {
+ "nodes" : [
+{"name":"E", "displayName": "E" }
+,{"name":"D", "displayName": "D" }
+,{"name":"C", "displayName": "C" }
+,{"name":"B", "displayName": "B" }
+,{"name":"A", "displayName": "A" }
+],
+ "edges" : [
+{"from": "E", "to": "D", "label": "2"}
+,{"from": "C", "to": "E", "label": "5"}
+,{"from": "C", "to": "D", "label": "5"}
+,{"from": "B", "to": "D", "label": "4"}
+,{"from": "B", "to": "C", "label": "2"}
+,{"from": "A", "to": "C", "label": "5"}
+,{"from": "A", "to": "B", "label": "2"}
+] 
+ }
+},
+{
+"type" : "graph",
+ "id" : 4,
+ "model" : {
+ "nodes" : [
+{"name":"4", "displayName": "4" }
+,{"name":"3", "displayName": "3" }
+,{"name":"2", "displayName": "2" }
+,{"name":"1", "displayName": "1" }
+],
+ "edges" : [
+{"from": "4", "to": "3", "label": ""}
+,{"from": "3", "to": "1", "label": ""}
+,{"from": "3", "to": "2", "label": ""}
+,{"from": "2", "to": "1", "label": ""}
+] 
+ }
+},
+{
+"type" : "tree",
+ "id" : 5,
+ "model" : {
+ "nodes" : [
+{"name":"2", "displayName": "Two" }
+,{"name":"3", "displayName": "Three" }
+,{"name":"4", "displayName": "Four" }
+,{"name":"5", "displayName": "Five" }
+],
+ "edges" : [
+{"from": "2", "to": "3", "label": ""}
+,{"from": "3", "to": "4", "label": ""}
+,{"from": "2", "to": "5", "label": ""}
+] 
+ }
+},
+{
+ "type" : "nfa",
+ "id" : 6,
+"simulation" : {
+ "input" : ["1","0","2","1"],
+ "configurations" : [
+{"state": "a","status": "","index": -1}
+,{"state": "b","status": "","index": 0}
+,{"state": "c","status": "","index": 1}
+,{"state": "d","status": "","index": 2}
+,{"state": "a","status": "accepted","index": 3}
+]
+},
+ "model" : {
+ "states" : [
+{"name":"a", "displayName": "a" }
+,{"name":"b", "displayName": "b" }
+,{"name":"c", "displayName": "c" }
+,{"name":"d", "displayName": "d" }
+,{"name":"e", "displayName": "e" }
+,{"name":"f", "displayName": "f" }
+],
+ "transitions" : [
+{"from": "a", "to": "b", "label": "1"}
+,{"from": "b", "to": "c", "label": "0"}
+,{"from": "c", "to": "d", "label": "2"}
+,{"from": "c", "to": "e", "label": "2"}
+,{"from": "d", "to": "a", "label": "1"}
+,{"from": "e", "to": "f", "label": "1"}
+], 
+ "startState" : "a",
+ "acceptedStates" : ["a"]
+}
+},
+{
+ "type" : "nfa",
+ "id" : 7,
+"simulation" : {
+ "input" : ["1","0","2"],
+ "configurations" : [
+{"state": "a","status": "","index": -1}
+,{"state": "b","status": "","index": 0}
+,{"state": "c","status": "","index": 1}
+,{"state": "d","status": "not accepted","index": 2}
+,{"state": "c","status": "","index": 1}
+,{"state": "e","status": "not accepted","index": 2}
+]
+},
+ "model" : {
+ "states" : [
+{"name":"a", "displayName": "a" }
+,{"name":"b", "displayName": "b" }
+,{"name":"c", "displayName": "c" }
+,{"name":"d", "displayName": "d" }
+,{"name":"e", "displayName": "e" }
+,{"name":"f", "displayName": "f" }
+],
+ "transitions" : [
+{"from": "a", "to": "b", "label": "1"}
+,{"from": "b", "to": "c", "label": "0"}
+,{"from": "c", "to": "d", "label": "2"}
+,{"from": "c", "to": "e", "label": "2"}
+,{"from": "d", "to": "a", "label": "1"}
+,{"from": "e", "to": "f", "label": "1"}
+], 
+ "startState" : "a",
+ "acceptedStates" : ["a"]
+}
+}]
+}
+

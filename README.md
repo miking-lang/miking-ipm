@@ -21,171 +21,235 @@ undirected graphs, and electrical circuits.
 * Create an integration with markdown converters, where the visualized
   models can be used in Latex environments and on static web pages.
 
-
-### Getting Started
+# Getting Started
 
 Before you can start visualizing your models inside a web browser, you need to
-install the following Node package using NPM (Node Package Manager): browser-sync.
-Install it in the root directory of the project.
+install Dune and the following OCaml packages using **opam**: cohttp-lwt-unix, fswatch_lwt and fswatch.
+You can use this command to install the OCaml packages:
 
-	npm install browser-sync
+	opam install cohttp-lwt-unix fswatch_lwt fswatch
+
+** Note: mac users might need to install fswatch with homebrew first:
+
+	brew install fswatch
+
+To install dune, follow the instructions on <a href="https://dune-project.org/">dune-project.org</a>.
+
+If you are using an old opam version, use the following commands to update it:
+
+	opam update
+	opam upgrade
 
 You can start the server for watching your file using this command and sourcing your **.mc** file (this would be if your file is in the root directory of the project):
+	
+	cd src/ocaml-server/
+	dune exec ./main.exe path/to/source.mc
 
-	node src/visual/boot.js path/to/your_file.mc
+This will prompt you to the port on your localhost on which the server is started, now if you modify and save the file which contains your models, it should generate a file called **data-source.js** and reflect the update in the browser immediately. The generated file will appear in the src/visual/webpage directory. Note that you must be in the ocaml-server directory to run the server.
 
-This will prompt you to the port on your localhost on which the server is started, now if you modify and save the file which contains your models, it should generate a file called **data-source.js** and reflect the update in the browser immediately. The generated file will appear in the src/visual/webpage directory.
+# Models
 
-## Data types
+This environment supports the datatypes of type _model_. The model type extends the functions already available in the datatypes to be able to visualize them.
 
-This environment supports the datatypes of type _model_. Right now this includes:
-* DFA
-* NFA
-* Directed graph
+This includes:
+* Deterministic finite automaton (DFA)
+
+    `DFA (Data, input, node2str, label2str, displayNames)`
+
+* Nondeterministic finite automaton (NFA)
+
+    `NFA (Data, input, node2str, label2str, displayNames)`
+* Directed graph (Digraph)
+
+    `Digraph (Data, node2str, label2str,    displayNames)`
+    
 * Graph
-* Binary tree
 
-## This is how you would write your DFA:
+    `Graph (Data,  node2str, label2str,       displayNames)`
+    
+* Binary tree (BTree)
 
-Starting State:
+    `BTree (Data,node2str,                   displayNames)`
 
-	let startState = "s0"
+The arguments for the constructors are:
 
-States:
+1. **Data**: data of type (DFA/NFA/Digraph/Graph).
 
-	let states = ["s0","s1","s2"]
+2. **input:** a input list containing input.
 
-Labels:
+3. **displayNames:** There is a option to define a display name for any of the nodes when visualizing any of the datatypes. These values must be strings, and have no affect on the model other than that when visualized the labels for the nodes/states will not be the names used in the model, but the display names. All names used in the model must be unique, but display names do not. The display names are defined by a list of tuples `(a,b)`, where `a` is the name of the node that is used in the model and `b` is the string that will be shown as the label instead.
 
-	let alfabeth = ['0','1']
+    **Note:** this does not work with file conversion at the moment. 
 
-Transitions:
+4. **node2str** and 5. **label2str:**  **toString** functions that return a string that represents the type you are modelling. 
 
-	let transitions = [("s0","s1",'1'),("s1","s1",'1'),("s1","s2",'0')]
+See the datatypes below for examples.
+## DFA
 
-Accepted States:
+The constructor for the DFA takes in seven arguments: 
+1. **states:** a list containing the names of of your states. Ex:
 
-	let acceptStates = ["s1"]
-	
-To visualize the DFA in action, please write your input in the form of an array of labels as follows:
+	`let states = ["s0","s1","s2"]`
 
-	let input = "11"
-	
-There are no data type requirements, thus you would need to write equality functions for the states (eqv) and labels (eql) (X and L in the above examples). The equality functions get 2 inputs and returns either **true** or **false** (true if the two states/labels are equal and false otherwise). 
+2. **transitions:** a list containing the transitions between states. One transition is represented as a tuple with the structure `(from,to,label)`. Ex:
 
-* For example, if your states were integers and your labels were chars, you could do:
+	`let transitions = [("s0","s1",'1'),("s1","s1",'1'),("s1","s2",'0')]`
 
-		let eqv = setEqual eqchar
-		let eql = lam s1. lam s2.
-			eqchar s1 s2
+3. **alphabet:** the language that is recognized by the DFA. Ex:
 
-To construct a DFA use this function:
+    `let alphabet = ['0','1']`
 
-	let your_dfa = dfaConstr states transitions
+4. **start state:** the state that the automaton starts on. Ex:
+
+    `let startState = "s0"`
+
+ 5. **accepted states:** a list containing the automatons accepted states. Ex:
+
+    `let acceptStates = ["s1"]`
+
+  6. **eqv** and 7. **eql** There are no data type requirements, thus you would need to write equality functions for the states (eqv) and the labels (eql). The equality functions take two inputs and returns either **true** if they are equal or **false** if they are not. Ex :
+  
+    `let eqString = setEqual eqchar in`
+
+    `let eqv = eqString`
+
+	`let eql = eqchar`
+
+The construct function is then called by:
+
+    dfaConstr states transitions
     alfabeth startState acceptStates eqv eql
 
+To get a `model` containing this DFA, use the model constructor. Ex:
 
-## This is how you would write your NFA:
-A NFA works the same as a DFA, just replace "dfa" with "nfa". The transitions labels do not need to be unique for a state.
+    DFA (my_dfa, "01010", string2string, char2string, [("s0","start")])
 
-## This is how you would write your directed graph:
+## NFA
+A NFA works the same as a DFA, except for the requirement for all transitions from a state to have unique labels. Just replace "dfa" with "nfa" in the above instructions.
+
+## Digraph
+A directed graph contains three different variables:
+1. An adjacency map, which maps each vertex to a list of outgoing edges from that vertex. To add nodes or edges to this, two functions can be used:
+
+    `digraphAddVertex v g`
+
+    `digraphAddEdge v1 v2 l g`
+
+    Where v, v1 and v2 are vertices, l is a label for an edge and g is the previous digraph. If you for example want the nodes 'A' and 'B' with a transition with from 'A' to 'B' with label 0, you would write:
+
+	  `digraphAddEdge 'A' 'B' 0 (digraphAddVertex 'B' (digraphAddVertex 'A' g))`
+
+2. **eqv** and 3. **eql:** There are no data type requirements, thus you would need to write equality functions for the nodes (eqv) and the labels (eql). The equality functions take two inputs and returns either **true** if they are equal or **false** if they are not. Ex:
+
+    `let eqv = eqchar`
+
+    `let eql = eqi`
 
 To start, create an empty digraph. This can be done with:
 	
-	digraphEmpty eqchar eqi
+    let g = digraphEmpty eqv eql
 
-There are no data type requirements, thus you would need to write equality functions for the vertices (eqv) and labels (eql). The equality functions get 2 inputs and returns either **true** or **false** (true if the two states/labels are equal and false otherwise). 
+To get a `model` containing this digraph, use the model constructor. Ex:
 
-For example, if your vertices were integers and your labels were charecters, you could do:
+    Digraph(g, char2string,int2string,[])
+## Graph
+A graph works the same was as the digraph, except that the edges are not directed. Just replace `digraph` with `graph` in the above example.
 
-	let empty = digraphEmpty eqi eqchar
+## BTree
+The constructor for the binary tree takes two arguments:
 
-To add vertexes and edges to the graph use these commands:
+1. **tree**: A binary tree. The tree is constructed of three types:
 
-	digraphAddVertex v g
-	digraphAddEdge v1 v2 l g
+    `Node  : (a,BTree,BTree)`
 
-Where v, v1 and v2 are vertices, l is a label for an edge and g is the previous digraph. If you for example want the nodes 'A' and 'B' with a transition with from 'A' to 'B' with label 0, you would write:
-
-	digraphAddEdge 'A' 'B' 0 (digraphAddVertex 'B' (digraphAddVertex 'A' empty))
-
-## This is how you would write your graph:
-A graph works the same was as the digraph, just replace `digraph` with `graph` in the functions.
-
-## This is how you would write your binary tree:
-To create a binary tree the constructor BTree can be used.
-
-	BTree (Node(2, Node(3, Nil (), Leaf 4), Leaf 5)) 
+    `Leaf  : (a)`
 	
-Here, the main wrapper object would be a BTree to start with. The following can have 3 types: Node, Leaf or Nil. The BTree wraps a Node that has 3 sub-objects, starting with a value and 2 other objects, arbitrary picked from the same 3 above mentioned, in this example, one is another Node and the other is a Leaf.
+    `Nil   : ()`
 
-## Visualizing the data
-To visualize any of the types defined above they need to be of type model. **toString**  functions are also required. These **toString** functions returns a string that represents the type you are modelling. For example, if you had a graph with vertices of type integer and labels of type character, the toString methods would be:
+    Ex:
 
-		let vertex2string = lam s.
-			int2string s
-		let label2string = lam s.
-			char2string s
+    `let tree = Node(2, Node(3, Nil (), Leaf 4), Leaf 5)`
+2. **eqv**: There is no data type requirements, thus you would need to write an equality function for the nodes. The equality function take two inputs and returns either **true** if they are equal or **false** if they are not.Ex:
 
-There is also the option to define a display name for any of the nodes when visualizing any of the datatypes defined above. These values must be strings, and have no affect on the model other than that when visualized the labels for the states will not be the names used in the model, but the display names. All names used in the model must be unique, but display names do not. The display names are defined by a list of tuples `(a,b)`, where `a` is the name of the node that is used in the model and `b` is the string that will be shown as the label instead. 
+    `let eqv = eqi`
 
-** Note: this does not work with file conversion at the moment. 
+The constructor is then called by:
 
-The model constructors for the types are:
+	let tree = btreeConstr tree eqv
 
-* DFA 
+To get a `model` containing this digraph, use the model constructor. Ex:
 
-  `DFA(dfa,input, state2string, label2string,displayNames)`
-  
-* NFA 
+    BTree(tree, int2string,[(2,"root")])
 
-  `NFA(nfa,input, state2string, label2string,displayNames)`
-  
-* Digraph : 
-    
-	`Digraph(digraph, vertex2string,label2string,displayNames),`
-	
-* Graph 
+# Usage
+The IPM framework can be used to visualize any data of type _model_. Make sure you source `modelVisualizer.mc` in your file:
 
-  `Graph(graph, vertex2string,label2string,displayNames)`
+    include "path/to/modelVisualizer.mc"
 
-* BTree
+Once you have data that you want to visualize, just call the function `visualize` with a list containing your data. Make sure that the data is of type `model` as the `toString` functions are required. Ex:
 
-  `BTree (btree,node2string,displayNames)`
+    visualize [
+      your_dfa,
+      you_btree,
+      your_graph
+    ]
 
-To create the visualizer, use this function:
+# Graphviz
 
-	visualize data
+Functions for writing the datatypes in dot are provided. The graphviz package then provides different ways to use this dot code such as generating pictures with the datatypes (pdf/jpg etc.) or generating latex code. 
 
-Where `data` is a list of models.
+## Installation 
+Before you can start, you need to install the graphviz package. Follow the instructions on <a href="https://graphviz.org/download/">graphviz.org</a>.
 
-# Creating files with the datatypes
-Before you can start converting your models to pdf and other formats, you need to
-install the graphviz package. Follow the instructions on <a href="https://graphviz.org/download/">graphviz.org</a>.
-
-Functions for writing the datatypes in dot are provided. Given the dot code, a command can be used to create a file with the datatype. Make sure that you include the model.mc file. 
+## Generating dot code
+Make sure that you include the model.mc file. 
 
 	include "path/to/model.mc"
 
-To write the dot code for some data of type `model`, use this command:
+To write the dot code for some data of type `model`, use one of these commands:
 
-	modelPrintDot "YOUR-DATA" "RENDER-DIRECTION"
+- 	`modelPrintDot "YOUR-DATA" "RENDER-DIRECTION"`
 
-where "RENDER-DIRECTION" takes one of the following values "TB", "RL", "BT", "LR".
+	Where _"YOUR-DATA"_ data of type `model` as defined above, and "RENDER-DIRECTION" takes one of the following values: "TB", "RL", "BT", "LR". 
 
-This command then creates your new file:
+-	`modelPrintDotWithOptions "YOUR-DATA" "RENDER-DIRECTION" ["OPTIONS"]`
+
+	Which allows you to enter settings for the nodes. _["OPTIONS"]`_ is a seqence of two element tuples, the first element refers to the name of the vertex, the second should be a string with space separated custom graphviz settings. The different settings could be found in the documentation at <a href="https://graphviz.org/documentation/">graphviz.org</a>.
+
+- `modelPrintDotSimulateTo "YOUR-DATA" "STEPS" "RENDER-DIRECTION" ["OPTIONS"]`
+	
+	Which simulates going through _"STEPS"_ steps of the input. 
+
+	**Note**: only works for NFA/DFA/BTree
+
+## Drawing graphs with dot
+This command creates your new file using the dot code:
 
 	dot  -"YOUR-FILETYPE" "NAME-OF-INPUT-FILE" -o "NAME-OF-OUTPUT-FILE"
 
-The filetype decides the type of file you are going to get. It can for example be -Tjpg. -Tps or -Tpdf. The input file will in this case be data-source.js. If you want to take the input directly without a file, the commands can also be piped:
+The filetype decides the type of file you are going to get. It can for example be -Tjpg. -Tps or -Tpdf. A list of the valid filetypes can be found at <a href="https://graphviz.org/doc/info/output.html">graphviz.org</a>. If you want to take the input directly without a file, the commands can also be piped:
 
-	mi "NAME-OF-CODE-FILE.mc" | dot  -"YOUR-FILETYPE" -o "NAME-OF-OUTPUT-FILE"
+	mi /path/to/source.mc | dot  [-Tjpg | -Tpdf | -Tps] -o /path/to/output
+
+## Latex
+To get started you need to install dot2tex. Follow the instructions here: https://dot2tex.readthedocs.io/en/latest/installation_guide.html
+
+There are several different ways to generate latex code, the following are some examples. Visit https://dot2tex.readthedocs.io/en/latest/usage_guide.html#invoking-dot2tex-from-the-command-line for more information.
+
+This command creates a complete latex file: 
+
+	mi /path/to/source.mc | dot2tex > /path/to/output.tex
+
+To create a figure which can be included in a latex document, --figonly can be added to the command:
+
+	mi /path/to/source.mc | dot2tex --figonly > /path/to/output.tex
 
 # Examples
 
-There is a **test.mc** in the root folder of the project which already contains a DFA as a starting point. If you want to write your own, make sure to source the **modelVisualizer.mc** properly:
+There is a **examples** folder in the root of the project which contains some files as a starting point. If you want to write your own, make sure to source the **modelVisualizer.mc** properly:
 
 	include "path/to/modelVisualizer.mc"
+
 
 ### DFA with display names.
 
@@ -234,6 +298,7 @@ This program displays a digraph and a graph on the same page.
 	let digraph = foldr (lam e. lam g. digraphAddEdge e.0 e.1 e.2 g) 
 	(foldr digraphAddVertex (digraphEmpty eqchar eqi) ['A','B','C','D','E']) 
                 [('A','B',2),('A','C',5),('B','C',2),('B','D',4),('C','D',5),('C','E',5),('E','D',2)] in
+
 
 	-- create your graph
 	let graph = foldr (lam e. lam g. graphAddEdge e.0 e.1 e.2 g) 
@@ -293,6 +358,7 @@ The following code creates a directed graph and prints it as dot code. To do the
 The following command runs the code, which is located in the file "test.mc", and creates a pdf file called "myDigraph.pdf" from the output:
 
 	mi test.mc | dot  -Tpdf -o graph.pdf
+
 
 ## MIT License
 
