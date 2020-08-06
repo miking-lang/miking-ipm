@@ -24,8 +24,8 @@ undirected graphs, and electrical circuits.
 # Getting Started
 
 Before you can start visualizing your models inside a web browser, you need to
-install the following OCaml packages using **opam**: cohttp-lwt-unix, fswatch_lwt and fswatch.
-You can use this command to install them all:
+install Dune and the following OCaml packages using **opam**: cohttp-lwt-unix, fswatch_lwt and fswatch.
+You can use this command to install the OCaml packages:
 
 	opam install cohttp-lwt-unix fswatch_lwt fswatch
 
@@ -33,12 +33,19 @@ You can use this command to install them all:
 
 	brew install fswatch
 
+To install dune, follow the instructions on <a href="https://dune-project.org/">dune-project.org</a>.
+
+If you are using an old opam version, use the following commands to update it:
+
+	opam update
+	opam upgrade
+
 You can start the server for watching your file using this command and sourcing your **.mc** file (this would be if your file is in the root directory of the project):
 	
 	cd src/ocaml-server/
 	dune exec ./main.exe path/to/source.mc
 
-This will prompt you to the port on your localhost on which the server is started, now if you modify and save the file which contains your models, it should generate a file called **data-source.js** and reflect the update in the browser immediately. The generated file will appear in the src/visual/webpage directory.
+This will prompt you to the port on your localhost on which the server is started, now if you modify and save the file which contains your models, it should generate a file called **data-source.js** and reflect the update in the browser immediately. The generated file will appear in the src/visual/webpage directory. Note that you must be in the ocaml-server directory to run the server.
 
 # Models
 
@@ -67,6 +74,7 @@ This includes:
 The arguments for the constructors are:
 
 1. **Data**: data of type (DFA/NFA/Digraph/Graph).
+
 2. **input:** a input list containing input.
 
 3. **displayNames:** There is a option to define a display name for any of the nodes when visualizing any of the datatypes. These values must be strings, and have no affect on the model other than that when visualized the labels for the nodes/states will not be the names used in the model, but the display names. All names used in the model must be unique, but display names do not. The display names are defined by a list of tuples `(a,b)`, where `a` is the name of the node that is used in the model and `b` is the string that will be shown as the label instead.
@@ -101,11 +109,11 @@ The constructor for the DFA takes in seven arguments:
 
   6. **eqv** and 7. **eql** There are no data type requirements, thus you would need to write equality functions for the states (eqv) and the labels (eql). The equality functions take two inputs and returns either **true** if they are equal or **false** if they are not. Ex :
   
-     `let eqString = setEqual eqchar in`
+    `let eqString = setEqual eqchar in`
 
-     `let eqv = eqString`
+    `let eqv = eqString`
 
-		`let eql = eqchar`
+	`let eql = eqchar`
 
 The construct function is then called by:
 
@@ -191,8 +199,7 @@ Once you have data that you want to visualize, just call the function `visualize
 Functions for writing the datatypes in dot are provided. The graphviz package then provides different ways to use this dot code such as generating pictures with the datatypes (pdf/jpg etc.) or generating latex code. 
 
 ## Installation 
-Before you can start, you need to
-install the graphviz package. Follow the instructions on <a href="https://graphviz.org/download/">graphviz.org</a>.
+Before you can start, you need to install the graphviz package. Follow the instructions on <a href="https://graphviz.org/download/">graphviz.org</a>.
 
 ## Generating dot code
 Make sure that you include the model.mc file. 
@@ -220,7 +227,7 @@ This command creates your new file using the dot code:
 
 	dot  -"YOUR-FILETYPE" "NAME-OF-INPUT-FILE" -o "NAME-OF-OUTPUT-FILE"
 
-The filetype decides the type of file you are going to get. It can for example be -Tjpg. -Tps or -Tpdf. If you want to take the input directly without a file, the commands can also be piped:
+The filetype decides the type of file you are going to get. It can for example be -Tjpg. -Tps or -Tpdf. A list of the valid filetypes can be found at <a href="https://graphviz.org/doc/info/output.html">graphviz.org</a>. If you want to take the input directly without a file, the commands can also be piped:
 
 	mi /path/to/source.mc | dot  [-Tjpg | -Tpdf | -Tps] -o /path/to/output
 
