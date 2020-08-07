@@ -3,7 +3,7 @@ open Cohttp_lwt_unix
 
 
 type flag = { modified : bool ref}
-let file_flag = {modified = ref true}
+let file_flag = {modified = ref false}
 let visualize = ref ""
 let no_file = ref false
 let port = ref 3030
@@ -13,19 +13,6 @@ let contains s1 s2 =
   try ignore (Str.search_forward re s1 0); true
   with Not_found -> false
 
-let modify_flag () =
-  let open Printf in
-  let file = "../webpage/js/flag.json" in
-  let message = "{\n \t\"modifiedByTheServer\": 0,\n \t \"modifiedByTheClient\": 0\n}" in
-  let oc = open_out file in
-  fprintf oc "%s\n" message;
-  close_out oc;
-  ()
-
-let method_filter meth (res,body) = match meth with
-  | `HEAD -> Lwt.return (res,`Empty)
-  | _ -> Lwt.return (res,body)
-
 let check_if_specific_file_mod event =
   let file_name = !visualize
                   |> String.split_on_char '/'
@@ -34,15 +21,10 @@ let check_if_specific_file_mod event =
                   |> List.hd
   in
   if contains event "Updated" && contains event file_name then
-    ignore @@ Sys.command (String.concat "" ["mi "; !visualize;" > ../webpage/js/data-source.json "]);
-  let open Printf in
-  let file = "../webpage/js/flag.json" in
-  let message = "{\n \t\"modifiedByTheServer\": 1,\n \t \"modifiedByTheClient\": 0\n}" in
-  let oc = open_out file in
-  fprintf oc "%s\n" message;
-  close_out oc;
-  (file_flag.modified) := true
-
+    begin
+      ignore @@ Sys.command (String.concat "" ["mi "; !visualize;" > ../webpage/js/data-source.json "]);
+      (file_flag.modified) := true
+    end
 
 let serve_file ~docroot ~uri =
   let fname = Server.resolve_local_file ~docroot ~uri in
@@ -74,12 +56,20 @@ let handler ~docroot ~index (_ch ,_conn) req _body =
   let path = Uri.path uri in
   match Request.meth req with
   | (`GET | `HEAD)  ->
-     serve ~docroot ~index uri path
+     if contains (Uri.to_string uri) "js/flag.json" then
+       Server.respond_string ~status:`OK
+         ~body:(string_of_bool !(file_flag.modified)) ()
+     else
+       serve ~docroot ~index uri path
   | `POST ->
      if contains (Uri.to_string uri) "js/flag.json" then
        begin
-         modify_flag ();
-         Server.respond_string ~status:`OK ~body:"POST request accepted" ()
+         Cohttp_lwt.Body.to_string _body >|= (fun msg ->
+         if contains msg "false" then
+           (file_flag.modified) := false
+       )
+         >>= (fun _ -> Server.respond_string ~status:`OK
+                         ~body:"POST request accepted" ())
        end
      else if contains (Uri.to_string uri) "js/data-source.json" then
        begin
