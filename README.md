@@ -27,23 +27,22 @@ Before you can start visualizing your models inside a web browser, you need to
 install Dune and the following OCaml packages using **opam**: cohttp-lwt-unix, fswatch_lwt and fswatch.
 You can use this command to install the OCaml packages:
 
-	opam install cohttp-lwt-unix fswatch_lwt fswatch
+	opam install dune cohttp-lwt-unix fswatch_lwt fswatch
 
 ** Note: mac users might need to install fswatch with homebrew first:
 
 	brew install fswatch
 
-To install dune, follow the instructions on <a href="https://dune-project.org/">dune-project.org</a>.
 
 If you are using an old opam version, use the following commands to update it:
 
 	opam update
 	opam upgrade
 
-You can start the server for watching your file using this command and sourcing your **.mc** file (this would be if your file is in the root directory of the project):
+You can start the server for watching your file using this command and giving the path toyour MCore source file (this would be if your file is in the root directory of the project):
 	
 	cd src/ocaml-server/
-	dune exec ./main.exe path/to/source.mc
+	dune exec ./main.exe -- path/to/source.mc [OPTIONAL -p PORT]
 
 This will prompt you to the port on your localhost on which the server is started, now if you modify and save the file which contains your models, it should generate a file called **data-source.js** and reflect the update in the browser immediately. The generated file will appear in the src/visual/webpage directory. Note that you must be in the ocaml-server directory to run the server.
 
@@ -95,10 +94,6 @@ The constructor for the DFA takes in seven arguments:
 
 	`let transitions = [("s0","s1",'1'),("s1","s1",'1'),("s1","s2",'0')]`
 
-3. **alphabet:** the language that is recognized by the DFA. Ex:
-
-    `let alphabet = ['0','1']`
-
 4. **start state:** the state that the automaton starts on. Ex:
 
     `let startState = "s0"`
@@ -117,8 +112,7 @@ The constructor for the DFA takes in seven arguments:
 
 The construct function is then called by:
 
-    dfaConstr states transitions
-    alfabeth startState acceptStates eqv eql
+    dfaConstr states transitions startState acceptStates eqv eql
 
 To get a `model` containing this DFA, use the model constructor. Ex:
 
@@ -259,7 +253,6 @@ There is a **examples** folder in the root of the project which contains some fi
 	let char2string = (lam b. [b]) in
 
 	-- create your DFA
-	let alfabeth = ['0','1'] in
 	let states = ["s0","s1","s2","s3"] in
 	let transitions = [
 	("s0","s1",'1'),
@@ -273,7 +266,7 @@ There is a **examples** folder in the root of the project which contains some fi
 	let startState = "s0" in
 	let acceptStates = ["s3"] in
 
-	let dfa = dfaConstr states transitions alfabeth startState acceptStates eqString eqchar in
+	let dfa = dfaConstr states transitions startState acceptStates eqString eqchar in
 
 	visualize [
 		-- accepted by the DFA
@@ -319,14 +312,13 @@ This program creates both a NFA and a Binary tree and displays them.
   	let char2string = (lam x. [x]) in
 	let eqString = setEqual eqchar in
 	
-	let nfaAlphabet = ['0','1','2','3'] in
 	let nfaStates = ["a","b","c","d","e","f"] in
 	let nfaTransitions = [("a","b",'1'),("b","c",'0'),("c","d",'2'),("c","e",'2'),("d","a",'1'),("e","f",'1')] in
 	let nfaStartState = "a" in
 	let nfaAcceptStates = ["a"] in
 	
 	-- create your NFA
-	let nfa = nfaConstr nfaStates nfaTransitions nfaAlphabet nfaStartState nfaAcceptStates eqString eqchar in
+	let nfa = nfaConstr nfaStates nfaTransitions nfaStartState nfaAcceptStates eqString eqchar in
 
 
 	-- create your Binary Tree
