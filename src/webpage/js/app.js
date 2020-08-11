@@ -49,11 +49,11 @@ function checkFlag() {
     http.onreadystatechange = (e) => {
 	const response = http.responseText;
 	try{
-	const parsedJSON = JSON.parse(response);
-	if(parsedJSON.modifiedByTheServer == 1){
+	    let flag = (response == 'true');
+	    if (flag) {
 	    location.reload();
 	    http.open("POST", url, true);
-	    http.send("{\"modifiedByTheServer\":0}");
+	    http.send("false");
 	}
 	}
 	catch (e){}
