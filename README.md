@@ -27,7 +27,7 @@ Before you can start visualizing your models inside a web browser, you need to
 install Dune and the following OCaml packages using **opam**: cohttp-lwt-unix, fswatch_lwt and fswatch.
 You can use this command to install the OCaml packages:
 
-	opam install dune cohttp-lwt-unix fswatch_lwt fswatch
+	opam install dune cohttp-lwt-unix fswatch_lwt fswatch websocket-lwt-unix
 
 ** Note: mac users might need to install fswatch with homebrew first:
 

@@ -53,5 +53,5 @@ visualize [
 	Graph(graph,int2string,string2string,[]),
 	BTree(btree, int2string,[(2,"Two"),(3,"Three"),(4,"Four"),(5,"Five")]),
 	NFA(nfa, "1021", string2string, char2string,[]),
-	NFA(nfa, "102", string2string, char2string,[])
+	NFA(nfa, "1011", string2string, char2string,[])
 ]

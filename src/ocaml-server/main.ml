@@ -1,9 +1,9 @@
 open Lwt.Infix
 open Cohttp_lwt_unix
-
+open Websocket
 
 type flag = { modified : bool ref}
-let file_flag = {modified = ref false}
+let file_flag = {modified = ref true}
 let visualize = ref ""
 let no_file = ref false
 let port = ref 3030
@@ -21,10 +21,7 @@ let check_if_specific_file_mod event =
                   |> List.hd
   in
   if contains event "Updated" && contains event file_name then
-    begin
-      ignore @@ Sys.command (String.concat "" ["mi "; !visualize;" > ../webpage/js/data-source.json "]);
-      (file_flag.modified) := true
-    end
+    (file_flag.modified) := true
 
 let serve_file ~docroot ~uri =
   let fname = Server.resolve_local_file ~docroot ~uri in
@@ -51,27 +48,50 @@ let serve ~docroot ~index uri path =
                ~body:"Not found"
                ())
 
+let rec read_all input_stream output =
+  try
+    let line = input_line input_stream in
+    read_all input_stream (String.concat "" [output; line])
+  with End_of_file ->
+    close_in input_stream;
+    output
+
+
 let handler ~docroot ~index (_ch ,_conn) req _body =
   let uri = Cohttp.Request.uri req in
-  let path = Uri.path uri in
+  let path =  Uri.path uri in
   match Request.meth req with
-  | (`GET | `HEAD)  ->
-     if contains (Uri.to_string uri) "js/flag.json" then
-       Server.respond_string ~status:`OK
-         ~body:(string_of_bool !(file_flag.modified)) ()
-     else
-       serve ~docroot ~index uri path
+  | (`GET | `HEAD) ->
+     begin
+       match path with
+       | "/ws" ->
+          Cohttp_lwt.Body.drain_body _body >>= fun () ->
+          Websocket_cohttp_lwt.upgrade_connection
+            req (fun _ -> ()) >>= fun (response, send_func) ->
+          let rec refresh () =
+            if !(file_flag.modified) = true then
+              begin
+                (file_flag.modified) := false;
+                let stream = Unix.open_process_in (String.concat "" ["mi "; !visualize;]) in
+                let msg =  read_all stream "" in
+                Lwt.wrap1 send_func @@
+                  Some (Frame.create ~content:msg ());
+                >>= fun () ->
+                Lwt_unix.sleep 0. >>=
+                  refresh
+              end
+            else
+              Lwt_unix.sleep 1. >>=
+                refresh
+          in
+          Lwt.async refresh;
+          Lwt.return response
+       | _ ->
+         serve ~docroot ~index uri path >|= fun resp ->
+          `Response resp
+     end
   | `POST ->
-     if contains (Uri.to_string uri) "js/flag.json" then
-       begin
-         Cohttp_lwt.Body.to_string _body >|= (fun msg ->
-         if contains msg "false" then
-           (file_flag.modified) := false
-       )
-         >>= (fun _ -> Server.respond_string ~status:`OK
-                         ~body:"POST request accepted" ())
-       end
-     else if contains (Uri.to_string uri) "js/data-source.json" then
+     if contains (Uri.to_string uri) "js/data-source.json" then
        begin
          Cohttp_lwt.Body.to_string _body >|= (fun msg ->
          let oc = open_out "../webpage/js/data-source.json" in
@@ -80,28 +100,30 @@ let handler ~docroot ~index (_ch ,_conn) req _body =
        )
          >>= (fun _ -> Server.respond_string ~status:`OK
                          ~body:"POST request accepted" ())
+         >|= fun resp -> `Response resp
        end
      else
        Server.respond_string ~status:`Method_not_allowed ~body:"No such file or directory" ()
+       >|= fun resp -> `Response resp
+
 
   | _ ->
      Server.respond_string ~status:`Method_not_allowed
-       ~body:"Method not allowed" ()
+       ~body:"Method not allowed" () >|= fun resp ->
+     `Response resp
 
 
 exception Invalid_input
 
 let start_server port () =
   print_endline (String.concat "" ["Server running, listening on port "; (string_of_int port); " for HTTP requests\n http://127.0.0.1:"; string_of_int port]);
-  (* Cohttp_lwt_unix.Debug.activate_debug (); *)
   let docroot = "../webpage/." in
   let index = "index.html" in
-  let host = "::" in
   let callback = handler ~docroot ~index in
-  let config = Server.make ~callback () in
-  Conduit_lwt_unix.init ~src:host ()
-  >>= fun ctx -> let ctx = Cohttp_lwt_unix.Net.init ~ctx () in
-                 Server.create ~ctx ~mode:(`TCP (`Port port)) config
+  Cohttp_lwt_unix.Server.create ~mode:(`TCP (`Port port))
+    (Cohttp_lwt_unix.Server.make_response_action
+       ~callback ())
+
 
 open Fswatch
 open Lwt
@@ -114,7 +136,6 @@ let parse_folder_to_file =
   |> List.tl
   |> List.rev
   |> String.concat "/"
-
 
 
 let rec listen msgBox=
@@ -151,8 +172,6 @@ let () =
     begin
       if not !no_file then
         begin
-
-          ignore @@ Sys.command (String.concat "" ["mi "; !visualize ;" > ../webpage/js/data-source.json "]);
           Lwt_main.run (Lwt.pick [source_updates ();
                                   Lwt.catch
                                     (fun () -> start_server !port ())
