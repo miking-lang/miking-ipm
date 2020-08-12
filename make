@@ -12,6 +12,9 @@
 # Forces the script to exit on error
 set -e
 
+# Setup environment variable to find ipm folder
+export MCORE_STDLIB=`pwd`;
+
 # Compile the project
 build(){
     mkdir -p build

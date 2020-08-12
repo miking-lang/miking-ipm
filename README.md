@@ -39,13 +39,20 @@ If you are using an old opam version, use the following commands to update it:
 	opam update
 	opam upgrade
 
-You can start the server for watching your file using this command and giving the path toyour MCore source file (this would be if your file is in the root directory of the project):
+You need to source the path to the IPM root folder as an environment variable:
+
+	export MI_IPM=/path/to/ipm
+
+To install the server, execute:
+
+	make install
+
+To run the server, execute:
+
+	ipm-server <file> [optional: -p <int> (for port number)]
 	
-	cd src/ocaml-server/
-	dune exec ./main.exe -- path/to/source.mc [OPTIONAL -p PORT]
-
-This will prompt you to the port on your localhost on which the server is started, now if you modify and save the file which contains your models, it should generate a file called **data-source.js** and reflect the update in the browser immediately. The generated file will appear in the src/visual/webpage directory. Note that you must be in the ocaml-server directory to run the server.
-
+Note: you need to source **src/models/modelVisualizer.mc** in your source file.
+	
 # Models
 
 This environment supports the datatypes of type _model_. The model type extends the functions already available in the datatypes to be able to visualize them.
