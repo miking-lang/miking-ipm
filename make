@@ -13,7 +13,7 @@
 set -e
 
 # Setup environment variable to find ipm folder
-export MCORE_STDLIB=`pwd`;
+export MI_IPM=`pwd`;
 
 # Compile the project
 build(){

@@ -6,8 +6,16 @@ let modified = ref true
 let visualize = ref ""
 let no_file = ref false
 let port = ref 3030
-let path_to_ipm = (Sys.getenv "MI_IPM")
 let message = ref ""
+
+let path_to_ipm = ref ""
+exception ENV_VAR of string
+let _ = 
+  try
+    path_to_ipm := (Sys.getenv "MI_IPM")
+  with
+    _ -> raise (ENV_VAR "Environment variable MI_IPM is not set.")
+
 
 let contains s1 s2 =
   let re = Str.regexp_string s2 in
@@ -111,7 +119,7 @@ let handler ~docroot ~index (_ch ,_conn) req _body =
          modified := true;
          Cohttp_lwt.Body.to_string _body >|= (fun msg ->
            message := msg;
-           let oc = open_out (String.concat "" [path_to_ipm; "/src/webpage/js/data-source.json "]) in
+           let oc = open_out (String.concat "" [!path_to_ipm; "/src/webpage/js/data-source.json "]) in
            Printf.fprintf oc "%s" msg;
            close_out oc;
          )
@@ -131,7 +139,7 @@ let handler ~docroot ~index (_ch ,_conn) req _body =
 
 let start_server port () =
   print_endline (String.concat "" ["Server running, listening on port "; (string_of_int port); " for HTTP requests\n http://127.0.0.1:"; string_of_int port]);
-  let docroot = (String.concat "" [ path_to_ipm; "/src/webpage/."]) in
+  let docroot = (String.concat "" [ !path_to_ipm; "/src/webpage/."]) in
   let index = "index.html" in
   let callback = handler ~docroot ~index in
   Cohttp_lwt_unix.Server.create ~mode:(`TCP (`Port port))
