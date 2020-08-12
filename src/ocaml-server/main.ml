@@ -2,11 +2,12 @@ open Lwt.Infix
 open Cohttp_lwt_unix
 open Websocket
 
-type flag = { modified : bool ref}
-let file_flag = {modified = ref true}
+let modified = ref true
 let visualize = ref ""
 let no_file = ref false
 let port = ref 3030
+let path_to_ipm = (Sys.getenv "MI_IPM")
+let message = ref ""
 
 let contains s1 s2 =
   let re = Str.regexp_string s2 in
@@ -21,7 +22,7 @@ let check_if_specific_file_mod event =
                   |> List.hd
   in
   if contains event "Updated" && contains event file_name then
-    (file_flag.modified) := true
+    modified := true
 
 let serve_file ~docroot ~uri =
   let fname = Server.resolve_local_file ~docroot ~uri in
@@ -69,16 +70,30 @@ let handler ~docroot ~index (_ch ,_conn) req _body =
           Websocket_cohttp_lwt.upgrade_connection
             req (fun _ -> ()) >>= fun (response, send_func) ->
           let rec refresh () =
-            if !(file_flag.modified) = true then
+            if !modified = true then
               begin
-                (file_flag.modified) := false;
-                let stream = Unix.open_process_in (String.concat "" ["mi "; !visualize;]) in
-                let msg =  read_all stream "" in
-                Lwt.wrap1 send_func @@
-                  Some (Frame.create ~content:msg ());
-                >>= fun () ->
-                Lwt_unix.sleep 0. >>=
-                  refresh
+                if !message = "" then
+                  begin
+                    modified := false;
+                    let stream = Unix.open_process_in (String.concat "" ["mi "; !visualize;]) in
+                    let msg =  read_all stream "" in
+                    Lwt.wrap1 send_func @@
+                      Some (Frame.create ~content:msg ());
+                    >>= fun () ->
+                    Lwt_unix.sleep 0. >>=
+                      refresh
+                  end
+                else
+                  begin
+                    modified := false;
+                    let msg =  !message in
+                    message := "";
+                    Lwt.wrap1 send_func @@
+                      Some (Frame.create ~content:msg ());
+                    >>= fun () ->
+                    Lwt_unix.sleep 0. >>=
+                      refresh
+                    end
               end
             else
               Lwt_unix.sleep 1. >>=
@@ -87,17 +102,19 @@ let handler ~docroot ~index (_ch ,_conn) req _body =
           Lwt.async refresh;
           Lwt.return response
        | _ ->
-         serve ~docroot ~index uri path >|= fun resp ->
+          serve ~docroot ~index uri path >|= fun resp ->
           `Response resp
      end
   | `POST ->
      if contains (Uri.to_string uri) "js/data-source.json" then
        begin
+         modified := true;
          Cohttp_lwt.Body.to_string _body >|= (fun msg ->
-         let oc = open_out "../webpage/js/data-source.json" in
-         Printf.fprintf oc "%s" msg;
-         close_out oc;
-       )
+           message := msg;
+           let oc = open_out (String.concat "" [path_to_ipm; "/src/webpage/js/data-source.json "]) in
+           Printf.fprintf oc "%s" msg;
+           close_out oc;
+         )
          >>= (fun _ -> Server.respond_string ~status:`OK
                          ~body:"POST request accepted" ())
          >|= fun resp -> `Response resp
@@ -112,12 +129,9 @@ let handler ~docroot ~index (_ch ,_conn) req _body =
        ~body:"Method not allowed" () >|= fun resp ->
      `Response resp
 
-
-exception Invalid_input
-
 let start_server port () =
   print_endline (String.concat "" ["Server running, listening on port "; (string_of_int port); " for HTTP requests\n http://127.0.0.1:"; string_of_int port]);
-  let docroot = "../webpage/." in
+  let docroot = (String.concat "" [ path_to_ipm; "/src/webpage/."]) in
   let index = "index.html" in
   let callback = handler ~docroot ~index in
   Cohttp_lwt_unix.Server.create ~mode:(`TCP (`Port port))
@@ -128,8 +142,8 @@ let start_server port () =
 open Fswatch
 open Lwt
 
-let parse_folder_to_file =
-  Sys.argv.(1)
+let parse_folder_to_file () =
+  !visualize
   |> String.split_on_char '/'
   |> List.filter (fun s -> s <> "")
   |> List.rev
@@ -150,7 +164,7 @@ let source_updates ()=
   match init_library () with
   | Status.FSW_OK->
      let handle, msgBox= Fswatch_lwt.init_session Monitor.System_default in
-     add_path handle (String.concat "" ["./"; parse_folder_to_file]);
+     add_path handle (String.concat "" ["./"; parse_folder_to_file ()]);
      async (Fswatch_lwt.start_monitor handle);
      listen msgBox
   | err-> Lwt_io.eprintf "%s\n" (Status.t_to_string err)
@@ -160,11 +174,13 @@ exception PortInUseException of string
 
 let () =
   let speclist = [
-      "--no-file", Arg.Set(no_file), "Enables the server to run without a file";
-      "-p", Arg.Set_int(port), "Enable port choices.";
+      "--no-file", Arg.Set(no_file), "\t Enables POST receive for compiled models";
+      "-p", Arg.Set_int(port), "<int> \t Enables user defined port. Defaults to 3030.";
+      "--help",Arg.Unit(fun () -> ()),"\t Display this list of options";
+      "-help",Arg.Unit(fun () -> ()),"\t Display this list of options";
     ] in
   let anon_fun arg = visualize := arg in
-  let usage_msg = "Usage: either --no-file for client sending POST data or give full path to a source file. \n Note: one of them is mandatory!" in
+  let usage_msg = "Usage: ipm-server <file> \n\nOptions:" in
   Arg.parse speclist anon_fun usage_msg;
   if !visualize = "" && not !no_file then
     Arg.usage speclist usage_msg
@@ -180,11 +196,12 @@ let () =
                                      | _ as e -> Lwt.fail e)])
         end
       else
-        ignore @@ Sys.command " > ../webpage/js/data-source.json ";
-      Lwt_main.run (Lwt.catch
-                      (fun () -> start_server !port ())
-                      (function
-                       | Unix.Unix_error(Unix.EADDRINUSE, _, _) -> Lwt.fail (PortInUseException (String.concat "" ["Error: Port "; (string_of_int !port); " already in use. Run the same command again with a different port. " ]))
-                       | _ as e -> Lwt.fail e))
+        Lwt_main.run (Lwt.catch
+                        (fun () -> start_server !port ())
+                        (function
+                         | Unix.Unix_error(Unix.EADDRINUSE, _, _) -> Lwt.fail (PortInUseException (String.concat "" ["Error: Port "; (string_of_int !port); " already in use. Run the same command again with a different port. " ]))
+                         | _ as e -> Lwt.fail e))
     end
+
+
 

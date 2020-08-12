@@ -1,10 +1,9 @@
-
+let message = "test";
 
 function render() {
     ws = new WebSocket('ws://localhost' + (location.port ? ':'+location.port:'') + '/ws');
     ws.onmessage = function(x) {
 	let data_models = JSON.parse(x.data);
-	console.log(x.data);
 	if (data_models.models) {
 
 	    document.getElementById("app").innerHTML = "";
@@ -41,5 +40,4 @@ function render() {
 }
 
 render()
-
 
