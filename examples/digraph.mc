@@ -21,5 +21,5 @@ let digraph = foldr (lam e. lam g. digraphAddEdge e.0 e.1 e.2 g) digraph [('A','
 -- This function parses the digraph and visualizez it
 -- Source the to string functions for both the vertices and the edges here
 visualize [
-	Digraph(digraph, char2string,int2string,"RL",[])
+	Digraph(digraph, char2string,int2string,"LR",[])
 ]

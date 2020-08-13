@@ -10,16 +10,20 @@ class GraphController {
         // Defining the callback function, which is called when the graph is rendered.
         const interactionCallback = nodes => {
             // Adds on click event listeners to each of the nodes.
-            this.graphView.getEdges().on("click", function () {
+            this.modelView.getEdges().on("click", function () {
                 let name = d3.select(this).attr("id")
                 console.log(name)
             })
-            this.graphView.getNodes().on("click", function () {
+            this.modelView.getNodes().on("click", function () {
                 let name = d3.select(this).attr("id")
                 console.log(name)
             })
         }
-
-        this.graphView = new GraphView(graphModel, modelRoot, interactionCallback)
+        this.modelView = new ModelView(
+            graphModel,
+            interactionCallback,
+            () => {}
+        )
+        this.modelView.init(modelRoot)
     }
 }

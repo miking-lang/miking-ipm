@@ -120,7 +120,7 @@ The construct function is then called by:
 
 To get a `model` containing this DFA, use the model constructor. Ex:
 
-    DFA (my_dfa, "01010", string2string, char2string, "RL", [("s0","start")])
+    DFA (my_dfa, "01010", string2string, char2string, "LR", [("s0","start")])
 
 ## NFA
 A NFA works the same as a DFA, except for the requirement for all transitions from a state to have unique labels. Just replace "dfa" with "nfa" in the above instructions.
@@ -274,11 +274,11 @@ There is a **examples** folder in the root of the project which contains some fi
 
 	visualize [
 		-- accepted by the DFA
-    DFA(dfa,"10010100",string2string, char2string,"RL",[("s0","start state"),("s3","accept state")]),
+    DFA(dfa,"10010100",string2string, char2string,"LR",[("s0","start state"),("s3","accept state")]),
     -- not accepted by the DFA
-    DFA(dfa,"101110",string2string, char2string,"RL",[]),
+    DFA(dfa,"101110",string2string, char2string,"LR",[]),
     -- not accepted by the DFA
-    DFA(dfa,"1010001",string2string, char2string,"RL",[])
+    DFA(dfa,"1010001",string2string, char2string,"LR",[])
 	] 
 
 
@@ -302,8 +302,8 @@ This program displays a digraph and a graph on the same page.
 	(foldr graphAddVertex (graphEmpty eqi eqString) [1,2,3,4]) [(1,2,""),(3,2,""),(1,3,""),(3,4,"")] in
 
 	visualize [
-	Digraph(digraph, char2string,int2string,"RL",[]),
-    Graph(graph,int2string,string2string,"RL",[])
+	Digraph(digraph, char2string,int2string,"LR",[]),
+    Graph(graph,int2string,string2string,"LR",[])
 	]
 
 
@@ -330,8 +330,8 @@ This program creates both a NFA and a Binary tree and displays them.
 
 	visualize [
     BTree(btree, int2string,[(2,"Two"),(3,"Three"),(4,"Four"),(5,"Five")],"TB",[]),
-    NFA(nfa, "1021", string2string, char2string,"RL",[]),
-    NFA(nfa, "102", string2string, char2string,"RL",[])
+    NFA(nfa, "1021", string2string, char2string,"LR",[]),
+    NFA(nfa, "102", string2string, char2string,"LR",[])
 	]
 
 ## Printing to pdf

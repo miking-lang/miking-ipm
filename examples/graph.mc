@@ -22,5 +22,5 @@ let graph = foldr (lam e. lam g. graphAddEdge e.0 e.1 e.2 g) graph [(1,2,""),(3,
 -- This function parses the graph and visualizez it
 -- Source the to string functions for both vertices and edges here
 visualize [
-	Graph(graph,int2string,string2string,"RL",[])
+	Graph(graph,int2string,string2string,"LR",[])
 ]

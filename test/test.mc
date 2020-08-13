@@ -44,11 +44,11 @@ let btree = btreeConstr (Node(2, Node(3, Nil (), Leaf 4), Leaf 5)) eqi in
 
 visualize [
 	-- accepted by the DFA
-	DFA(dfa,"1001010",string2string, char2string,"TB",[("s0","start state"),("s3","accept state")]),
-	-- not accepted by the DFA
-	DFA(dfa,"101110",string2string, char2string,"LR",[]),
-	-- not accepted by the DFA
-	DFA(dfa,"1010001",string2string, char2string,"LR",[]),
+	-- DFA(dfa,"1001010",string2string, char2string,"LR",[("s0","start state"),("s3","accept state")]),
+	-- -- not accepted by the DFA
+	-- DFA(dfa,"101110",string2string, char2string,"LR",[]),
+	-- -- not accepted by the DFA
+	-- DFA(dfa,"1010001",string2string, char2string,"LR",[]),
 	Digraph(digraph, char2string,int2string,"LR",[]),
 	Graph(graph,int2string,string2string,"LR",[]),
 	BTree(btree, int2string,"TB",[(2,"Two"),(3,"Three"),(4,"Four"),(5,"Five")]),
