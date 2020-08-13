@@ -16,22 +16,23 @@ class NFAController {
                 let name = d3.select(this).attr("id")
                 console.log(nfaModel.visualizationModel.getStateByName(name))
             })
+            /* < -- TEMPORARY       */
 
         const simulationCallback = d => {
             /*might need to be more general if users can change the shapes of nodes*/
             let simulationState = nfaModel.getSimulationState()
-            if (d.key.includes("path") && (d.parent != undefined) && d.parent.key == simulationState.node){
+            if (d.key.includes("path") && (d.parent !== undefined) && d.parent.key === simulationState.node){
                 d.attributes.fill = simulationState.color;
             }
-            else if ((d.tag == "path" && d.parent.key == simulationState.edge)){
+            else if ((d.tag === "path" && d.parent.key === simulationState.edge)){
                 d.attributes.stroke = simulationState.color;
             }
-            else if (d.tag == "polygon" && d.parent.key == simulationState.edge){
+            else if (d.tag == "polygon" && d.parent.key === simulationState.edge){
                 d.attributes.fill = simulationState.color;
                 d.attributes.stroke = simulationState.color;
+                // d.attributes.fontcolot = "white"
             }
         }
-            /* < -- TEMPORARY       */
         this.nfaView = new NFAView(nfaModel, modelRoot, model.model, interactionCallback, simulationCallback)
     }
 }

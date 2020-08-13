@@ -1,44 +1,37 @@
+fetch('js/data-source.json')
+.then(response => response.text())
+.then(response => JSON.parse(response))
+.then(data => handleResponse(data))
 
-
-function render() {
-    fetch('js/data-source.json')
-	.then(response => response.text())
-	.then((data) => {
-	    let data_models = JSON.parse(data);
-        if (data_models.models) {
-	const root = document.body.querySelector("#app");
-	// Maps over all models in the generated output.
-    
-	data_models.models.map((model) => {
-        // Creates a root element for the model and add it to the root of the application.
+function handleResponse(data) {
+    if (data.models) {
+        const root = document.body.querySelector("#app");
+        // Maps over all models in the generated output.
+        data.models.map((model) => {
+            // Creates a root element for the model and add it to the root of the application.
             let modelRoot = document.createElement(`div`);
             modelRoot.className = "container";
             root.appendChild(modelRoot);
-        // Creates the controller for the specified model if the type is supported.
-        switch (model.type) {
-        case "dfa":
-        case "nfa":
-            new NFAController(model, modelRoot);
-            break;
-        case "digraph":
-        case "graph":
-        case "tree":
-            new GraphController(model, modelRoot);
-            break;
-        default:
-            modelRoot.innerHTML = `<div class="warning">Unsopported model type</div>`;
-            break;
-        }
-    })
-} else {
-    document.getElementById("error-container").textContent += data_models;
+            // Creates the controller for the specified model if the type is supported.
+            switch (model.type) {
+            case "dfa":
+            case "nfa":
+                new NFAController(model, modelRoot);
+                break;
+            case "digraph":
+            case "graph":
+            case "tree":
+                new GraphController(model, modelRoot);
+                break;
+            default:
+                modelRoot.innerHTML = `<div class="warning">Unsopported model type</div>`;
+                break;
+            }
+        })
+    } else {
+        document.getElementById("error-container").textContent += data;
+    }
 }
-	})
-}
-
-render()
-
-
 
 function checkFlag() {
     const http = new XMLHttpRequest();
