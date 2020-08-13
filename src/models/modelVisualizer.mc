@@ -135,8 +135,8 @@ let treeVisual = lam dot. lam model. lam v2str. lam displayNames. lam id.
     let edges = foldl (lam edges. lam e. strJoin "," [edges, e]) (head edges) (tail edges) in
     formatGraph dot vertices edges "tree" id
 
--- make all models into string object
-let visualize = lam models.
+-- format a model into a string representation for visualization
+let formatModels = lam models.
     let ids = mapi (lam i. lam x. i) models in
     let models = zipWith (lam x. lam y. (x,y)) models ids in
     let models = strJoin ",\n" (
@@ -156,8 +156,10 @@ let visualize = lam models.
             treeVisual dot btree node2str displayName id
         else error "unknown type") models
     ) in
-    print (foldl concat [] ["{\"models\": [\n", models, "]\n}\n"])
-                        
+    foldl concat [] ["{\"models\": [\n", models, "]\n}\n"]
+
+let visualize = compose print formatModels
+
 mexpr
 let states = [1,2,3] in
 let transitions = [(1,2,'0'),(3,1,'0'),(1,2,'1'),(2,3,'1'),(1,2,'2'),(3,1,'1')] in
