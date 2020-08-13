@@ -144,20 +144,20 @@ let visualize = lam models.
         map (lam model_tup.
 	    let model = model_tup.0 in
 	    let id = model_tup.1 in
-	    match model with Digraph(digraph,vertex2str,edge2str,displayNames) then
-            let dot = modelGetDotWithOptions model "LR" id [] in
+	    match model with Digraph(digraph,vertex2str,edge2str,direction,displayNames) then
+            let dot = modelGetDotWithOptions model direction id [] in
             graphVisual dot digraph displayNames vertex2str edge2str "digraph" id
-        else match model with DFA(dfa,input,state2str,label2str,displayNames) then
-            let dot = modelGetDotWithOptions model "LR" id [] in
+        else match model with DFA(dfa,input,state2str,label2str,direction,displayNames) then
+            let dot = modelGetDotWithOptions model direction id [] in
             dfaVisual dot dfa input state2str label2str "dfa" displayNames id
-        else match model with Graph(graph,vertex2str,edge2str,displayNames) then
-            let dot = modelGetDotWithOptions model "LR" id [] in
+        else match model with Graph(graph,vertex2str,edge2str,direction,displayNames) then
+            let dot = modelGetDotWithOptions model direction id [] in
             graphVisual dot graph displayNames vertex2str edge2str "graph" id
-        else match model with NFA(nfa,input,state2str,label2str,displayNames) then
-            let dot = modelGetDotWithOptions model "LR" id [] in
+        else match model with NFA(nfa,input,state2str,label2str,direction,displayNames) then
+            let dot = modelGetDotWithOptions model direction id [] in
             nfaVisual dot nfa input state2str label2str "nfa" displayNames id
-        else match model with BTree(btree, node2str,displayName) then
-            let dot = modelGetDotWithOptions model "TD" id [] in
+        else match model with BTree(btree, node2str,direction,displayName) then
+            let dot = modelGetDotWithOptions model direction id [] in
             treeVisual dot btree node2str displayName id
         else error "unknown type") models
     ) in
@@ -171,5 +171,5 @@ let startState = 1 in
 let acceptStates = [1] in
 let input = "010" in
 let newDfa = dfaConstr states transitions alfabeth startState acceptStates eqi eqchar in
-let model = DFA(newDfa, input, int2string, lam b. [b],[]) in
+let model = DFA(newDfa, input, int2string, lam b. [b],"LR",[]) in
 visualize [model]

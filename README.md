@@ -53,34 +53,38 @@ This environment supports the datatypes of type _model_. The model type extends 
 This includes:
 * Deterministic finite automaton (DFA)
 
-    `DFA (Data, input, node2str, label2str, displayNames)`
+    `DFA (Data, input, node2str, label2str, direction, displayNames)`
 
 * Nondeterministic finite automaton (NFA)
 
-    `NFA (Data, input, node2str, label2str, displayNames)`
+    `NFA (Data, input, node2str, label2str, direction, displayNames)`
+
 * Directed graph (Digraph)
 
-    `Digraph (Data, node2str, label2str,    displayNames)`
+    `Digraph (Data, node2str, label2str,    direction, displayNames)`
     
 * Graph
 
-    `Graph (Data,  node2str, label2str,       displayNames)`
+    `Graph (Data,  node2str, label2str,     direction, displayNames)`
     
 * Binary tree (BTree)
 
-    `BTree (Data,node2str,                   displayNames)`
+    `BTree (Data,node2str,                  direction, displayNames)`
 
 The arguments for the constructors are:
 
-1. **Data**: data of type (DFA/NFA/Digraph/Graph).
+- **Data:** data of type (DFA/NFA/Digraph/Graph).
 
-2. **input:** a input list containing input.
+- **(input):** a input list containing input.
 
-3. **displayNames:** There is a option to define a display name for any of the nodes when visualizing any of the datatypes. These values must be strings, and have no affect on the model other than that when visualized the labels for the nodes/states will not be the names used in the model, but the display names. All names used in the model must be unique, but display names do not. The display names are defined by a list of tuples `(a,b)`, where `a` is the name of the node that is used in the model and `b` is the string that will be shown as the label instead.
+- **node2str** and **label2str:**  **toString** functions that return a string that represents the type you are modelling. 
+
+- **direction:** Defines the render direction. Takes one of the following values: "TB", "RL", "BT", "LR".
+
+- **displayNames:** There is a option to define a display name for any of the nodes when visualizing any of the datatypes. These values must be strings, and have no affect on the model other than that when visualized the labels for the nodes/states will not be the names used in the model, but the display names. All names used in the model must be unique, but display names do not. The display names are defined by a list of tuples `(a,b)`, where `a` is the name of the node that is used in the model and `b` is the string that will be shown as the label instead.
 
     **Note:** this does not work with file conversion at the moment. 
 
-4. **node2str** and 5. **label2str:**  **toString** functions that return a string that represents the type you are modelling. 
 
 See the datatypes below for examples.
 ## DFA
@@ -98,11 +102,11 @@ The constructor for the DFA takes in seven arguments:
 
     `let startState = "s0"`
 
- 5. **accepted states:** a list containing the automatons accepted states. Ex:
+5. **accepted states:** a list containing the automatons accepted states. Ex:
 
     `let acceptStates = ["s1"]`
 
-  6. **eqv** and 7. **eql** There are no data type requirements, thus you would need to write equality functions for the states (eqv) and the labels (eql). The equality functions take two inputs and returns either **true** if they are equal or **false** if they are not. Ex :
+6. **eqv** and 7. **eql** There are no data type requirements, thus you would need to write equality functions for the states (eqv) and the labels (eql). The equality functions take two inputs and returns either **true** if they are equal or **false** if they are not. Ex :
   
     `let eqString = setEqual eqchar in`
 
@@ -116,7 +120,7 @@ The construct function is then called by:
 
 To get a `model` containing this DFA, use the model constructor. Ex:
 
-    DFA (my_dfa, "01010", string2string, char2string, [("s0","start")])
+    DFA (my_dfa, "01010", string2string, char2string, "RL", [("s0","start")])
 
 ## NFA
 A NFA works the same as a DFA, except for the requirement for all transitions from a state to have unique labels. Just replace "dfa" with "nfa" in the above instructions.
@@ -173,7 +177,7 @@ The constructor is then called by:
 
 To get a `model` containing this digraph, use the model constructor. Ex:
 
-    BTree(tree, int2string,[(2,"root")])
+    BTree(tree, int2string,"TB",[(2,"root")])
 
 # Usage
 The IPM framework can be used to visualize any data of type _model_. Make sure you source `modelVisualizer.mc` in your file:
@@ -270,11 +274,11 @@ There is a **examples** folder in the root of the project which contains some fi
 
 	visualize [
 		-- accepted by the DFA
-    DFA(dfa,"10010100",string2string, char2string,[("s0","start state"),("s3","accept state")]),
+    DFA(dfa,"10010100",string2string, char2string,"RL",[("s0","start state"),("s3","accept state")]),
     -- not accepted by the DFA
-    DFA(dfa,"101110",string2string, char2string,[]),
+    DFA(dfa,"101110",string2string, char2string,"RL",[]),
     -- not accepted by the DFA
-    DFA(dfa,"1010001",string2string, char2string,[])
+    DFA(dfa,"1010001",string2string, char2string,"RL",[])
 	] 
 
 
@@ -298,8 +302,8 @@ This program displays a digraph and a graph on the same page.
 	(foldr graphAddVertex (graphEmpty eqi eqString) [1,2,3,4]) [(1,2,""),(3,2,""),(1,3,""),(3,4,"")] in
 
 	visualize [
-	Digraph(digraph, char2string,int2string,[]),
-    Graph(graph,int2string,string2string,[])
+	Digraph(digraph, char2string,int2string,"RL",[]),
+    Graph(graph,int2string,string2string,"RL",[])
 	]
 
 
@@ -325,9 +329,9 @@ This program creates both a NFA and a Binary tree and displays them.
 	let btree = BTree (Node(2, Node(3, Nil (), Leaf 4), Leaf 5)) in
 
 	visualize [
-    BTree(btree, int2string,[(2,"Two"),(3,"Three"),(4,"Four"),(5,"Five")],[]),
-    NFA(nfa, "1021", string2string, char2string,[]),
-    NFA(nfa, "102", string2string, char2string,[])
+    BTree(btree, int2string,[(2,"Two"),(3,"Three"),(4,"Four"),(5,"Five")],"TB",[]),
+    NFA(nfa, "1021", string2string, char2string,"RL",[]),
+    NFA(nfa, "102", string2string, char2string,"RL",[])
 	]
 
 ## Printing to pdf

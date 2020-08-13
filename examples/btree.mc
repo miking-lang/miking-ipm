@@ -19,8 +19,8 @@ let btree2 = btreeConstr btreeModel2 eqi in
 -- needed. This examples maps node 10 to the output name
 -- of "root".
 visualize [
-	BTree(btree, int2string,[]),
+	BTree(btree, int2string,"TB",[]),
     -- with the display names
-	BTree(btree, int2string,[(2,"Two"),(3,"Three"),(4,"Four"),(5,"Five")]),
-	BTree(btree2, int2string,[])
+	BTree(btree, int2string,"TB",[(2,"Two"),(3,"Three"),(4,"Four"),(5,"Five")]),
+	BTree(btree2, int2string,"TB",[])
 ]

@@ -28,6 +28,6 @@ let nfa = nfaConstr nfaStates nfaTransitions nfaStartState nfaAcceptStates eqStr
 -- of "start state".
 -- Leave it empty for printing the actual names of the states.
 visualize [
-	NFA(nfa, "1021", string2string, char2string,[]),
-	NFA(nfa, "102", string2string, char2string,[])
+	NFA(nfa, "1021", string2string, char2string,"RL",[]),
+	NFA(nfa, "102", string2string, char2string,"RL",[])
 ]
