@@ -43,7 +43,7 @@ let model2dot = lam graphType. lam direction. lam stdVerticesSetting. lam vertic
         foldl (lam output. lam e. concat output (edgeToDot e)) edges,"}"
     ]
 
--- prints a given model in dot syntax
+-- gets a given model in dot syntax
 let getDot = lam graphType. lam direction. lam stdVerticesSetting. lam vertices. lam edges.
     let output = foldl concat [] [[graphType," {","rankdir=",direction,";",
         "node [",stdVerticesSetting,"];"],
@@ -114,7 +114,7 @@ let nfaGetDot = lam nfa. lam v2str. lam l2str. lam direction. lam vSettings. lam
     getDot "digraph" direction (getStdNodeSettings ()) dotVertices dotEdges
 
 
--- converts and prints the given model in dot. vSettings is a seqence of 
+-- converts the given model in dot. vSettings is a seqence of 
 -- two element tuples, the first element refers to the name of the vertex, 
 -- the second should be a string with custom graphviz settings.
 let modelGetDotWithOptions = lam model. lam direction. lam vSettings.
