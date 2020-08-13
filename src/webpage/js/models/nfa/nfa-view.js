@@ -5,13 +5,15 @@ class NFAView {
      * 
      * @param {NFAModel} model The model including the data used in this view.
      * @param {div} modelRoot The root element of the view.
-     * @param {function} callbackFunction The callback function called, when interacting with the
+     * @param {function} interactionCallback The callback function called, when interacting with the
      *                                    graphviz graph.
      */
-    constructor(model, modelRoot, callbackFunction){
+    constructor(model, modelRoot, dotModel, interactionCallback, simulationCallback){
         this.model = model
         this.modelRoot = modelRoot
-        this.callbackFunction = () => callbackFunction(this.getNodes())
+        this.dotModel = dotModel
+        this.interactionCallback = () => interactionCallback(this.getNodes())
+        this.simulationCallback = simulationCallback
         this.initView()
 
         // Add the view as an observer to the model.
@@ -48,10 +50,12 @@ class NFAView {
             this.model.getInfoStatusAndText(),
             this.model.input,
             idx => this.model.isCurrentInputIndex(idx))
+
         ModelRender(
             this.modelRoot.lastElementChild, 
-            this.model.toDot(), 
-            this.callbackFunction)
+            this.model.getDot(), 
+            this.interactionCallback,
+            this.simulationCallback)
     }
     
     /*              GETTERS               */
@@ -59,6 +63,6 @@ class NFAView {
      * Gets the nodes of the graph.
      */
     getNodes() {
-        return d3.selectAll("."+this.model.visualizationModel.name+"-node")
+        return d3.selectAll("."+this.model.getName()+"-node")
     }
 }

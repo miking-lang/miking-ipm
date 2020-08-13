@@ -1,3 +1,4 @@
+/*This file provides styling for the visualization of models*/
 /*             GENERAL             */
 .capitalize {
     text-transform: capitalize;
@@ -73,6 +74,7 @@ body {
 .warning {
     color: #8B8B00;
 }
+
 /*              GRAPH               */
 .node {
     cursor: pointer;

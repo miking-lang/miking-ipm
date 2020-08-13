@@ -5,11 +5,11 @@ function render() {
 	.then(response => response.text())
 	.then((data) => {
 	    let data_models = JSON.parse(data);
-	     if (data_models.models) {
+        if (data_models.models) {
 	const root = document.body.querySelector("#app");
 	// Maps over all models in the generated output.
     
-	data_models.models.map((model, idx) => {
+	data_models.models.map((model) => {
         // Creates a root element for the model and add it to the root of the application.
             let modelRoot = document.createElement(`div`);
             modelRoot.className = "container";
@@ -18,12 +18,12 @@ function render() {
         switch (model.type) {
         case "dfa":
         case "nfa":
-            new NFAController(model, modelRoot, idx);
+            new NFAController(model, modelRoot);
             break;
         case "digraph":
         case "graph":
         case "tree":
-            new GraphController(model, modelRoot, idx);
+            new GraphController(model, modelRoot);
             break;
         default:
             modelRoot.innerHTML = `<div class="warning">Unsopported model type</div>`;
@@ -34,8 +34,6 @@ function render() {
     document.getElementById("error-container").textContent += data_models;
 }
 	})
-
-   
 }
 
 render()
@@ -49,11 +47,11 @@ function checkFlag() {
     http.onreadystatechange = (e) => {
 	const response = http.responseText;
 	try{
-	    let flag = (response == 'true');
-	    if (flag) {
+	const parsedJSON = JSON.parse(response);
+	if(parsedJSON.modifiedByTheServer == 1){
 	    location.reload();
 	    http.open("POST", url, true);
-	    http.send("false");
+	    http.send("{\"modifiedByTheServer\":0}");
 	}
 	}
 	catch (e){}

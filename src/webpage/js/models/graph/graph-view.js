@@ -35,8 +35,9 @@ class GraphView {
         TitleRender(this.modelRoot.firstElementChild, "capitalize", this.model.getType())
         ModelRender(
             this.modelRoot.lastElementChild, 
-            this.model.toDot(), 
-            this.callbackFunction)
+            this.model.getDot(), 
+            this.callbackFunction,
+            () => {})
     }
     
     /*              GETTERS               */
@@ -44,6 +45,6 @@ class GraphView {
      * Gets the nodes of the graph.
      */
     getNodes() {
-        return d3.selectAll("."+this.model.visualizationModel.name+"-node")
+        return d3.selectAll("."+this.model.getName()+"-node")
     }
 }
