@@ -1,7 +1,9 @@
+-- This file provides functions that generates a JSON object of models defined in model.mc
+
 include "string.mc"
 include "map.mc"
 include "model.mc"
-
+include "modelDot.mc"
 
 let getDisplayName = lam name. lam displayNames. lam v2s.
     let vertex_display = (find (lam v. 
@@ -89,7 +91,7 @@ let formatInput = lam input. lam label2str.
 
 -- (any (lam x. or (eqchar x '{') (eqchar x '[')) first)
 -- format NFA to JS code for visualizing
-let nfaVisual = lam nfa. lam input. lam s2s. lam l2s. lam nfaType. lam displayNames. lam id.
+let nfaVisual = lam dot. lam nfa. lam input. lam s2s. lam l2s. lam nfaType. lam displayNames. lam id.
     foldl concat [] ["{\n ",
         "\"type\" : \"", nfaType,"\",\n ",
 	"\"id\" : ",
@@ -101,50 +103,38 @@ let nfaVisual = lam nfa. lam input. lam s2s. lam l2s. lam nfaType. lam displayNa
             (formatInputPath (nfaMakeInputPath (negi 1) nfa.startState input nfa) s2s),
             "]\n",
         "},\n ",
-        "\"model\" : {\n ",
-            "\"states\" : [\n",
-            (formatStates (nfaStates nfa) s2s (nfaGetEqv nfa) displayNames),
-            "],\n ",
-            "\"transitions\" : [\n",
-            (formatTransitions (nfaTransitions nfa) s2s l2s (nfaGetEqv nfa)),
-            "], \n ",
-            "\"startState\" : \"", (s2s nfa.startState),"\",\n ",
-            "\"acceptedStates\" : [",
-	    (strJoin "" ["\"", (s2s (head nfa.acceptStates)), "\""]),
-	    foldl concat [] (map (lam s. foldl concat [] [",\"", (s2s s), "\""]) (tail nfa.acceptStates)),"]\n",
-        "}\n",
+        "\"model\" :",
+            "\"",dot,"\"\n",
     "}"
 ]
 
 let dfaVisual = nfaVisual 
 
 -- format a graph to JS code
-let formatGraph = lam nodes. lam edges. lam graphType. lam id.
+let formatGraph = lam dot. lam nodes. lam edges. lam graphType. lam id.
     foldl concat [] ["{\n\"type\" : \"",
         graphType,
         "\",\n \"id\" : ",
         int2string id,
         ",\n",
-        " \"model\" : {\n \"nodes\" : [\n",
-        nodes ,
-        "],\n \"edges\" : [\n",
-        edges,
-        "] \n }\n}"
+        " \"model\" :",
+            "\"",dot, "\"\n" ,
+        "}\n"
 	]
 
 -- format a graph to JS code for visualizing
-let graphVisual = lam model. lam displayNames. lam vertex2str. lam edge2str. lam graphType. lam id.
+let graphVisual = lam dot. lam model. lam displayNames. lam vertex2str. lam edge2str. lam graphType. lam id.
     let nodes = formatVertices (graphVertices model) vertex2str model.eqv displayNames in
     let edges = formatEdges (graphEdges model) vertex2str edge2str model.eqv in
-    formatGraph nodes edges graphType id
+    formatGraph dot nodes edges graphType id
 
 -- format a tree to JS code for visualizing
-let treeVisual = lam model. lam v2str. lam displayNames. lam id.
+let treeVisual = lam dot. lam model. lam v2str. lam displayNames. lam id.
     let eqv = model.eqv in
     let vertices = formatVertices (treeVertices model) v2str eqv displayNames in
     let edges = map (lam e. formatEdge (v2str e.0) (v2str e.1) e.2) (treeEdges model ()) in
     let edges = foldl (lam edges. lam e. strJoin "," [edges, e]) (head edges) (tail edges) in
-    formatGraph vertices edges "tree" id
+    formatGraph dot vertices edges "tree" id
 
 -- make all models into string object
 let visualize = lam models.
@@ -154,26 +144,21 @@ let visualize = lam models.
         map (lam model_tup.
 	    let model = model_tup.0 in
 	    let id = model_tup.1 in
-	    match model with Digraph(model,vertex2str,edge2str,displayNames) then
-            graphVisual model displayNames vertex2str edge2str "digraph" id
-	    else match model with Digraph(model,vertex2str,edge2str) then
-            graphVisual model [] vertex2str edge2str "digraph" id
-        else match model with DFA(model,input,state2str,label2str,displayNames) then
-            dfaVisual model input state2str label2str "dfa" displayNames id
-        else match model with DFA(model,input,state2str,label2str) then
-            dfaVisual model input state2str label2str "dfa" [] id
-        else match model with Graph(model,vertex2str,edge2str,displayNames) then
-            graphVisual model displayNames vertex2str edge2str "graph" id
-        else match model with Graph(model,vertex2str,edge2str) then
-            graphVisual model [] vertex2str edge2str "graph" id
-        else match model with NFA(model,input,state2str,label2str,displayNames) then
-            nfaVisual model input state2str label2str "nfa" displayNames id
-        else match model with NFA(model,input,state2str,label2str) then
-            nfaVisual model input state2str label2str "nfa" [] id
-        else match model with BTree(model, node2str,displayName) then
-            treeVisual model node2str displayName id
-        else match model with BTree(model, node2str) then
-            treeVisual model node2str [] id
+	    match model with Digraph(digraph,vertex2str,edge2str,displayNames) then
+            let dot = modelGetDot model "LR" in
+            graphVisual dot digraph displayNames vertex2str edge2str "digraph" id
+        else match model with DFA(dfa,input,state2str,label2str,displayNames) then
+            let dot = modelGetDot model "LR" in
+            dfaVisual dot dfa input state2str label2str "dfa" displayNames id
+        else match model with Graph(graph,vertex2str,edge2str,displayNames) then
+            let dot = modelGetDot model "LR" in
+            graphVisual dot graph displayNames vertex2str edge2str "graph" id
+        else match model with NFA(nfa,input,state2str,label2str,displayNames) then
+            let dot = modelGetDot model "LR" in
+            nfaVisual dot nfa input state2str label2str "nfa" displayNames id
+        else match model with BTree(btree, node2str,displayName) then
+            let dot = modelGetDot model "TD" in
+            treeVisual dot btree node2str displayName id
         else error "unknown type") models
     ) in
     print (foldl concat [] ["{\"models\": [\n", models, "]\n}\n"])

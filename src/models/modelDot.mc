@@ -1,3 +1,4 @@
+-- This file provides toDot functions for all models defined in model.mc.
 include "model.mc"
 
 type dotEdge = {
@@ -27,7 +28,7 @@ let concatList = lam list.
 
 -- formats a dotEdge to dot
 let edgeToDot = lam e.
-    concatList [e.from," ",e.delimiter," ",e.to," [label=\"",e.label,"\" ",e.extra,"];"]
+    concatList [e.from," ",e.delimiter," ",e.to," [label=\\\"",e.label,"\\\" ",e.extra,"];"]
 
 -- formats a dotVertex to dot
 let vertexToDot = lam v.
@@ -43,13 +44,14 @@ let model2dot = lam graphType. lam direction. lam stdVerticesSetting. lam vertic
     ]
 
 -- prints a given model in dot syntax
-let printDot = lam graphType. lam direction. lam stdVerticesSetting. lam vertices. lam edges.
-    let printList = map (lam x. print x) in
-    let _ = printList [graphType," {","rankdir=",direction,";"] in
-    let _ = printList ["node [",stdVerticesSetting,"];"] in
-    let _ = printList (map (lam v. vertexToDot v) vertices) in
-    let _ = printList (map (lam e. edgeToDot e) edges) in
-    let _ = print "}" in ()
+let getDot = lam graphType. lam direction. lam stdVerticesSetting. lam vertices. lam edges.
+    let output = foldl concat [] [[graphType," {","rankdir=",direction,";",
+        "node [",stdVerticesSetting,"];"],
+        (map (lam v. vertexToDot v) vertices),
+        (map (lam e. edgeToDot e) edges),
+        ["}"]
+    ] in 
+    foldl concat [] output
 
 -- returns the standard active node setting
 let getActiveNodeSetting = lam _.
@@ -60,27 +62,27 @@ let getStdNodeSettings = lam _.
     "style=filled fillcolor=white shape=circle"
 
 
--- prints a btree in dot.
-let btreePrintDot = lam tree. lam node2str. lam direction. lam vSettings.
+-- returns a btree in dot.
+let btreeGetDot = lam tree. lam node2str. lam direction. lam vSettings.
     let dotEdges = map (lam e. initDotEdge (node2str e.0) (node2str e.1) "" "->" "") (treeEdges tree ()) in
     let dotVertices = map (lam v. 
         let extra = find (lam x. tree.eqv x.0 v) vSettings in
         initDotVertex (node2str v) (match extra with Some e then e.1 else "")
     ) (treeVertices tree) in
-    printDot "digraph" direction (getStdNodeSettings ()) dotVertices dotEdges
+    getDot "digraph" direction (getStdNodeSettings ()) dotVertices dotEdges
 
--- prints a graph in dot.
-let graphPrintDot = lam graph. lam v2str. lam l2str. lam direction. lam graphType. lam vSettings.
+-- returns a graph in dot.
+let graphGetDot = lam graph. lam v2str. lam l2str. lam direction. lam graphType. lam vSettings.
     let delimiter = if ((setEqual eqchar) graphType "graph") then "--" else "->" in
     let dotVertices = map (lam v. 
         let extra = find (lam x. graph.eqv x.0 v) vSettings in
         initDotVertex (v2str v) (match extra with Some e then e.1 else "")
     ) (graphVertices graph) in
     let dotEdges = map (lam e. initDotEdge (v2str e.0) (v2str e.1) (l2str e.2) delimiter "") (graphEdges graph) in
-    printDot graphType direction (getStdNodeSettings ()) dotVertices dotEdges
+    getDot graphType direction (getStdNodeSettings ()) dotVertices dotEdges
 
--- prints a NFA in dot.
-let nfaPrintDot = lam nfa. lam v2str. lam l2str. lam direction. lam vSettings. lam input. lam steps.
+-- Gets a NFA in dot.
+let nfaGetDot = lam nfa. lam v2str. lam l2str. lam direction. lam vSettings. lam input. lam steps.
     let eqv = nfaGetEqv nfa in
     let path = (if (lti (negi 0) steps) then slice (nfaMakeEdgeInputPath nfa.startState input nfa) 0 steps
         else []) in
@@ -109,32 +111,32 @@ let nfaPrintDot = lam nfa. lam v2str. lam l2str. lam direction. lam vSettings. l
             else "" in
             initDotEdge (v2str e.0) (v2str e.1) (l2str e.2) "->" extra)
         (nfaTransitions nfa)] in
-    printDot "digraph" direction (getStdNodeSettings ()) dotVertices dotEdges
+    getDot "digraph" direction (getStdNodeSettings ()) dotVertices dotEdges
 
 
 -- converts and prints the given model in dot. vSettings is a seqence of 
 -- two element tuples, the first element refers to the name of the vertex, 
 -- the second should be a string with custom graphviz settings.
-let modelPrintDotWithOptions = lam model. lam direction. lam vSettings.
+let modelGetDotWithOptions = lam model. lam direction. lam vSettings.
     match model with Graph(graph,v2str,l2str) then
-        graphPrintDot graph v2str l2str direction "graph" vSettings
+        graphGetDot graph v2str l2str direction "graph" vSettings
     else match model with Digraph(digraph,v2str,l2str) then
-        graphPrintDot digraph v2str l2str direction "digraph" vSettings
+        graphGetDot digraph v2str l2str direction "digraph" vSettings
     else match model with NFA(nfa,input,state2str,label2str) then
-        nfaPrintDot nfa state2str label2str direction vSettings "" (negi 1)
+        nfaGetDot nfa state2str label2str direction vSettings "" (negi 1)
     else match model with DFA(dfa,input,state2str,label2str) then
-        nfaPrintDot dfa state2str label2str direction vSettings "" (negi 1)
+        nfaGetDot dfa state2str label2str direction vSettings "" (negi 1)
     else match model with BTree(tree, node2str) then
-        btreePrintDot tree node2str direction vSettings
+        btreeGetDot tree node2str direction vSettings
     else ""
 
-let modelPrintDotSimulateTo = lam model. lam steps. lam direction. lam vSettings.
+let modelGetDotSimulateTo = lam model. lam steps. lam direction. lam vSettings.
     match model with NFA(nfa,input,state2str,label2str) then
-        nfaPrintDot nfa state2str label2str direction vSettings input steps
+        nfaGetDot nfa state2str label2str direction vSettings input steps
     else match model with DFA(dfa,input,state2str,label2str) then
-        nfaPrintDot dfa state2str label2str direction vSettings input steps
+        nfaGetDot dfa state2str label2str direction vSettings input steps
     else ""
 
 -- converts and prints the given model in dot.
-let modelPrintDot = lam model. lam direction.
-    modelPrintDotWithOptions model direction []
+let modelGetDot = lam model. lam direction.
+    modelGetDotWithOptions model direction []
