@@ -63,6 +63,6 @@ class NFAView {
      * Gets the nodes of the graph.
      */
     getNodes() {
-        return d3.selectAll("."+this.model.getName()+"-node")
+        return d3.selectAll(".node")
     }
 }

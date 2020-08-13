@@ -14,23 +14,26 @@ class NFAController {
             // Adds on click event listeners to each of the nodes.
             nodes.on("click", function () {
                 let name = d3.select(this).attr("id")
-                console.log(nfaModel.visualizationModel.getStateByName(name))
+                console.log(name)
             })
             /* < -- TEMPORARY       */
 
         const simulationCallback = d => {
-            /*might need to be more general if users can change the shapes of nodes*/
             let simulationState = nfaModel.getSimulationState()
-            if (d.key.includes("path") && (d.parent !== undefined) && d.parent.key === simulationState.node){
-                d.attributes.fill = simulationState.color;
-            }
-            else if ((d.tag === "path" && d.parent.key === simulationState.edge)){
-                d.attributes.stroke = simulationState.color;
-            }
-            else if (d.tag == "polygon" && d.parent.key === simulationState.edge){
-                d.attributes.fill = simulationState.color;
-                d.attributes.stroke = simulationState.color;
-                // d.attributes.fontcolot = "white"
+            /*might need to be more general if users can change the shapes of nodes*/
+            if (d.attributes.class === "node" && d.key === simulationState.node) {
+                d.attributes.fill = "white"
+                d.children
+                    .filter(x => !x.tag.includes("text") && x.tag !== "title")
+                    .map(x => x.attributes.fill = simulationState.color)
+            } else if (d.attributes.class === "edge" && d.key === simulationState.edge) {
+                d.attributes.fill = simulationState.color
+                let edgeParts = d.children
+                    .filter(x => !x.tag.includes("text") && x.tag !== "title")
+                edgeParts.map(x => x.attributes.stroke = simulationState.color)
+                edgeParts
+                    .filter(x => x.tag !== "path")
+                    .map(x => x.attributes.fill = simulationState.color)
             }
         }
         this.nfaView = new NFAView(nfaModel, modelRoot, model.model, interactionCallback, simulationCallback)
