@@ -43,13 +43,17 @@ You need to source the path to the IPM root folder as an environment variable:
 
 	export MI_IPM=/path/to/ipm
 
+For example, if you are in the IPM root folder, use this command
+	
+	export MI_IPM=$(pwd)
+
 To install the server, execute:
 
 	make install
 
 To run the server, execute:
 
-	ipm-server <file> [optional: -p <int> (for port number)]
+	ipm-server /path/to/file [optional: -p <int> (for port number)]
 	
 Note: you need to source **src/models/modelVisualizer.mc** in your source file.
 	
