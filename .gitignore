@@ -11,3 +11,5 @@ package-lock.json
 src/ocaml-server/_build/*
 src/webpage/js/data-source.json
 src/ocaml-server/.merlin
+_build/*
+build/*
