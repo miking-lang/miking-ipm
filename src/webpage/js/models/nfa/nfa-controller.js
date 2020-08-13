@@ -20,19 +20,17 @@ class NFAController {
 
         const simulationCallback = d => {
             let simulationState = nfaModel.getSimulationState()
-            /*might need to be more general if users can change the shapes of nodes*/
+            let basicFilter = elem => !elem.tag.includes("text") && elem.tag !== "title"
             if (d.attributes.class === "node" && d.key === simulationState.node) {
                 d.attributes.fill = "white"
-                d.children
-                    .filter(x => !x.tag.includes("text") && x.tag !== "title")
+                d.children.filter(x => basicFilter(x))
                     .map(x => x.attributes.fill = simulationState.color)
+
             } else if (d.attributes.class === "edge" && d.key === simulationState.edge) {
                 d.attributes.fill = simulationState.color
-                let edgeParts = d.children
-                    .filter(x => !x.tag.includes("text") && x.tag !== "title")
+                let edgeParts = d.children.filter(x => basicFilter(x))
                 edgeParts.map(x => x.attributes.stroke = simulationState.color)
-                edgeParts
-                    .filter(x => x.tag !== "path")
+                edgeParts.filter(x => x.tag !== "path")
                     .map(x => x.attributes.fill = simulationState.color)
             }
         }
