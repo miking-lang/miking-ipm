@@ -5,13 +5,13 @@ class GraphView {
      * 
      * @param {GraphModel} model The model including the data used in this view.
      * @param {div} modelRoot The root element of the view.
-     * @param {function} callbackFunction The callback function called, when interacting with the
+     * @param {function} interactionCallback The callback function called, when interacting with the
      *                                    graphviz graph.
      */
-    constructor(model, modelRoot, callbackFunction){
+    constructor(model, modelRoot, interactionCallback){
         this.model = model
         this.modelRoot = modelRoot
-        this.callbackFunction = () => callbackFunction(this.getNodes())
+        this.interactionCallback = () => interactionCallback(this.getNodes())
         this.initView()
 
         // Add the view as an observer to the model.
@@ -36,15 +36,22 @@ class GraphView {
         ModelRender(
             this.modelRoot.lastElementChild, 
             this.model.getDot(), 
-            this.callbackFunction,
+            this.interactionCallback,
             () => {})
     }
     
     /*              GETTERS               */
     /**
+     * Gets the edges of the graph.
+     */
+    getEdges() {
+        return d3.selectAll(".model"+this.model.getID()+"edge")
+    }
+
+    /**
      * Gets the nodes of the graph.
      */
     getNodes() {
-        return d3.selectAll("."+this.model.getName()+"-node")
+        return d3.selectAll(".model"+this.model.getID()+"node")
     }
 }

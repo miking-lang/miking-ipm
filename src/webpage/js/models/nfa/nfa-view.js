@@ -8,11 +8,10 @@ class NFAView {
      * @param {function} interactionCallback The callback function called, when interacting with the
      *                                    graphviz graph.
      */
-    constructor(model, modelRoot, dotModel, interactionCallback, simulationCallback){
+    constructor(model, modelRoot, interactionCallback, simulationCallback){
         this.model = model
         this.modelRoot = modelRoot
-        this.dotModel = dotModel
-        this.interactionCallback = () => interactionCallback(this.getNodes())
+        this.interactionCallback = interactionCallback
         this.simulationCallback = simulationCallback
         this.initView()
 
@@ -60,9 +59,16 @@ class NFAView {
     
     /*              GETTERS               */
     /**
+     * Gets the edges of the graph.
+     */
+    getEdges() {
+        return d3.selectAll(".model"+this.model.getID()+"edge")
+    }
+
+    /**
      * Gets the nodes of the graph.
      */
     getNodes() {
-        return d3.selectAll(".node")
+        return d3.selectAll(".model"+this.model.getID()+"node")
     }
 }

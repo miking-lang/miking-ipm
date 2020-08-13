@@ -39,8 +39,15 @@ class Model {
     /**
      * Gets the name of the model.
      */
+    getID() {
+        return this.id
+    }
+
+    /**
+     * Gets the name of the model.
+     */
     getName() {
-        return this.getType()+this.id
+        return this.getType()+this.getID()
     }
 
     /**

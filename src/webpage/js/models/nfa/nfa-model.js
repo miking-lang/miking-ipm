@@ -198,6 +198,13 @@ class NFAModel {
     /**
      * Gets the name of the visualization model.
      */
+    getID() {
+        return this.model.getID()
+    }
+
+    /**
+     * Gets the name of the visualization model.
+     */
     getName() {
         return this.model.getName()
     }
