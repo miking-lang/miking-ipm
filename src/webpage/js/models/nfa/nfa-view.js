@@ -41,6 +41,7 @@ class NFAView {
             this.model.getType())
         ControlPanelRender(
             this.modelRoot.firstElementChild.nextElementSibling, 
+            "Change state:",
             this.model.isAtStartState(), 
             this.model.simulationIsFinished(),
             () => this.model.nextState(),
@@ -50,7 +51,6 @@ class NFAView {
             this.model.getInfoStatusAndText(),
             this.model.input,
             idx => this.model.isCurrentInputIndex(idx))
-
         ModelRender(
             this.modelRoot.lastElementChild, 
             this.model.getDot(), 

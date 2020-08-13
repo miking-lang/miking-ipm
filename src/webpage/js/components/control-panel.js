@@ -7,9 +7,9 @@
  * @param {function} nextButtonAction The action performed when next button is clicked.
  * @param {function} previousButtonAction The action performed when previous button is clicked.
  */
-function ControlPanelRender(root, disablePrevious, simulationIsFinished, nextButtonAction, previousAction) {
+function ControlPanelRender(root, title, disablePrevious, simulationIsFinished, nextButtonAction, previousAction) {
     root.innerHTML=`
-        <span class="simulation-title">Change state:</span>
+        <span class="simulation-title">${title}</span>
         <button class="previousButton std-btn" ${disablePrevious?"disabled=true":""}>Previous</button>
         <button class="nextButton std-btn">${simulationIsFinished?`Restart simulation`:`Next`}</button>
         `
