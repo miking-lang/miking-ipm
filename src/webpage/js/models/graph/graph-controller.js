@@ -4,10 +4,9 @@ class GraphController {
      * 
      * @param {object} model An object representing a model.
      * @param {div} modelRoot The root element of the view.
-     * @param {int} index A unique model number.
      */
-    constructor(model, modelRoot, index){
-        let graphModel = new GraphModel(new Graph(model.model, model.type, index))
+    constructor(model, modelRoot){
+        let graphModel = new Model(model.id, model.type, model.model)
         // Defining the callback function, which is called when the graph is rendered.
         const callbackFunction = nodes =>
             /*      TEMPORARY -->   */

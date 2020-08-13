@@ -5,13 +5,24 @@ class NFAModel {
      * @param {object} visualizationModel Valid types: NFA (DFA)
      * @param {[string]} input An array of strings, each representing a transition.
      */
-    constructor(visualizationModel, simulation){
-        this.visualizationModel = visualizationModel
-        this.input = simulation.input
-        this.configurations = simulation.configurations
+    constructor(model){
+        this.input = model.simulation.input
+        this.configurations = model.simulation.configurations
+        this.model = new Model(model.id, model.type, model.model)
         this.currentConfigurationIndex = 0
-        this.callbacks = []
+        this.simulationState = this.getSimulationState()
         this.updateNFA()
+    }
+
+    getSimulationState(){
+        let current = this.configurations[this.currentConfigurationIndex].state
+        let prev = this.currentConfigurationIndex <= 0 ? "start" : this.configurations[this.currentConfigurationIndex-1].state
+        let color = this.inputWasNotAccepted() || this.nfaGotStuck() ? 
+                        "red"
+                    : this.nfaBranchGotStuck() || this.inputWasNotAcceptedByBranch() ?
+                        "yellow"
+                    :   "green"
+        return {node:current,edge:prev+"->"+current,color: color}
     }
 
     /**
@@ -19,14 +30,14 @@ class NFAModel {
      * @param {function} callback The callback function to add.
      */
     addObserver(callback) {
-       this.callbacks.push(callback)
+       this.model.addObserver(callback)
     }
 
     /**
      * Notifies the observers of the model.
      */
     notifyObservers() {
-       this.callbacks.map(callback => callback())
+       this.model.notifyObservers()
     }
 
     /**
@@ -55,13 +66,7 @@ class NFAModel {
      * Updates the NFA according to the current configuration.
      */
     updateNFA() {
-        let activeColor = this.inputWasNotAccepted() || this.nfaGotStuck() ? 
-                        "danger"
-                    : this.nfaBranchGotStuck() || this.inputWasNotAcceptedByBranch() ?
-                        "warning"
-                    :   "active"
-        let colorPreviousEdge = this.getPreviousConfigurationStatus() !== -1
-        this.visualizationModel.makeTransition(this.getActiveStateName(), this.getPreviousStateName(), activeColor, colorPreviousEdge)
+        this.simulationState = this.getSimulationState()
         this.notifyObservers()
     }
 
@@ -69,8 +74,8 @@ class NFAModel {
      * Translates the NFA object to dot syntax.
      * @returns {string} The NFA object in dot syntax.
      */
-    toDot() {
-        return this.visualizationModel.toDot()
+    getDot() {
+        return this.model.getDot()
     }
 
     /*             STATE GETTERS            */
@@ -167,7 +172,7 @@ class NFAModel {
      * Gets the status and text for the current model configuration.
      */
     getInfoStatusAndText() {
-        let automata = this.visualizationModel.type==="dfa" ? "DFA" : "NFA"
+        let automata = this.model.getType() === "dfa" ? "DFA" : "NFA"
         return this.inputWasNotAccepted() ?
             {status: "danger", text: `Not accepted: The given input string is not accepted by the ${automata}.`}
         : this.nfaGotStuck() ?
@@ -191,9 +196,16 @@ class NFAModel {
     }
 
     /**
+     * Gets the name of the visualization model.
+     */
+    getName() {
+        return this.model.getName()
+    }
+
+    /**
      * Gets the type of the visualization model.
      */
     getType() {
-        return this.visualizationModel.type
+        return this.model.getType()
     }
 }
