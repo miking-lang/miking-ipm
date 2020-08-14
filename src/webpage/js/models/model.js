@@ -10,22 +10,6 @@ class Model {
         this.id = id
         this.type = type
         this.dot = model
-        this.callbacks = []
-    }
-
-    /**
-     * Adds a callback function, executed when the model is changed.
-     * @param {function} callback The callback function to add.
-     */
-    addObserver(callback) {
-       this.callbacks.push(callback)
-    }
-
-    /**
-     * Notifies the observers of the model.
-     */
-    notifyObservers() {
-       this.callbacks.map(callback => callback())
     }
 
     /**
@@ -39,8 +23,8 @@ class Model {
     /**
      * Gets the name of the model.
      */
-    getName() {
-        return this.getType()+this.id
+    getID() {
+        return this.id
     }
 
     /**

@@ -14,19 +14,23 @@ let concatList = lam list.
     foldl concat [] list
 
 -- formats a dotEdge to dot
-let edgeToDot = lam e.
-    concatList [e.from," ",e.delimiter," ",e.to," [label=\\\"",e.label,"\\\" ",e.extra,"];"]
+let edgeToDot = lam e. lam modelID.
+    let class = match modelID with () then "" else concatList ["class=model",(int2string modelID),"edge"] in
+    concatList [e.from," ",e.delimiter," ",e.to," [label=\\\"",e.label,"\\\" ",
+                                                  "id=",e.from,e.label,e.to," ",
+                                                  class," ",e.extra,"];"]
 
 -- formats a dotVertex to dot
-let vertexToDot = lam v.
-    concatList [v.name,"[",v.extra,"];"]
+let vertexToDot = lam v. lam modelID.
+    let class = match modelID with () then "" else concatList ["class=model",(int2string modelID),"node"] in
+    concatList [v.name,"[","id=",v.name," ",class," ",v.extra,"];"]
 
--- gets a given model in dot syntax
-let getDot = lam graphType. lam direction. lam stdVerticesSetting. lam vertices. lam edges.
+-- prints a given model in dot syntax
+let getDot = lam graphType. lam direction. lam stdVerticesSetting. lam vertices. lam edges. lam id.
     let output = foldl concat [] [[graphType," {","rankdir=",direction,";",
         "node [",stdVerticesSetting,"];"],
-        (map (lam v. vertexToDot v) vertices),
-        (map (lam e. edgeToDot e) edges),
+        (map (lam v. vertexToDot v id) vertices),
+        (map (lam e. edgeToDot e id) edges),
         ["}"]
     ] in 
     foldl concat [] output
@@ -41,27 +45,26 @@ let getStdNodeSettings = lam _.
 
 
 -- returns a btree in dot.
-let btreeGetDot = lam tree. lam node2str. lam direction. lam vSettings.
+let btreeGetDot = lam tree. lam node2str. lam direction. lam id. lam vSettings.
     let dotEdges = map (lam e. initDotEdge (node2str e.0) (node2str e.1) "" "->" "") (treeEdges tree ()) in
     let dotVertices = map (lam v. 
         let extra = find (lam x. tree.eqv x.0 v) vSettings in
         initDotVertex (node2str v) (match extra with Some e then e.1 else "")
     ) (treeVertices tree) in
-    getDot "digraph" direction (getStdNodeSettings ()) dotVertices dotEdges
+    getDot "digraph" direction (getStdNodeSettings ()) dotVertices dotEdges id
 
 -- returns a graph in dot.
-let graphGetDot = lam graph. lam v2str. lam l2str. lam direction. lam graphType. lam vSettings.
+let graphGetDot = lam graph. lam v2str. lam l2str. lam direction. lam id. lam graphType. lam vSettings.
     let delimiter = if ((setEqual eqchar) graphType "graph") then "--" else "->" in
     let dotVertices = map (lam v. 
         let extra = find (lam x. graph.eqv x.0 v) vSettings in
         initDotVertex (v2str v) (match extra with Some e then e.1 else "")
     ) (graphVertices graph) in
     let dotEdges = map (lam e. initDotEdge (v2str e.0) (v2str e.1) (l2str e.2) delimiter "") (graphEdges graph) in
-    getDot graphType direction (getStdNodeSettings ()) dotVertices dotEdges
-
+    getDot graphType direction (getStdNodeSettings ()) dotVertices dotEdges id
 
 -- Gets a NFA in dot.
-let nfaGetDotSimulate = lam nfa. lam v2str. lam l2str. lam direction. lam vSettings. lam input. lam steps.
+let nfaGetDotSimulate = lam nfa. lam v2str. lam l2str. lam direction. lam id. lam vSettings. lam input. lam steps.
     let eqv = nfaGetEqv nfa in
     let path = (if (lti (negi 0) steps) then slice (nfaMakeEdgeInputPath nfa.startState input nfa) 0 steps
         else []) in
@@ -90,36 +93,35 @@ let nfaGetDotSimulate = lam nfa. lam v2str. lam l2str. lam direction. lam vSetti
             else "" in
             initDotEdge (v2str e.0) (v2str e.1) (l2str e.2) "->" extra)
         (nfaTransitions nfa)] in
-    getDot "digraph" direction (getStdNodeSettings ()) dotVertices dotEdges
-
+    getDot "digraph" direction (getStdNodeSettings ()) dotVertices dotEdges id
 
 -- Gets a NFA in dot.
-let nfaGetDot = lam nfa. lam v2str. lam l2str. lam direction. lam vSettings.
-    nfaGetDotSimulate nfa v2str l2str direction vSettings "" (negi 1)
+let nfaGetDot = lam nfa. lam v2str. lam l2str. lam direction. lam id. lam vSettings.
+    nfaGetDotSimulate nfa v2str l2str direction id vSettings "" (negi 1)
 
 -- converts the given model in dot. vSettings is a seqence of 
 -- two element tuples, the first element refers to the name of the vertex, 
 -- the second should be a string with custom graphviz settings.
-let modelGetDotWithOptions = lam model. lam direction. lam vSettings.
+let modelGetDotWithOptions = lam model. lam direction. lam id. lam vSettings.
     match model with Graph(graph,v2str,l2str) then
-        graphGetDot graph v2str l2str direction "graph" vSettings
+        graphGetDot graph v2str l2str direction id "graph" vSettings
     else match model with Digraph(digraph,v2str,l2str) then
-        graphGetDot digraph v2str l2str direction "digraph" vSettings
+        graphGetDot digraph v2str l2str direction id "digraph" vSettings
     else match model with NFA(nfa,input,state2str,label2str) then
-        nfaGetDot nfa state2str label2str direction vSettings "" (negi 1)
+        nfaGetDot nfa state2str label2str direction id vSettings
     else match model with DFA(dfa,input,state2str,label2str) then
-        nfaGetDot dfa state2str label2str direction vSettings "" (negi 1)
+        nfaGetDot dfa state2str label2str direction id vSettings
     else match model with BTree(tree, node2str) then
-        btreeGetDot tree node2str direction vSettings
+        btreeGetDot tree node2str direction id vSettings
     else ""
 
 let modelGetDotSimulateTo = lam model. lam steps. lam direction. lam vSettings.
     match model with NFA(nfa,input,state2str,label2str) then
-        nfaGetDot nfa state2str label2str direction vSettings input steps
+        nfaGetDotSimulate nfa state2str label2str direction 0 vSettings input steps
     else match model with DFA(dfa,input,state2str,label2str) then
-        nfaGetDot dfa state2str label2str direction vSettings input steps
+        nfaGetDotSimulate dfa state2str label2str direction 0 vSettings input steps
     else ""
 
 -- converts and prints the given model in dot.
 let modelGetDot = lam model. lam direction.
-    modelGetDotWithOptions model direction []
+    modelGetDotWithOptions model direction 0 []

@@ -35,7 +35,7 @@ let formatInput = lam input. lam label2str.
 -- (any (lam x. or (eqchar x '{') (eqchar x '[')) first)
 -- format NFA to JS code for visualizing
 let nfaVisual = lam nfa. lam input. lam s2s. lam l2s. lam nfaType. lam displayNames. lam id.
-    let dot = nfaGetDot nfa s2s l2s "LR" (displayNamesToOptions displayNames) in
+    let dot = nfaGetDot nfa s2s l2s "LR" id (displayNamesToOptions displayNames) in
     foldl concat [] ["{\n ",
         "\"type\" : \"", nfaType,"\",\n ",
 	"\"id\" : ",
@@ -68,12 +68,12 @@ let formatGraph = lam dot. lam graphType. lam id.
 
 -- format a graph to JS code for visualizing
 let graphVisual = lam graph. lam v2str. lam l2str. lam graphType. lam id. lam displayNames.
-    let dot = graphGetDot graph  v2str l2str "LR" graphType (displayNamesToOptions displayNames) in
+    let dot = graphGetDot graph  v2str l2str "LR" id graphType (displayNamesToOptions displayNames) in
     formatGraph dot graphType id
 
 -- format a tree to JS code for visualizing
 let treeVisual = lam btree. lam v2str. lam displayNames. lam id.
-    let dot = btreeGetDot btree v2str "TD" (displayNamesToOptions displayNames) in
+    let dot = btreeGetDot btree v2str "TD" id (displayNamesToOptions displayNames) in
     formatGraph dot "tree" id
 
 -- make all models into string object
