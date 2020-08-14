@@ -34,7 +34,8 @@ let graph = foldr (lam e. lam g. graphAddEdge e.0 e.1 e.2 g)
 let nfaStates = ["a","b","c","d","e","f"] in
 let nfaTransitions = [("a","b",'1'),("b","c",'0'),("c","d",'2'),("c","e",'2'),("d","a",'1'),("e","f",'1')] in
 let nfaStartState = "a" in
-let nfaAcceptStates = ["a"] in	
+let nfaAcceptStates = ["a"] in
+	
 
 -- create your NFA
 let nfa = nfaConstr nfaStates nfaTransitions nfaStartState nfaAcceptStates eqString eqchar in
@@ -49,7 +50,7 @@ visualize [
 	DFA(dfa,"101110",string2string, char2string,[]),
 	-- not accepted by the DFA
 	DFA(dfa,"1010001",string2string, char2string,[]),
-	Digraph(digraph, char2string,int2string,[]),
+	Digraph(digraph, char2string,int2string,[('A',"aa")]),
 	Graph(graph,int2string,string2string,[]),
 	BTree(btree, int2string,[(2,"Two"),(3,"Three"),(4,"Four"),(5,"Five")]),
 	NFA(nfa, "1021", string2string, char2string,[]),

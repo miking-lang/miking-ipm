@@ -15,7 +15,7 @@ undirected graphs, and electrical circuits.
   back to the Miking environment.
 
 * Enabled interactions with the execution of models (state changes).
-
+ 
 * Provide a server that watches file updates and acts as a local web server.
 
 * Create an integration with markdown converters, where the visualized

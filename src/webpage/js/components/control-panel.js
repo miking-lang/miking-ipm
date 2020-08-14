@@ -1,3 +1,4 @@
+
 /**
  * This function is responsible for visualizing the control panel.
  * Renders the DOM tree of the control panel. 

@@ -75,14 +75,16 @@ let btreeGetDot = lam tree. lam node2str. lam direction. lam vSettings.
 let graphGetDot = lam graph. lam v2str. lam l2str. lam direction. lam graphType. lam vSettings.
     let delimiter = if ((setEqual eqchar) graphType "graph") then "--" else "->" in
     let dotVertices = map (lam v. 
+        utest vSettings with [] in
         let extra = find (lam x. graph.eqv x.0 v) vSettings in
         initDotVertex (v2str v) (match extra with Some e then e.1 else "")
     ) (graphVertices graph) in
     let dotEdges = map (lam e. initDotEdge (v2str e.0) (v2str e.1) (l2str e.2) delimiter "") (graphEdges graph) in
     getDot graphType direction (getStdNodeSettings ()) dotVertices dotEdges
 
+
 -- Gets a NFA in dot.
-let nfaGetDot = lam nfa. lam v2str. lam l2str. lam direction. lam vSettings. lam input. lam steps.
+let nfaGetDotSimulate = lam nfa. lam v2str. lam l2str. lam direction. lam vSettings. lam input. lam steps.
     let eqv = nfaGetEqv nfa in
     let path = (if (lti (negi 0) steps) then slice (nfaMakeEdgeInputPath nfa.startState input nfa) 0 steps
         else []) in
@@ -113,6 +115,10 @@ let nfaGetDot = lam nfa. lam v2str. lam l2str. lam direction. lam vSettings. lam
         (nfaTransitions nfa)] in
     getDot "digraph" direction (getStdNodeSettings ()) dotVertices dotEdges
 
+
+-- Gets a NFA in dot.
+let nfaGetDot = lam nfa. lam v2str. lam l2str. lam direction. lam vSettings.
+    nfaGetDotSimulate nfa v2str l2str direction vSettings "" (negi 1)
 
 -- converts the given model in dot. vSettings is a seqence of 
 -- two element tuples, the first element refers to the name of the vertex, 
