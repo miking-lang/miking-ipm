@@ -39,6 +39,7 @@ let serve ~docroot ~index uri path =
       match stat.Unix.st_kind with
       | S_DIR ->
          begin
+           modified := true;
            let uri = Uri.with_path uri (String.concat ""[path; index]) in
            serve_file ~docroot ~uri
          end

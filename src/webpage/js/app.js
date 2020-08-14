@@ -5,7 +5,6 @@ function render() {
     ws.onmessage = function(x) {
 	let data_models = JSON.parse(x.data);
 	if (data_models.models) {
-
 	    document.getElementById("app").innerHTML = "";
 		const root = document.body.querySelector("#app");
 		// Maps over all models in the generated output.
@@ -31,12 +30,10 @@ function render() {
 			break;
 		    }
 		})
-	    } else {
-		document.getElementById("error-container").textContent += data_models;
-	    }
-	};
-
-    
+	} else {
+	    document.getElementById("error-container").textContent += data_models;
+	};   
+    }
 }
 
 render()
