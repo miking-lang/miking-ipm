@@ -1,19 +1,6 @@
 -- This file provides toDot functions for all models defined in model.mc.
 include "model.mc"
 
-type dotEdge = {
-    from: String,
-    to: String,
-    label: String,
-    delimiter: String,
-    extra: String
-}
-
-type dotVertex = {
-    name: String,
-    extra: String
-}
-
 -- constructor for dotEdge
 let initDotEdge = lam from. lam to. lam label. lam delimiter. lam extra.
     {from = from, to = to, label = label, delimiter = delimiter, extra = extra}
@@ -33,15 +20,6 @@ let edgeToDot = lam e.
 -- formats a dotVertex to dot
 let vertexToDot = lam v.
     concatList [v.name,"[",v.extra,"];"]
-
--- converts a given model to dot and returns it as a string.
-let model2dot = lam graphType. lam direction. lam stdVerticesSetting. lam vertices. lam edges.
-    concatList [
-        graphType," {","rankdir=",direction,";",
-        "node [",stdVerticesSetting,"];",
-        foldl (lam output. lam v. concat output (vertexToDot v)) vertices,
-        foldl (lam output. lam e. concat output (edgeToDot e)) edges,"}"
-    ]
 
 -- gets a given model in dot syntax
 let getDot = lam graphType. lam direction. lam stdVerticesSetting. lam vertices. lam edges.
@@ -75,7 +53,6 @@ let btreeGetDot = lam tree. lam node2str. lam direction. lam vSettings.
 let graphGetDot = lam graph. lam v2str. lam l2str. lam direction. lam graphType. lam vSettings.
     let delimiter = if ((setEqual eqchar) graphType "graph") then "--" else "->" in
     let dotVertices = map (lam v. 
-        utest vSettings with [] in
         let extra = find (lam x. graph.eqv x.0 v) vSettings in
         initDotVertex (v2str v) (match extra with Some e then e.1 else "")
     ) (graphVertices graph) in

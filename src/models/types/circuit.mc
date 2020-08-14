@@ -102,6 +102,22 @@ let getTotalCurrent = lam circ.
     -- I = V/R 
     divf voltage resistance
 
+let firstComp = lam circ.
+    match circ with Battery (name,_) then circ
+    else match circ with Resistor (name,_) then circ
+    else
+    match circ with Series c then (head c)
+    else match circ with Parallel c then (head c)
+    else None ()
+
+let tailComp = lam circ.
+     match circ with Battery (name,_) then None()
+    else match circ with Resistor (name,_) then None()
+    else
+    match circ with Series c then (tail c)
+    else match circ with Parallel c then (tail c)
+    else None ()
+
 mexpr
 let circ = Series [
                 Parallel [
@@ -117,6 +133,8 @@ let circ = Series [
                 Resistor ("R3",2.7)
             ]
             in
+utest firstComp circ with [] in
+utest tailComp circ with [] in
 utest getTotalVoltage circ with 11.0 in
 utest getTotalResistance circ with 3.4 in 
 utest getTotalCurrent circ with 3.235294 in 
