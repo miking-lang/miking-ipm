@@ -110,30 +110,17 @@ finally resetting the flag.
 │     ├── css
 │     │  └── style.css
 │     ├── js
-│     │  ├── components
-│     │  │  ├── control-panel.js
-│     │  │  ├── model.js
-│     │  │  ├── status-container.js
-│     │  │  └── title.js
+│     │  ├── controllers
+│     │  │  ├── model-controller.js
+│     │  │  ├── nfa-controller.js
 │     │  ├── models
-│     │  │  ├── graph
-│     │  │  │  ├── graph-controller.js
-│     │  │  │  ├── graph-model.js
-│     │  │  │  ├── graph-view.js
-│     │  │  │  └── graph.js
-│     │  │  ├── nfa
-│     │  │  │  ├── nfa-controller.js
-│     │  │  │  ├── nfa-model.js
-│     │  │  │  ├── nfa-view.js
-│     │  │  │  └── nfa.js
-│     │  │  └── dfa.js
+│     │  │  ├── model.js
+│     │  │  ├── model-simulation.js
+│     │  ├── views
+│     │  │  ├── model.js
+│     │  │  ├── model-simulation.js
 │     │  ├── app.js
 │     │  ├── data-source.json
-│     │  └── data-source.json
-│     ├── jsonInterface
-│     │  ├── ex.js
-│     │  ├── example.json
-│     │  └── interface.md
 │     └── index.html
 ├── test
 │  ├── test-conv-to-pdf.mc
@@ -165,6 +152,10 @@ through the environment variable **MI_IPM** set to the root of the directory.
 The webpage directory is what is sourced in the server to be sent over to the client. Every file in there
 can be sent over HTTP to the client, thus there is the code to display the data models, given by the 
 output of the function visualize from the above mentioned generator file.
+
+The webpage directory consists of the index.html file and and the css and js directories. The css directory simple contains a style.css file which is not necessary but makes the GUI prettier. The js directory consists of a app.js file and the three directories: controllers, models and views. The app.js file acts as the main file of the application and handles the communication between the server. This file also initializes all the necessary objects defined in the other files. A controller, a model and a view is initialized for each model. This means that each model sent from the server is independent from the others on the JS side. 
+
+The controller instance of the model is dependent of the model type. Each controller class defines the simulation and interaction methods. Hence, a new controller class must be created if a new model type with different simulation behavior is created in mcore. If a new model type with simulation is created, make sure to include the configurations attribute as stated in the Rest api below. A model without simulation can simply use the model.js controller which doesn't make use of simulation. The controller instantiates a view and a model object. If the model includes simulation, the controller should make use of the model-simulation view/model, and the model view/model otherwise.
 
 ## Rest API
 This section describes the interface between the client and the server. This interface is very simple at the moment and handles only one request.
