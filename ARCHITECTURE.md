@@ -27,10 +27,10 @@ The websocket is located on the relative path **/ws**.
 source file is required (thus waiting for the model through HTTP POST)
 and the one in which it compiles the source file given as an 
 argument.
-	One of two options is chosen when executing the command to run the
-	server: --no-file for listening to HTTP POST or /path/to/file.mc 
-	for the server compiling the MCore source file.
-	
+    One of two options is chosen when executing the command to run the
+    server: --no-file for listening to HTTP POST or /path/to/file.mc 
+    for the server compiling the MCore source file.
+    
 5. In the second case, when a file is also given as an argument,
 the server is running two main threads: the server itself and one
 for listening to file updates. The module used for the second one 
@@ -167,3 +167,84 @@ can be sent over HTTP to the client, thus there is the code to display the data 
 output of the function visualize from the above mentioned generator file.
 
 ## Rest API
+This section describes the interface between the client and the server. This interface is very simple at the moment and handles only one request.
+
+The response to all requests include a data object with one or several models where each model has the following attributes:
+- <code>type</code> (string) - Ex: "dfa", "nfa", "graph".
+- <code>id</code> (int) - A unique number used for model specific requests.
+- <code>model</code> (string) - The model in dot-syntax.
+- <code>simulation</code> (object) - An object with simulation information (only included for models with simulation). The JS code expects the simulation object to have the <code>configurations</code> attribute which refers to an array with state specific attributes. The <code>configurations</code> attribute is used in the <code>model-simulation.js</code> file and must be included. The example below gives an idea of what the <code>configurations</code> attribute looks like in the case of a DFA/NFA model.
+
+#### REQUEST - ALL MODELS
+The following request retrieves all the models defined in the user-specified <code>.mc</code> file. The models are returned in their initial state. 
+
+<code>GET: BASE_URL + "/all-models"</code> // TO BE CHANGED!!
+
+###### Sample output
+```json
+{
+    "data" : {
+		"models": [
+			{
+				"type" : "digraph",
+				"id" : 0,
+				"model" :"digraph {rankdir=LR;node [style=filled fillcolor=white shape=circle];
+					E[id=\"E\" class=\"model0node\" ];
+					D[id=\"D\" class=\"model0node\" ];
+					C[id=\"C\" class=\"model0node\" ];
+					B[id=\"B\" class=\"model0node\" ];
+					A[id=\"A\" class=\"model0node\" ];
+					E -> D [label=\"2\" id=\"E2D\" class=\"model0edge\" ];
+					C -> E [label=\"5\" id=\"C5E\" class=\"model0edge\" ];
+					C -> D [label=\"5\" id=\"C5D\" class=\"model0edge\" ];
+					B -> D [label=\"4\" id=\"B4D\" class=\"model0edge\" ];
+					B -> C [label=\"2\" id=\"B2C\" class=\"model0edge\" ];
+					A -> C [label=\"5\" id=\"A5C\" class=\"model0edge\" ];
+					A -> B [label=\"2\" id=\"A2B\" class=\"model0edge\" ];}"
+			},
+			{
+				"type" : "tree",
+				"id" : 2,
+				"model" :"digraph {rankdir=TB;node [style=filled fillcolor=white shape=circle];
+					2[id=\"2\" class=\"model2node\" ];
+					3[id=\"3\" class=\"model2node\" ];
+					4[id=\"4\" class=\"model2node\" ];
+					5[id=\"5\" class=\"model2node\" ];
+					2 -> 3 [label=\"\" id=\"23\" class=\"model2edge\" ];
+					3 -> 4 [label=\"\" id=\"34\" class=\"model2edge\" ];
+					2 -> 5 [label=\"\" id=\"25\" class=\"model2edge\" ];}"
+			},
+			{
+				"type" : "nfa",
+				"id" : 3,
+				"simulation" : {
+					"input" : ["1","0","2"],
+					"configurations" : [
+						{"state": "a","status": "","index": -1},
+						{"state": "b","status": "","index": 0},
+						{"state": "c","status": "","index": 1},
+						{"state": "d","status": "not accepted","index": 2},
+						{"state": "c","status": "","index": 1},
+						{"state": "e","status": "not accepted","index": 2}
+					]
+				},
+				"model" :"digraph {rankdir=LR;node [style=filled fillcolor=white shape=circle];
+					start[id=\"start\" class=\"model4node\" style=invis];
+					a[id=\"a\" class=\"model4node\" shape=doublecircle  ];
+					b[id=\"b\" class=\"model4node\"   ];
+					c[id=\"c\" class=\"model4node\"   ];
+					d[id=\"d\" class=\"model4node\"   ];
+					e[id=\"e\" class=\"model4node\"   ];
+					f[id=\"f\" class=\"model4node\"   ];
+					start -> a [label=\"start\" id=\"startstarta\" class=\"model4edge\" ];
+					a -> b [label=\"1\" id=\"a1b\" class=\"model4edge\" ];
+					b -> c [label=\"0\" id=\"b0c\" class=\"model4edge\" ];
+					c -> d [label=\"2\" id=\"c2d\" class=\"model4edge\" ];
+					c -> e [label=\"2\" id=\"c2e\" class=\"model4edge\" ];
+					d -> a [label=\"1\" id=\"d1a\" class=\"model4edge\" ];
+					e -> f [label=\"1\" id=\"e1f\" class=\"model4edge\" ];}"
+			}
+		]
+	}
+}
+```
