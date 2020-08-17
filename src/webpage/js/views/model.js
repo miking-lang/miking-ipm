@@ -27,11 +27,11 @@ class ModelView {
     }
 
     render() {
-        d3.select(this.root.lastElementChild)
-            .graphviz({zoom: false})
-            .attributer(this.simulationCallback)
-            .renderDot(this.model.getDot())
-            .on("end", this.interactionCallback)
+            d3.select(this.root.lastElementChild)
+                .graphviz({zoom: false})
+                .attributer(this.simulationCallback)
+                .renderDot(this.model.getDot())
+                .on("end", this.interactionCallback)
     }
 
     /*              GETTERS               */

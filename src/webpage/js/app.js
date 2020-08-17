@@ -3,6 +3,7 @@ let message = "test";
 function render() {
     ws = new WebSocket('ws://localhost' + (location.port ? ':'+location.port:'') + '/ws');
     ws.onmessage = function(x) {
+		console.log(x.data)
 	let data_models = JSON.parse(x.data);
 	if (data_models.models) {
 
@@ -25,6 +26,8 @@ function render() {
 		    case "graph":
 		    case "tree":
 			new GraphController(model, modelRoot, idx);
+			case "circuit":
+			new CircuitController(model,modelRoot,idx);
 			break;
 		    default:
 			modelRoot.innerHTML = `<div class="warning">Unsopported model type</div>`;

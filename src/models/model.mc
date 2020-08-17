@@ -1,4 +1,5 @@
 include "types/btree.mc"
+include "types/circuit.mc"
 include "dfa.mc"
 
 -- Represents models that can be visualized and its associated data.
@@ -8,6 +9,7 @@ type Model
     con Graph   : (Graph,  vertex2str, edge2str,     direction, displayNames) -> Model
     con NFA     : (NFA, input, state2str, label2str, direction, displayNames) -> Model
     con BTree   : (BTree,node2str,                   direction, displayNames) -> Model
+    con Circuit : (Circuit,comp2str                                         ) -> Model
 
 mexpr
 let alfabeth = ['0','1'] in

@@ -60,7 +60,7 @@ let graphGetDot = lam graph. lam v2str. lam l2str. lam direction. lam id. lam gr
         let extra = find (lam x. graph.eqv x.0 v) vSettings in
         initDotVertex (v2str v) (match extra with Some e then e.1 else "")
     ) (graphVertices graph) in
-    let dotEdges = map (lam e. initDotEdge (v2str e.0) (v2str e.1) (l2str e.2) delimiter "") (graphEdges graph) in
+    let dotEdges = map (lam e. initDotEdge (v2str e.0) (v2str e.1) (l2str e.2) "" delimiter "") (graphEdges graph) in
     getDot graphType direction (getStdNodeSettings ()) dotVertices dotEdges id
 
 -- Gets a NFA in dot.
@@ -98,6 +98,19 @@ let nfaGetDotSimulate = lam nfa. lam v2str. lam l2str. lam direction. lam id. la
 -- Gets a NFA in dot.
 let nfaGetDot = lam nfa. lam v2str. lam l2str. lam direction. lam id. lam vSettings.
     nfaGetDotSimulate nfa v2str l2str direction id vSettings "" (negi 1)
+
+-- returns a graph in dot.
+let circGetDot = lam circ. lam comp2str. lam id. lam vSettings.
+    let delimiter = "->" in
+    let dotVertices = map (lam c. 
+        match c with Battery (name,value,position) then
+            initDotVertex (comp2str name) ""
+        else match c with Resistor (name,value,position) then
+            initDotVertex (comp2str name) ""
+        else ""
+    ) (circGetAllComponents circ) in
+    let dotEdges = map (lam e. initDotEdge (comp2str e.0) (comp2str e.1) "" delimiter "") (circGetAllEdges circ) in
+    getDot "digraph" "LR" (getStdNodeSettings ()) dotVertices dotEdges id
 
 -- converts the given model in dot. vSettings is a seqence of 
 -- two element tuples, the first element refers to the name of the vertex, 

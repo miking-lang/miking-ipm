@@ -6,8 +6,8 @@ include "set.mc"
 include "char.mc"
 
 type Circuit 
-    con Battery : (name,voltage) -> Circuit
-    con Resistor : (name,resistance) -> Circuit
+    con Battery : (name,voltage,position) -> Circuit --position (x,y)
+    con Resistor : (name,resistance,position) -> Circuit
     con Series : [Circuit] -> Circuit 
     con Parallel : [Circuit] -> Circuit
 
@@ -102,7 +102,7 @@ let getTotalCurrent = lam circ.
     -- I = V/R 
     divf voltage resistance
 
-let firstComp = lam circ.
+let headComp = lam circ.
     match circ with Battery (name,_) then circ
     else match circ with Resistor (name,_) then circ
     else
@@ -118,24 +118,37 @@ let tailComp = lam circ.
     else match circ with Parallel c then (tail c)
     else None ()
 
+recursive
+let circGetAllComponents = lam circ.
+    match tailComp circ with None () then headComp circ
+    else snoc (tailComp circ) (headComp circ)
+end
+
+recursive
+let circGetAllEdges = lam circ.
+    match circ with Series c then 
+        zipWith (lam a. lam b. 
+            let first = match a with Series c_2 then
+                circGetAllEdges c_2
+                else match a with Battery (name,_,_) then name
+                else match a with Resistor (name,_,_) then name
+                else None() in
+            let snd = match b with Series c_3 then
+                circGetAllEdges c_3
+                else match b with Battery (name,_,_) then name
+                else match b with Resistor (name,_,_) then name
+                else None() in
+            (first,snd)
+        ) (init c) (tail c)
+    else None()
+end
+
 mexpr
 let circ = Series [
-                Parallel [
-                    Series [
-                        Battery ("V1",11.0),
-                        Resistor ("R1",1.4)
-                    ],
-                    Series[
-                        Battery ("V2",11.0),
-                        Resistor ("R2",1.4)
-                    ]
-                ],
-                Resistor ("R3",2.7)
-            ]
-            in
-utest firstComp circ with [] in
-utest tailComp circ with [] in
-utest getTotalVoltage circ with 11.0 in
-utest getTotalResistance circ with 3.4 in 
-utest getTotalCurrent circ with 3.235294 in 
-()
+            Battery ("V1",11.0,(0,0)),
+            Resistor ("R1",1.4,(0,4)),
+            Battery ("V2",11.0,(4,4)),
+            Resistor ("R2",1.4,(4,0))
+        ] in
+let _ = print (circGetDot circ (lam x. x)) in
+circGetAllEdges circ

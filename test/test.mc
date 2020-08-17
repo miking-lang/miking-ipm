@@ -43,16 +43,13 @@ let nfa = nfaConstr nfaStates nfaTransitions nfaStartState nfaAcceptStates eqStr
 -- create your BTree
 let btree = btreeConstr (Node(2, Node(3, Nil (), Leaf 4), Leaf 5)) eqi in
 
+let circuit = Circuit (Series [
+            Battery ("V1",11.0,(0,0)),
+            Resistor ("R1",1.4,(0,4)),
+            Battery ("V2",11.0,(4,4)),
+            Resistor ("R2",1.4,(4,0))
+        ],(lam x. x)) in
 visualize [
 	-- accepted by the DFA
-	DFA(dfa,"1001010",string2string, char2string,[("s0","start state"),("s3","accept state")]),
-	-- not accepted by the DFA
-	DFA(dfa,"101110",string2string, char2string,[]),
-	-- not accepted by the DFA
-	DFA(dfa,"1010001",string2string, char2string,[]),
-	Digraph(digraph, char2string,int2string,[('A',"aa")]),
-	Graph(graph,int2string,string2string,[]),
-	BTree(btree, int2string,[(2,"Two"),(3,"Three"),(4,"Four"),(5,"Five")]),
-	NFA(nfa, "1021", string2string, char2string,[]),
-	NFA(nfa, "1011", string2string, char2string,[])
+	circuit
 ]
