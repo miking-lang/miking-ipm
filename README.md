@@ -223,7 +223,7 @@ To write the dot code for some data of type `model`, use one of these commands:
 
 - `modelPrintDotSimulateTo "YOUR-DATA" "STEPS" ["OPTIONS"]`
 	
-	Which simulates going through _"STEPS"_ steps of the input. (Only available for NFA/DFA).
+	Which simulates going through _"STEPS"_ steps of the input (only available for NFA/DFA).
 
 	**Note**: only works for NFA/DFA/BTree
 

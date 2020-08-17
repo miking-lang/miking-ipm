@@ -135,4 +135,4 @@ let modelPrintDotSimulateTo = lam model. lam steps. lam vSettings.
 
 -- converts and prints the given model in dot.
 let modelPrintDot = lam model. lam vSettings.
-    modelGetDot model () vSettings
+    print (modelGetDot model () vSettings)

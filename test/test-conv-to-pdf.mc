@@ -39,4 +39,4 @@ let myNfa = NFA(nfa, "102", string2string, char2string,"LR",[]) in
 
 let myGraph = Graph(graph,int2string,string2string,"LR") in
 let myDigraph = Digraph(digraph, char2string,int2string,"LR") in
-print (modelGetDot myDigraph [])
+  modelPrintDot myDigraph []
