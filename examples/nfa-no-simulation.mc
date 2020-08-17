@@ -28,5 +28,7 @@ let nfa = nfaConstr nfaStates nfaTransitions nfaStartState nfaAcceptStates eqStr
 -- of "start state".
 -- Leave it empty for printing the actual names of the states.
 visualize [
-	NFA(nfa, "", string2string, char2string,"LR",[])
+	-- Prints a NFA without simulation. This happens when the input parameter is 
+	-- an empty sequence.
+	NFA(nfa, [], string2string, char2string,"LR",[])
 ]

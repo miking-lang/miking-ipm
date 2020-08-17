@@ -286,7 +286,15 @@ There is a **examples** folder in the root of the project which contains some fi
     DFA(dfa,"101110",string2string, char2string,"LR",[]),
     -- not accepted by the DFA
     DFA(dfa,"1010001",string2string, char2string,"LR",[])
-	] 
+	]
+
+### DFA/NFA without simulation.
+
+The only difference from the examples above, is that an empty sequence is given as the input parameter.
+
+	visualize [
+		DFA(dfa, [], string2string, char2string,"LR",[])
+	]
 
 
 ### Different types: digraph and graph
