@@ -22,9 +22,8 @@ function render() {
 			)
 		} else {
 			document.getElementById("error-container").textContent += dataModels;
-		};   
+		}
     }
 }
 
 render()
-
