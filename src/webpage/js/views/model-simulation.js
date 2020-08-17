@@ -6,7 +6,7 @@ class ModelSimulationView {
     /**
      * @param {div} root The root element, defining where to render.
      * @param {ModelSimulation} model The model which is visualizes and simulated.
-     * @param {function} interactionCallback The callback function called, when interacting with the graph.
+     * @param {function} interactionCallback The callback function called, when interacting with the model.
      * @param {function} simulationCallback The callback function called, when pressing the simulation buttons.
      */
     constructor(root, model, interactionCallback, simulationCallback) {
@@ -43,14 +43,14 @@ class ModelSimulationView {
 
     /*              GETTERS               */
     /**
-     * Gets the edges of the graph.
+     * Gets the edges of the model.
      */
     getEdges() {
         return this.modelView.getEdges()
     }
 
     /**
-     * Gets the nodes of the graph.
+     * Gets the nodes of the model.
      */
     getNodes() {
         return this.modelView.getNodes()

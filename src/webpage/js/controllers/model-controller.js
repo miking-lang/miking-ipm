@@ -1,13 +1,13 @@
-class GraphController {
+class ModelController {
     /**
-     * Controller class for the Graph view.
+     * Controller class for the Model view.
      * 
      * @param {object} model An object representing a model.
      * @param {div} modelRoot The root element of the view.
      */
-    constructor(model, modelRoot){
-        let graphModel = new Model(model.id, model.type, model.model)
-        // Defining the callback function, which is called when the graph is rendered.
+    constructor(inputModel, modelRoot){
+        let model = new Model(inputModel.id, inputModel.type, inputModel.model)
+        // Defining the callback function, which is called when the model is rendered.
         const interactionCallback = nodes => {
             // Adds on click event listeners to each of the nodes.
             this.modelView.getEdges().on("click", function () {
@@ -20,7 +20,7 @@ class GraphController {
             })
         }
         this.modelView = new ModelView(
-            graphModel,
+            model,
             interactionCallback,
             () => {}
         )

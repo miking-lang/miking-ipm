@@ -3,7 +3,7 @@ class Model {
      * This class is responsible for the data of a model.
      * 
      * @param {int} id The model identifier.
-     * @param {string} type The modeltype. Valid types: Graph (Digraph, Tree)
+     * @param {string} type The modeltype.
      * @param {string} model A string in dot format representing the initial state of the model.
      */
     constructor(id, type, model){

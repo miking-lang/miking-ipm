@@ -4,9 +4,8 @@
  */
 class ModelView {
     /**
-     * @param {div} root The root element, defining where to render.
      * @param {string} dot The model in dot format.
-     * @param {function} interactionCallback The callback function called, when interacting with the graph.
+     * @param {function} interactionCallback The callback function called, when interacting with the model.
      * @param {function} simulationCallback The callback function called, when pressing the simulation buttons.
      */
     constructor(model, interactionCallback, simulationCallback) {
@@ -15,7 +14,7 @@ class ModelView {
         this.simulationCallback = simulationCallback
     }
     /**
-     * Renders the DOM tree of the graph view including 
+     * Renders the DOM tree of the model view including 
      */
     init(root) {
         this.root = root
@@ -36,14 +35,14 @@ class ModelView {
 
     /*              GETTERS               */
     /**
-     * Gets the edges of the graph.
+     * Gets the edges of the model.
      */
     getEdges() {
         return d3.selectAll(".model"+this.model.getID()+"edge")
     }
 
     /**
-     * Gets the nodes of the graph.
+     * Gets the nodes of the model.
      */
     getNodes() {
         return d3.selectAll(".model"+this.model.getID()+"node")

@@ -3,7 +3,7 @@ class ModelSimulation {
      * This class is responsible for the data of a model.
      * 
      * @param {int} id The model identifier.
-     * @param {string} type The modeltype. Valid types: Graph (Digraph, Tree)
+     * @param {string} type The modeltype.
      * @param {string} model A model object in dot syntax.
      * @param {[object]} model An array of configurations. The content can take any form but must be controlled 
      *                         in the controller.

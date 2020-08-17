@@ -84,7 +84,7 @@ This includes:
 
 The arguments for the constructors are:
 
-- **Data:** data of type (DFA/NFA/Digraph/Graph).
+- **Data:** data of type (DFA/NFA/Digraph/Graph/BTree).
 
 - **(input):** a input list containing input.
 
@@ -95,7 +95,6 @@ The arguments for the constructors are:
 - **displayNames:** There is a option to define a display name for any of the nodes when visualizing any of the datatypes. These values must be strings, and have no affect on the model other than that when visualized the labels for the nodes/states will not be the names used in the model, but the display names. All names used in the model must be unique, but display names do not. The display names are defined by a list of tuples `(a,b)`, where `a` is the name of the node that is used in the model and `b` is the string that will be shown as the label instead.
 
     **Note:** this does not work with file conversion at the moment. 
-
 
 See the datatypes below for examples.
 ## DFA
@@ -160,7 +159,8 @@ To start, create an empty digraph. This can be done with:
 
 To get a `model` containing this digraph, use the model constructor. Ex:
 
-    Digraph(g, char2string,int2string,[])
+    Digraph(g, char2string,int2string,"LR",[])
+
 ## Graph
 A graph works the same was as the digraph, except that the edges are not directed. Just replace `digraph` with `graph` in the above example.
 
@@ -199,7 +199,7 @@ Once you have data that you want to visualize, just call the function `visualize
 
     visualize [
       your_dfa,
-      you_btree,
+      your_btree,
       your_graph
     ]
 
@@ -217,17 +217,13 @@ Make sure that you include the model.mc file.
 
 To write the dot code for some data of type `model`, use one of these commands:
 
-- 	`modelPrintDot "YOUR-DATA" "RENDER-DIRECTION"`
+-	`modelPrintDot "YOUR-DATA" ["OPTIONS"]`
 
-	Where _"YOUR-DATA"_ data of type `model` as defined above, and "RENDER-DIRECTION" takes one of the following values: "TB", "RL", "BT", "LR". 
+	Where _"YOUR-DATA"_ data of type `model` as defined above. _`["OPTIONS"]`_ is a seqence of two element tuples, the first element refers to the name of the vertex, the second should be a string with space separated custom graphviz settings. The different settings could be found in the documentation at <a href="https://graphviz.org/documentation/">graphviz.org</a>. If you're not interested in adding any customizes settings, just pass an empty sequence `[]`.
 
--	`modelPrintDotWithOptions "YOUR-DATA" "RENDER-DIRECTION" ["OPTIONS"]`
-
-	Which allows you to enter settings for the nodes. _["OPTIONS"]`_ is a seqence of two element tuples, the first element refers to the name of the vertex, the second should be a string with space separated custom graphviz settings. The different settings could be found in the documentation at <a href="https://graphviz.org/documentation/">graphviz.org</a>.
-
-- `modelPrintDotSimulateTo "YOUR-DATA" "STEPS" "RENDER-DIRECTION" ["OPTIONS"]`
+- `modelPrintDotSimulateTo "YOUR-DATA" "STEPS" ["OPTIONS"]`
 	
-	Which simulates going through _"STEPS"_ steps of the input. 
+	Which simulates going through _"STEPS"_ steps of the input. (Only available for NFA/DFA).
 
 	**Note**: only works for NFA/DFA/BTree
 
@@ -358,9 +354,9 @@ The following code creates a directed graph and prints it as dot code. To do the
 	(foldr digraphAddVertex (digraphEmpty eqchar eqi) ['A','B','C','D','E']) 
                 [('A','B',2),('A','C',5),('B','C',2),('B','D',4),('C','D',5),('C','E',5),('E','D',2)] in
   
-	let digraphModel = Digraph(digraph, char2string,int2string,[]) in
+	let digraphModel = Digraph(digraph, char2string,int2string,"LR",[]) in
 
-	modelPrintDot digraphModel "LR"
+	modelPrintDot digraphModel []
 
 The following command runs the code, which is located in the file "test.mc", and creates a pdf file called "myDigraph.pdf" from the output:
 

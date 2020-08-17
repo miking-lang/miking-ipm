@@ -28,15 +28,16 @@ let concatList = lam list.
 
 -- formats a dotEdge to dot
 let edgeToDot = lam e. lam modelID.
-    let class = match modelID with () then "" else concatList ["class=model",(int2string modelID),"edge"] in
-    concatList [e.from," ",e.delimiter," ",e.to," [label=\\\"",e.label,"\\\" ",
-                                                  "id=",e.from,e.label,e.to," ",
-                                                  class," ",e.extra,"];"]
+    let quote = match modelID with () then "\"" else "\\\"" in
+    let class = match modelID with () then "" else concatList ["class=",quote,"model",(int2string modelID),"edge",quote," ",
+                                                              "id=",quote,e.from,e.label,e.to,quote," "] in
+    concatList [e.from," ",e.delimiter," ",e.to," [label=",quote,e.label,quote," ",class,e.extra,"];"]
 
 -- formats a dotVertex to dot
 let vertexToDot = lam v. lam modelID.
-    let class = match modelID with () then "" else concatList ["class=model",(int2string modelID),"node"] in
-    concatList [v.name,"[","id=",v.name," ",class," ",v.extra,"];"]
+    let quote = match modelID with () then "\"" else "\\\"" in
+    let class = match modelID with () then "" else concatList ["class=model",(int2string modelID),"node"," "] in
+    concatList [v.name,"[","id=",quote,v.name,quote," ",class,v.extra,"];"]
 
 -- prints a given model in dot syntax
 let getDot = lam graphType. lam direction. lam stdVerticesSetting. lam vertices. lam edges. lam id.
@@ -112,26 +113,26 @@ let nfaGetDot = lam nfa. lam v2str. lam l2str. lam direction. lam id. lam vSetti
 -- converts and prints the given model in dot. vSettings is a seqence of 
 -- two element tuples, the first element refers to the name of the vertex, 
 -- the second should be a string with custom graphviz settings.
-let modelGetDotWithOptions = lam model. lam direction. lam id. lam vSettings.
-    match model with Graph(graph,v2str,l2str) then
+let modelGetDot = lam model. lam id. lam vSettings.
+    match model with Graph(graph,v2str,l2str,direction) then
         graphGetDot graph v2str l2str direction id "graph" vSettings
-    else match model with Digraph(digraph,v2str,l2str) then
+    else match model with Digraph(digraph,v2str,l2str,direction) then
         graphGetDot digraph v2str l2str direction id "digraph" vSettings
-    else match model with NFA(nfa,input,state2str,label2str) then
+    else match model with NFA(nfa,input,state2str,label2str,direction) then
         nfaGetDot nfa state2str label2str direction id vSettings "" (negi 1)
-    else match model with DFA(dfa,input,state2str,label2str) then
+    else match model with DFA(dfa,input,state2str,label2str,direction) then
         nfaGetDot dfa state2str label2str direction id vSettings "" (negi 1)
-    else match model with BTree(tree, node2str) then
+    else match model with BTree(tree, node2str,direction) then
         btreeGetDot tree node2str direction id vSettings
     else ""
 
-let modelGetDotSimulateTo = lam model. lam steps. lam direction. lam vSettings.
-    match model with NFA(nfa,input,state2str,label2str) then
-        nfaGetDot nfa state2str label2str direction 0 vSettings input steps
-    else match model with DFA(dfa,input,state2str,label2str) then
-        nfaGetDot dfa state2str label2str direction 0 vSettings input steps
+let modelPrintDotSimulateTo = lam model. lam steps. lam vSettings.
+    match model with NFA(nfa,input,state2str,label2str,direction) then
+        nfaGetDot nfa state2str label2str direction () vSettings input steps
+    else match model with DFA(dfa,input,state2str,label2str,direction) then
+        nfaGetDot dfa state2str label2str direction () vSettings input steps
     else ""
 
 -- converts and prints the given model in dot.
-let modelGetDot = lam model. lam direction.
-    modelGetDotWithOptions model direction 0 []
+let modelPrintDot = lam model. lam vSettings.
+    modelGetDot model () vSettings

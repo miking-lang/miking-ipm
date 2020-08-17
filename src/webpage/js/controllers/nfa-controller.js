@@ -6,7 +6,7 @@ class NFAController {
      * @param {div} modelRoot The root element of the view.
      */
     constructor(model, modelRoot){
-        // Defining the callback function called when the graph is rendered.
+        // Defining the callback function called when the model is rendered.
         const interactionCallback = () => {
             // Adds on click event listeners to each of the nodes.
             this.simulationView.getEdges().on("click", function () {
