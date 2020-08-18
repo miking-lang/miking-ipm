@@ -64,8 +64,8 @@ let graphGetDot = lam graph. lam v2str. lam l2str. lam direction. lam id. lam gr
     let dotEdges = map (lam e. initDotEdge (v2str e.0) (v2str e.1) (l2str e.2) delimiter "") (graphEdges graph) in
     getDot graphType direction (getStdNodeSettings ()) dotVertices dotEdges id
 
--- Gets a NFA in dot.
-let nfaGetDot = lam nfa. lam v2str. lam l2str. lam direction. lam id. lam vSettings. lam input. lam steps.
+-- Gets a NFA in dot simulated "steps" steps av the "input" input.
+let nfaGetDotSimulate = lam nfa. lam v2str. lam l2str. lam direction. lam id. lam vSettings. lam input. lam steps.
     let eqv = nfaGetEqv nfa in
     let path = (if (lti (negi 0) steps) then slice (nfaMakeEdgeInputPath nfa.startState input nfa) 0 steps
         else []) in
@@ -95,6 +95,10 @@ let nfaGetDot = lam nfa. lam v2str. lam l2str. lam direction. lam id. lam vSetti
             initDotEdge (v2str e.0) (v2str e.1) (l2str e.2) "->" extra)
         (nfaTransitions nfa)] in
     getDot "digraph" direction (getStdNodeSettings ()) dotVertices dotEdges id
+
+-- Gets a NFA in dot.
+let nfaGetDot = lam nfa. lam v2str. lam l2str. lam direction. lam id. lam vSettings.
+    nfaGetDotSimulate nfa v2str l2str direction id vSettings "" (negi 1)
 
 
 -- returns the standard node setting
@@ -128,18 +132,20 @@ let modelGetDot = lam model. lam id. lam vSettings.
     else match model with Digraph(digraph,v2str,l2str,direction) then
         graphGetDot digraph v2str l2str direction id "digraph" vSettings
     else match model with NFA(nfa,input,state2str,label2str,direction) then
-        nfaGetDot nfa state2str label2str direction id vSettings "" (negi 1)
+        nfaGetDot nfa state2str label2str direction id vSettings
     else match model with DFA(dfa,input,state2str,label2str,direction) then
-        nfaGetDot dfa state2str label2str direction id vSettings "" (negi 1)
+        nfaGetDot dfa state2str label2str direction id vSettings
     else match model with BTree(tree, node2str,direction) then
         btreeGetDot tree node2str direction id vSettings
+    else match model with Circuit(circuit,comp2str) then
+        circGetDot circuit comp2str id vSettings
     else ""
 
 let modelPrintDotSimulateTo = lam model. lam steps. lam vSettings.
     match model with NFA(nfa,input,state2str,label2str,direction) then
-        nfaGetDot nfa state2str label2str direction () vSettings input steps
+        nfaGetDotSimulate nfa state2str label2str direction () vSettings input steps
     else match model with DFA(dfa,input,state2str,label2str,direction) then
-        nfaGetDot dfa state2str label2str direction () vSettings input steps
+        nfaGetDotSimulate dfa state2str label2str direction () vSettings input steps
     else ""
 
 -- converts and prints the given model in dot.

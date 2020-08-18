@@ -38,14 +38,13 @@ let formatInput = lam input. lam label2str.
 
 -- format nfa simulation to JS code
 let nfaFormatSimulation = lam nfa. lam input. lam s2s. lam l2s. 
-    -- match input with "" then "" else foldl concat [] 
-    --     ["\"simulation\" : {\n",
-    --         " \"input\" : [", (formatInput input l2s),"],\n",
-    --         " \"configurations\" : [\n", 
-    --         (formatInputPath (nfaMakeInputPath (negi 1) nfa.startState input nfa) s2s),
-    --         "]\n",
-    --     "},\n "]
-    ""
+    match input with "" then "" else foldl concat [] 
+        ["\"simulation\" : {\n",
+            " \"input\" : [", (formatInput input l2s),"],\n",
+            " \"configurations\" : [\n", 
+            (formatInputPath (nfaMakeInputPath (negi 1) nfa.startState input nfa) s2s),
+            "]\n",
+        "},\n "]
 
 -- format a model to JS code
 let formatModel = lam dot. lam graphType. lam id. lam simulation.
@@ -58,6 +57,7 @@ let formatModel = lam dot. lam graphType. lam id. lam simulation.
         "}\n"
 	]
 
+-- format a nfa to JS code for visualizing
 let nfaVisual = lam nfa. lam input. lam s2s. lam l2s. lam nfaType. lam displayNames. lam id. lam direction.
     let simulation = nfaFormatSimulation nfa input s2s l2s in
     let dot = nfaGetDot nfa s2s l2s direction id (displayNamesToOptions displayNames) in
