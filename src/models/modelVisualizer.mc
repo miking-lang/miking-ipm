@@ -102,13 +102,3 @@ let visualize = lam models.
         else error "unknown type") models
     ) in
     print (foldl concat [] ["{\"models\": [\n", models, "]\n}\n"])
-                        
-mexpr
-let states = [1,2,3] in
-let transitions = [(1,2,'0'),(3,1,'0'),(1,2,'1'),(2,3,'1'),(1,2,'2'),(3,1,'1')] in
-let startState = 1 in
-let acceptStates = [1] in
-let input = "010" in
-let newDfa = dfaConstr states transitions startState acceptStates eqi eqchar in
-let model = DFA(newDfa, input, int2string, lam b. [b],"LR",[]) in
-visualize [model]
