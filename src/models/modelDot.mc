@@ -28,12 +28,11 @@ let vertexToDot = lam v. lam modelID.
 
 -- prints a given model in dot syntax
 let getDot = lam graphType. lam direction. lam stdVerticesSetting. lam vertices. lam edges. lam id.
-    let output = foldl concat [] [[graphType," {","rankdir=",direction,";",
-        "node [",stdVerticesSetting,"];"],
+    let output = foldl concat [] [[graphType," {","rankdir=",direction,";"],
         (map (lam v. vertexToDot v id) vertices),
         (map (lam e. edgeToDot e id) edges),
         ["}"]
-    ] in 
+    ] in
     foldl concat [] output
 
 -- returns the standard active node setting
@@ -45,10 +44,12 @@ let getStdNodeSettings = lam _.
     "style=filled fillcolor=white shape=circle"
 
 
+
 -- returns a btree in dot.
 let btreeGetDot = lam tree. lam node2str. lam direction. lam id. lam vSettings.
     let dotEdges = map (lam e. initDotEdge (node2str e.0) (node2str e.1) "" "->" "") (treeEdges tree ()) in
     let dotVertices = map (lam v. 
+        utest vSettings with [] in
         let extra = find (lam x. tree.eqv x.0 v) vSettings in
         initDotVertex (node2str v) (match extra with Some e then e.1 else "") "node" (getStdNodeSettings ())
     ) (treeVertices tree) in
@@ -103,11 +104,11 @@ let nfaGetDot = lam nfa. lam v2str. lam l2str. lam direction. lam id. lam vSetti
 
 -- returns the standard node setting
 let getBatteryNodeSettings = lam _.
-    "style=filled fillcolor=white shape=rect"
+    "style=filled fillcolor=blue shape=diamond"
 
 -- returns the standard node setting
 let getResistorNodeSettings = lam _.
-    "style=filled fillcolor=white shape=diamond"
+    "style=filled fillcolor=gray shape=rect"
 
 -- returns a graph in dot.
 let circGetDot = lam circ. lam comp2str. lam id. lam vSettings.

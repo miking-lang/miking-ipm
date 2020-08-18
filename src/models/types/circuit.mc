@@ -12,6 +12,7 @@ type Circuit
     con Component : (circ_type,name,value) -> Circuit
     con Series : [Component] -> Circuit 
     con Parallel : [Component] -> Circuit
+    con Close : () -> Circuit -- closes the circuit by connecting to the first component
 
 -- gets the name of component comp
 let circGetComponentName = lam comp. 
@@ -126,6 +127,7 @@ let makeEdges = lam from_lst. lam to_lst.
 recursive
 let circHead = lam circ. 
     match circ with Component c then [circ] else
+    match circ with Close () then [Close ()] else
     match circ with Series lst then circHead (head lst)
     else match circ with Parallel lst then 
         foldl (lam res. lam elem. concat res (circHead elem)) [] lst
@@ -135,6 +137,7 @@ end
 recursive
 let circLast= lam circ. 
     match circ with Component c then [circ] else
+    match circ with Close () then [Close ()] else
     match circ with Series lst then circLast (last lst)
     else match circ with Parallel lst then 
         foldl (lam res. lam elem. concat res (circLast elem)) [] lst
@@ -147,14 +150,22 @@ let circGetAllEdges = lam circ.
     else match circ with Series circ_lst then
         if (eqi (length circ_lst) 0) then []
         else
-            let k = (zipWith (lam a. lam b.
+            let edges = (zipWith (lam a. lam b.
                 let from = circLast a in
-                let to = circHead b in
+                let maybe_to = circHead b in
+                utest maybe_to with [] in
+                let to = match maybe_to with [Close ()] then [head circ_lst] else maybe_to in
                 let a_edges = circGetAllEdges a in
-                let b_edges = circGetAllEdges b in
                 concat (a_edges) (makeEdges from to)
             )(init circ_lst) (tail circ_lst)) in
-            join (concat k [])
+            join (concat edges [])
+    else match circ with Parallel circ_lst then
+        if (eqi (length circ_lst) 0) then []
+        else
+            let edges = (foldl (lam lst. lam a.
+                concat lst (circGetAllEdges a)
+            )[] (circ_lst)) in
+            join (concat edges [])
     else []
 end
 
