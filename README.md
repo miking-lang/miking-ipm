@@ -15,7 +15,7 @@ undirected graphs, and electrical circuits.
   back to the Miking environment.
 
 * Enabled interactions with the execution of models (state changes).
-
+ 
 * Provide a server that watches file updates and acts as a local web server.
 
 * Create an integration with markdown converters, where the visualized
@@ -281,11 +281,11 @@ There is a **examples** folder in the root of the project which contains some fi
 
 	visualize [
 		-- accepted by the DFA
-    DFA(dfa,"10010100",string2string, char2string,"LR",[("s0","start state"),("s3","accept state")]),
-    -- not accepted by the DFA
-    DFA(dfa,"101110",string2string, char2string,"LR",[]),
-    -- not accepted by the DFA
-    DFA(dfa,"1010001",string2string, char2string,"LR",[])
+		DFA(dfa,"10010100",string2string, char2string,"LR",[("s0","start state"),("s3","accept state")]),
+		-- not accepted by the DFA
+		DFA(dfa,"101110",string2string, char2string,"LR",[]),
+		-- not accepted by the DFA
+		DFA(dfa,"1010001",string2string, char2string,"LR",[])
 	]
 
 ### DFA/NFA without simulation.
@@ -317,8 +317,8 @@ This program displays a digraph and a graph on the same page.
 	(foldr graphAddVertex (graphEmpty eqi eqString) [1,2,3,4]) [(1,2,""),(3,2,""),(1,3,""),(3,4,"")] in
 
 	visualize [
-	Digraph(digraph, char2string,int2string,"LR",[]),
-    Graph(graph,int2string,string2string,"LR",[])
+		Digraph(digraph, char2string,int2string,"LR",[]),
+		Graph(graph,int2string,string2string,"LR",[])
 	]
 
 
@@ -344,9 +344,9 @@ This program creates both a NFA and a Binary tree and displays them.
 	let btree = BTree (Node(2, Node(3, Nil (), Leaf 4), Leaf 5)) in
 
 	visualize [
-    BTree(btree, int2string,[(2,"Two"),(3,"Three"),(4,"Four"),(5,"Five")],"TB",[]),
-    NFA(nfa, "1021", string2string, char2string,"LR",[]),
-    NFA(nfa, "102", string2string, char2string,"LR",[])
+		BTree(btree, int2string,[(2,"Two"),(3,"Three"),(4,"Four"),(5,"Five")],"TB",[]),
+		NFA(nfa, "1021", string2string, char2string,"LR",[]),
+		NFA(nfa, "102", string2string, char2string,"LR",[])
 	]
 
 ## Printing to pdf
