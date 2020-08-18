@@ -3,7 +3,7 @@ let message = "test";
 function render() {
     ws = new WebSocket('ws://localhost' + (location.port ? ':'+location.port:'') + '/ws');
     ws.onmessage = function(x) {
-		console.log(x.data)
+	console.log(x.data)
 	let data_models = JSON.parse(x.data);
 	if (data_models.models) {
 

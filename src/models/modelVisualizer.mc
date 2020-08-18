@@ -76,19 +76,6 @@ let treeVisual = lam btree. lam v2str. lam displayNames. lam id.
     let dot = btreeGetDot btree v2str "TD" id (displayNamesToOptions displayNames) in
     formatGraph dot "tree" id
 
-let formatComponent = lam component. lam comp2str.
-    let comp = (match component with Battery (name,volt,pos) then
-            {compType="battery",name=name,value=volt,pos=pos}
-        else match component with Resistor (name,res,pos) then
-            {compType="resistor", name=name,value=res,pos=pos}
-        else ()
-    ) in
-    foldl concat [] ["{\"type\":\"",comp.compType,"\",\"name\":\"",comp.name,"\",\"value\":",(float2string comp.value),
-        ",\"x_pos\": ",(int2string (comp.pos).0),",\"y_pos\":",(int2string (comp.pos).1),"}"]
-
-let formatEdge = lam component. lam comp2str.
-    foldl concat [] ["{\"from\" : \\\"", component.0, "\", \"to\" : \\\"", component.1,"\"}"]
-
 let circVisual = lam circuit. lam comp2str. lam id.
     let dot = circGetDot circuit comp2str id [] in
     formatGraph dot "graph" id

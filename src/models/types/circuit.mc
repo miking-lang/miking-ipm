@@ -5,37 +5,36 @@
 include "set.mc"
 include "char.mc"
 
-type Circuit 
-    con Battery : (name,voltage,position) -> Circuit --position (x,y)
-    con Resistor : (name,resistance,position) -> Circuit
-    con Series : [Circuit] -> Circuit 
-    con Parallel : [Circuit] -> Circuit
+-- (type,name,value) where type is either "resistor" or "battery"
+-- for example ("battery","V1",10.0) is a battery named V1 with value 10 volt
+
+type Circuit
+    con Component : (circ_type,name,value) -> Circuit
+    con Series : [Component] -> Circuit 
+    con Parallel : [Component] -> Circuit
 
 -- gets the name of component comp
 let circGetComponentName = lam comp. 
-    match comp with Battery (name,_) then name
-    else match comp with Resistor (name, _) then name
+    match comp with Component (_,name,_) then name
     else None ()
 
 -- gets the component with name 'name' from circuit circ
 recursive
 let circGetComponentByName = lam circ. lam name.
-    match circ with Parallel lst then circGetComponentByName lst name
-    else match circ with Series lst then circGetComponentByName lst name
-    else if (eqi (length circ) 0) then None () 
-    else
-        let first = (head circ) in 
-        let comp_name = circGetComponentName first in
-        match comp_name with None () then 
-            let first_lst = match first with Series lst then lst 
-                else match first with Parallel lst then lst
+    match circ with Component (_,comp_name,_) then 
+        if (setEqual eqchar name comp_name) then circ
+        else None()
+    else 
+        let lst = match circ with Parallel p_circ then 
+                    p_circ
+                else match circ with Series s_circ then
+                    s_circ
                 else [] in
-            let res = find (lam x. let name_comp = (circGetComponentName x) in
-                            match name_comp with None () then false else
-                            if (setEqual eqchar name) then true else false) first_lst in 
-            match res with Some comp then comp
-            else circGetComponentByName (tail circ) name
-        else if (setEqual eqchar comp_name name) then first else circGetComponentByName (tail circ)
+    foldl (lam res. lam comp. 
+        match res with None() then
+            circGetComponentByName comp name
+        else res
+    ) (None ()) lst
 end
 
 -- calculates the total voltage in circuit circ
@@ -43,7 +42,7 @@ recursive
 let getTotalVoltage = lam circ.
         -- for batteries in series the total voltage is the sum
         let calc_series_voltage = lam lst. foldl (lam volt_con. lam comp.
-            match comp with Battery (name, voltage) then 
+            match comp with Component ("battery",name, voltage) then 
                 addf volt_con voltage 
             else match comp with Series s_circ then addf volt_con (getTotalVoltage comp)
             else match comp with Parallel p_circ then addf volt_con (getTotalVoltage comp)
@@ -52,7 +51,7 @@ let getTotalVoltage = lam circ.
         -- for batteries in parallel the total voltage is the same as each battery.
         -- batteries in parallel need to have the same voltage
         let calc_parallel_voltage = lam lst. foldl (lam volt_con. lam comp.
-            let v = match comp with Battery (name, voltage) then voltage
+            let v = match comp with Component ("battery",name, voltage) then voltage
                     else match comp with Series s_circ then getTotalVoltage comp
                     else match comp with Parallel p_circ then getTotalVoltage comp
                     else volt_con in
@@ -71,7 +70,7 @@ recursive
 let getTotalResistance = lam circ.
     -- for resistors in series the total resistance is the sum
     let calc_series_res = lam lst. foldl (lam res_comp. lam comp. 
-        match comp with Resistor (name, res) then 
+        match comp with Component ("resistor",name, res) then 
             addf res_comp res
         else match comp with Series c then getTotalResistance comp 
         else match comp with Parallel c then getTotalResistance comp
@@ -81,7 +80,7 @@ let getTotalResistance = lam circ.
     -- 1/Rt = 1/R1 + 1/R2 ... 1/Rn
     let calc_parallel_res = lam lst. 
         (let res_con = foldl (lam res_comp. lam comp.
-            match comp with Resistor (name, res) then 
+            match comp with Component ("resistor",name, res) then 
                 addf (divf 1.0 res) res_comp
             else match comp with Series c then addf (divf 1.0 (getTotalResistance comp)) res_comp
             else match comp with Parallel c then addf (divf 1.0 (getTotalResistance comp)) res_comp
@@ -102,53 +101,92 @@ let getTotalCurrent = lam circ.
     -- I = V/R 
     divf voltage resistance
 
-let headComp = lam circ.
-    match circ with Battery (name,_) then circ
-    else match circ with Resistor (name,_) then circ
-    else
-    match circ with Series c then (head c)
-    else match circ with Parallel c then (head c)
-    else None ()
-
-let tailComp = lam circ.
-     match circ with Battery (name,_) then None()
-    else match circ with Resistor (name,_) then None()
-    else
-    match circ with Series c then (tail c)
-    else match circ with Parallel c then (tail c)
-    else None ()
-
 recursive
 let circGetAllComponents = lam circ.
-    match tailComp circ with None () then headComp circ
-    else snoc (tailComp circ) (headComp circ)
+    match circ with Component c then [circ] 
+    else match circ with Series circ_lst then 
+        foldl (lam lst. lam comp. concat lst (circGetAllComponents comp)) [] circ_lst
+    else match circ with Parallel circ_lst then 
+        foldl (lam lst. lam comp. concat lst (circGetAllComponents comp)) [] circ_lst
+    else []
+end
+
+let makeEdges = lam from_lst. lam to_lst.
+    foldl (lam lst. lam a. 
+        concat lst (map (lam b. 
+            match a with Component (_,a_name,_) then
+                match b with Component (_,b_name,_) then
+                    (a_name,b_name)
+                else error "edges must be between components"
+            else error "edges must be between components"
+            ) 
+        to_lst)
+    ) [] from_lst
+    
+recursive
+let circHead = lam circ. 
+    match circ with Component c then [circ] else
+    match circ with Series lst then circHead (head lst)
+    else match circ with Parallel lst then 
+        foldl (lam res. lam elem. concat res (circHead elem)) [] lst
+    else []
+end
+
+recursive
+let circLast= lam circ. 
+    match circ with Component c then [circ] else
+    match circ with Series lst then circLast (last lst)
+    else match circ with Parallel lst then 
+        foldl (lam res. lam elem. concat res (circLast elem)) [] lst
+    else []
 end
 
 recursive
 let circGetAllEdges = lam circ.
-    match circ with Series c then 
-        zipWith (lam a. lam b. 
-            let first = match a with Series c_2 then
-                circGetAllEdges c_2
-                else match a with Battery (name,_,_) then name
-                else match a with Resistor (name,_,_) then name
-                else None() in
-            let snd = match b with Series c_3 then
-                circGetAllEdges c_3
-                else match b with Battery (name,_,_) then name
-                else match b with Resistor (name,_,_) then name
-                else None() in
-            (first,snd)
-        ) (init c) (tail c)
-    else None()
+    match circ with Component (_,name,_) then []
+    else match circ with Series circ_lst then
+        if (eqi (length circ_lst) 0) then []
+        else
+            let k = (zipWith (lam a. lam b.
+                let from = circLast a in
+                let to = circHead b in
+                let a_edges = circGetAllEdges a in
+                let b_edges = circGetAllEdges b in
+                concat (a_edges) (makeEdges from to)
+            )(init circ_lst) (tail circ_lst)) in
+            join (concat k [])
+    else []
 end
 
 mexpr
 let circ = Series [
-            Battery ("V1",11.0,(0,0)),
-            Resistor ("R1",1.4,(0,4)),
-            Battery ("V2",11.0,(4,4)),
-            Resistor ("R2",1.4,(4,0))
+            Series [
+            Component ("battery","V1",11.0),
+            Component ("resistor","R3",1.4),
+            Component ("resistor","R1",1.4),
+            Component ("battery","V2",11.0),
+            Component ("resistor","R2",1.4)
+            ],
+            Parallel [
+            Component ("battery","V3",0.0),
+            Component ("resistor", "R4",0.0)
+            ],
+            Series [
+                Component("resistor", "r5",0.0)
+            ]
         ] in
-let _ = print (circGetDot circ (lam x. x)) in
-circGetAllEdges circ
+let edges = circGetAllEdges circ in
+utest edges with [] in
+let _ = map (lam x. 
+    utest x with [] in
+    match x with (a,b) then
+        
+        let _ = print a in
+        let _ = print "," in
+        let _ = print b in
+        print "\n"
+    else print "no match") edges in ()
+--utest (circGetAllComponents circ) with "" in
+--utest circLast circ with [] in
+--utest circGetAllEdges circ with [] in 
+
