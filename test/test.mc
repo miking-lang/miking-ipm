@@ -57,10 +57,14 @@ let circuit = Circuit (Series [
             ],
             Series [
                 Component("resistor", "r5",0.0)
-            ]
-        ] ,(lam x. x)) in
+            ],
+            Close ()
+        ]
+         ,(lam x. x)) in
+
 visualize [
 	-- accepted by the DFA
+    circuit,
 	DFA(dfa,"1001010",string2string, char2string,"LR",[("s0","start state"),("s3","accept state")]),
 	-- DFA without simulation
 	DFA(dfa,"",string2string, char2string,"LR",[]),
@@ -72,6 +76,6 @@ visualize [
 	Graph(graph,int2string,string2string,"LR",[]),
 	BTree(btree, int2string,"TB",[(2,"Two"),(3,"Three"),(4,"Four"),(5,"Five")]),
 	NFA(nfa, "1021", string2string, char2string,"LR",[]),
-	NFA(nfa, "1011", string2string, char2string,"LR",[]),
-	circuit
+	NFA(nfa, "1011", string2string, char2string,"LR",[])
+	
 ]

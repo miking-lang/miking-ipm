@@ -6,8 +6,8 @@ let initDotEdge = lam from. lam to. lam label. lam delimiter. lam extra.
     {from = from, to = to, label = label, delimiter = delimiter, extra = extra}
 
 -- constructor for dotVertex
-let initDotVertex = lam name. lam extra. lam nodeType. lam settings.
-    {name = name, extra = extra,nodeType=nodeType,settings=settings}
+let initDotVertex = lam name. lam extra. lam settings.
+    {name = name, extra = extra,settings=settings}
 
 -- concatenates a list of strings
 let concatList = lam list.
@@ -24,11 +24,11 @@ let edgeToDot = lam e. lam modelID.
 let vertexToDot = lam v. lam modelID.
     let quote = match modelID with () then "\"" else "\\\"" in
     let class = match modelID with () then "" else concatList ["class=model",(int2string modelID),"node"," "] in
-    concatList [v.name,"[","id=",quote,v.name,quote," ",class,v.extra,"];"]
+    concatList ["node[",v.settings,"];",v.name,"[","id=",quote,v.name,quote," ",class,v.extra,"];"]
 
 -- prints a given model in dot syntax
-let getDot = lam graphType. lam direction. lam stdVerticesSetting. lam vertices. lam edges. lam id.
-    let output = foldl concat [] [[graphType," {","rankdir=",direction,";"],
+let getDot = lam graphType. lam direction. lam vertices. lam edges. lam id. lam extra.
+    let output = foldl concat [] [[graphType," {\n",extra,"\n","rankdir=",direction,";"],
         (map (lam v. vertexToDot v id) vertices),
         (map (lam e. edgeToDot e id) edges),
         ["}"]
@@ -51,19 +51,19 @@ let btreeGetDot = lam tree. lam node2str. lam direction. lam id. lam vSettings.
     let dotVertices = map (lam v. 
         utest vSettings with [] in
         let extra = find (lam x. tree.eqv x.0 v) vSettings in
-        initDotVertex (node2str v) (match extra with Some e then e.1 else "") "node" (getStdNodeSettings ())
+        initDotVertex (node2str v) (match extra with Some e then e.1 else "") (getStdNodeSettings ())
     ) (treeVertices tree) in
-    getDot "digraph" direction (getStdNodeSettings ()) dotVertices dotEdges id
+    getDot "digraph" direction dotVertices dotEdges id ""
 
 -- returns a graph in dot.
 let graphGetDot = lam graph. lam v2str. lam l2str. lam direction. lam id. lam graphType. lam vSettings.
     let delimiter = if ((setEqual eqchar) graphType "graph") then "--" else "->" in
     let dotVertices = map (lam v. 
         let extra = find (lam x. graph.eqv x.0 v) vSettings in
-        initDotVertex (v2str v) (match extra with Some e then e.1 else "") "node" (getStdNodeSettings ())
+        initDotVertex (v2str v) (match extra with Some e then e.1 else "") (getStdNodeSettings ())
     ) (graphVertices graph) in
     let dotEdges = map (lam e. initDotEdge (v2str e.0) (v2str e.1) (l2str e.2) delimiter "") (graphEdges graph) in
-    getDot graphType direction (getStdNodeSettings ()) dotVertices dotEdges id
+    getDot graphType direction dotVertices dotEdges id ""
 
 -- Gets a NFA in dot simulated "steps" steps av the "input" input.
 let nfaGetDotSimulate = lam nfa. lam v2str. lam l2str. lam direction. lam id. lam vSettings. lam input. lam steps.
@@ -75,7 +75,7 @@ let nfaGetDotSimulate = lam nfa. lam v2str. lam l2str. lam direction. lam id. la
         else (last path).1 in 
     let finalEdge = if (lti steps 1) then None() 
         else last path in
-    let dotVertices = join [[initDotVertex "start" "style=invis" "node" (getStdNodeSettings ())],
+    let dotVertices = join [[initDotVertex "start" "style=invis" (getStdNodeSettings ())],
         map (lam v. 
             let dbl = if (any (lam x. eqv x v) nfa.acceptStates) then "shape=doublecircle" else "" in
             let settings = (if (lti (negi 1) steps) then 
@@ -83,7 +83,7 @@ let nfaGetDotSimulate = lam nfa. lam v2str. lam l2str. lam direction. lam id. la
             else "") in
             let extra = find (lam x. eqv x.0 v) vSettings in
             let extraSettings = strJoin " " [dbl,(match extra with Some e then e.1 else "")] in
-            initDotVertex (v2str v) extraSettings "node" settings)
+            initDotVertex (v2str v) extraSettings settings)
         (nfaStates nfa)] in
     let startEdgeStyle = if (eqi 0 steps) then "color=darkgreen" else "" in
     let eqEdge = (lam a. lam b. and (eqv a.0 b.0) (eqv a.1 b.1)) in
@@ -95,7 +95,7 @@ let nfaGetDotSimulate = lam nfa. lam v2str. lam l2str. lam direction. lam id. la
             else "" in
             initDotEdge (v2str e.0) (v2str e.1) (l2str e.2) "->" extra)
         (nfaTransitions nfa)] in
-    getDot "digraph" direction (getStdNodeSettings ()) dotVertices dotEdges id
+    getDot "digraph" direction dotVertices dotEdges id ""
 
 -- Gets a NFA in dot.
 let nfaGetDot = lam nfa. lam v2str. lam l2str. lam direction. lam id. lam vSettings.
@@ -115,14 +115,16 @@ let circGetDot = lam circ. lam comp2str. lam id. lam vSettings.
     let delimiter = "->" in
     let dotVertices = map (lam c. 
         match c with Component (comp_type,name,value) then
+            -- round to two decimals
+            let value_str = head (strSplit "." (float2string value)) in
             if (setEqual eqchar comp_type "resistor") then
-                initDotVertex (comp2str name) "" comp_type (getResistorNodeSettings ())
-            else initDotVertex (comp2str name) "" comp_type (getBatteryNodeSettings ())
+                initDotVertex (comp2str name) (foldl concat [] ["label=\\\"",(comp2str name)," = " ,value_str," &Omega;\\\""]) (getResistorNodeSettings ())
+            else initDotVertex (comp2str name) "" (getBatteryNodeSettings ())
         else ""
     ) (circGetAllComponents circ) in
     let dotEdges = map (lam e. initDotEdge (comp2str e.0) (comp2str e.1) "" delimiter "") (circGetAllEdges circ) in
     utest dotEdges with [] in
-    getDot "digraph" "LR" (getResistorNodeSettings ()) dotVertices dotEdges id
+    getDot "digraph" "LR" dotVertices dotEdges id "splines=ortho;"
 
 -- converts the given model in dot. vSettings is a seqence of 
 -- two element tuples, the first element refers to the name of the vertex, 

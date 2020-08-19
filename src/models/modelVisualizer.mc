@@ -77,7 +77,7 @@ let treeVisual = lam btree. lam v2str. lam displayNames. lam id. lam direction.
 
 let circVisual = lam circuit. lam comp2str. lam id.
     let dot = circGetDot circuit comp2str id [] in
-    formatModel dot "graph" id ""
+    formatModel dot "circuit" id ""
 
 -- make all models into string object
 let visualize = lam models.

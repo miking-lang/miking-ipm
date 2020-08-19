@@ -153,8 +153,7 @@ let circGetAllEdges = lam circ.
             let edges = (zipWith (lam a. lam b.
                 let from = circLast a in
                 let maybe_to = circHead b in
-                utest maybe_to with [] in
-                let to = match maybe_to with [Close ()] then [head circ_lst] else maybe_to in
+                let to = match maybe_to with [Close ()] then circHead circ else maybe_to in
                 let a_edges = circGetAllEdges a in
                 concat (a_edges) (makeEdges from to)
             )(init circ_lst) (tail circ_lst)) in
@@ -184,14 +183,14 @@ let circ = Series [
             ],
             Series [
                 Component("resistor", "r5",0.0)
-            ]
+            ],
+            Close ()
         ] in
 let edges = circGetAllEdges circ in
 utest edges with [] in
 let _ = map (lam x. 
     utest x with [] in
     match x with (a,b) then
-        
         let _ = print a in
         let _ = print "," in
         let _ = print b in
