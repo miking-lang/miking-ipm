@@ -5,7 +5,7 @@
 include "set.mc"
 include "char.mc"
 
--- (type,name,value) where type is either "resistor" or "battery"
+-- (type,name,value) where type is either "resistor", "battery" or "ground"
 -- for example ("battery","V1",10.0) is a battery named V1 with value 10 volt
 
 type Circuit
@@ -18,6 +18,20 @@ type Circuit
 let circGetComponentName = lam comp. 
     match comp with Component (_,name,_) then name
     else None ()
+
+let circCompEq = lam a. lam b. 
+    match a with Component (circ_type,name,value) then
+        match b with Component (circ_type,name,value) then true 
+        else false
+    else 
+        match a with Parallel p_lst then
+            match b with Parallel p_lst then true
+            else false
+        else
+            match a with Series s_lst then
+                match b with Series s_lst then true 
+                else false
+            else false
 
 -- gets the component with name 'name' from circuit circ
 recursive
@@ -117,7 +131,7 @@ let makeEdges = lam from_lst. lam to_lst.
         concat lst (map (lam b. 
             match a with Component (_,a_name,_) then
                 match b with Component (_,b_name,_) then
-                    (a_name,b_name)
+                    (a,b)
                 else error "edges must be between components"
             else error "edges must be between components"
             ) 
@@ -184,18 +198,11 @@ let circ = Series [
             Series [
                 Component("resistor", "r5",0.0)
             ],
+            Component("ground","g",0.0),
             Close ()
         ] in
-let edges = circGetAllEdges circ in
-utest edges with [] in
-let _ = map (lam x. 
-    utest x with [] in
-    match x with (a,b) then
-        let _ = print a in
-        let _ = print "," in
-        let _ = print b in
-        print "\n"
-    else print "no match") edges in ()
+let edges = circGetAllEdges circ in 
+utest edges with [] in ()
 --utest (circGetAllComponents circ) with "" in
 --utest circLast circ with [] in
 --utest circGetAllEdges circ with [] in 

@@ -26,9 +26,19 @@ let vertexToDot = lam v. lam modelID.
     let class = match modelID with () then "" else concatList ["class=model",(int2string modelID),"node"," "] in
     concatList ["node[",v.settings,"];",v.name,"[","id=",quote,v.name,quote," ",class,v.extra,"];"]
 
+let edgeToSubgraph = lam lst. lam modelID.
+    let w = foldl (lam str. lam x. concat str (foldl concat [] [["subgraph {\n",
+    "rank=same;",
+    vertexToDot x.1 modelID,
+    vertexToDot x.0 modelID,
+    "\n};"
+    ]])) "" lst in
+    utest w with [] in w
+
 -- prints a given model in dot syntax
-let getDot = lam graphType. lam direction. lam vertices. lam edges. lam id. lam extra.
+let getDot = lam graphType. lam direction. lam vertices. lam edges. lam id. lam extra. lam subgraphs.
     let output = foldl concat [] [[graphType," {\n",extra,"\n","rankdir=",direction,";"],
+        edgeToSubgraph subgraphs id,
         (map (lam v. vertexToDot v id) vertices),
         (map (lam e. edgeToDot e id) edges),
         ["}"]
@@ -49,11 +59,10 @@ let getStdNodeSettings = lam _.
 let btreeGetDot = lam tree. lam node2str. lam direction. lam id. lam vSettings.
     let dotEdges = map (lam e. initDotEdge (node2str e.0) (node2str e.1) "" "->" "") (treeEdges tree ()) in
     let dotVertices = map (lam v. 
-        utest vSettings with [] in
         let extra = find (lam x. tree.eqv x.0 v) vSettings in
         initDotVertex (node2str v) (match extra with Some e then e.1 else "") (getStdNodeSettings ())
     ) (treeVertices tree) in
-    getDot "digraph" direction dotVertices dotEdges id ""
+    getDot "digraph" direction dotVertices dotEdges id "" []
 
 -- returns a graph in dot.
 let graphGetDot = lam graph. lam v2str. lam l2str. lam direction. lam id. lam graphType. lam vSettings.
@@ -63,7 +72,7 @@ let graphGetDot = lam graph. lam v2str. lam l2str. lam direction. lam id. lam gr
         initDotVertex (v2str v) (match extra with Some e then e.1 else "") (getStdNodeSettings ())
     ) (graphVertices graph) in
     let dotEdges = map (lam e. initDotEdge (v2str e.0) (v2str e.1) (l2str e.2) delimiter "") (graphEdges graph) in
-    getDot graphType direction dotVertices dotEdges id ""
+    getDot graphType direction dotVertices dotEdges id "" []
 
 -- Gets a NFA in dot simulated "steps" steps av the "input" input.
 let nfaGetDotSimulate = lam nfa. lam v2str. lam l2str. lam direction. lam id. lam vSettings. lam input. lam steps.
@@ -91,40 +100,100 @@ let nfaGetDotSimulate = lam nfa. lam v2str. lam l2str. lam direction. lam id. la
         map (lam e. 
             let extra = if (lti 0 steps) then 
                 if (eqEdge (e.0,e.1) finalEdge) then "color=darkgreen"
-            else "" 
+                else "" 
             else "" in
             initDotEdge (v2str e.0) (v2str e.1) (l2str e.2) "->" extra)
         (nfaTransitions nfa)] in
-    getDot "digraph" direction dotVertices dotEdges id ""
+    getDot "digraph" direction dotVertices dotEdges id "" []
 
 -- Gets a NFA in dot.
 let nfaGetDot = lam nfa. lam v2str. lam l2str. lam direction. lam id. lam vSettings.
     nfaGetDotSimulate nfa v2str l2str direction id vSettings "" (negi 1)
 
+let makeTDElem = lam color. lam elem_width. lam elem_height.
+        foldl concat [] ["<td ",
+            "bgcolor=\\\"", color,"\\\" ",
+            "width = \\\"",(int2string elem_width),"\\\" ",
+            " height=\\\"",(int2string elem_height),"\\\"",
+            "></td>\n"]
 
 -- returns the standard node setting
 let getBatteryNodeSettings = lam _.
-    "style=filled fillcolor=blue shape=diamond"
+    let side_width = 1 in
+    let center_width = 10 in
+    let side_height = 5 in
+    let center_height = 10 in
+    foldl concat [] ["shape=none, color=none height=0 width=0 margin=0 label=<
+    <table BORDER=\\\"0\\\" CELLBORDER=\\\"0\\\" CELLSPACING=\\\"0\\\" CELLPADDING=\\\"0\\\"> 
+        <tr>",
+            (foldl (lam str. lam x. concat str (makeTDElem x.0 x.1 x.2))) "" 
+                [("black",side_width,side_height),("none",center_width,side_height),("none",side_width,side_height)],
+        "</tr> 
+        <tr>",
+            (foldl (lam str. lam x. concat str (makeTDElem x.0 x.1 x.2))) "" 
+                [("black",side_width,side_height),("none",center_width,center_height),("black",side_width,side_height)],
+        "</tr>
+        <tr>",
+            (foldl (lam str. lam x. concat str (makeTDElem x.0 x.1 x.2))) "" 
+                [("black",side_width,side_height), ("none",center_width,side_height),("none",side_width,side_height)],
+        "</tr>   
+     </table>>"]
+
+-- returns the standard node setting
+let getGroundNodeSettings = lam _.
+    let width =5 in
+    let height = 1 in
+    foldl concat [] ["shape=none, color=none height=0 width=0 margin=0 label=<
+    <table CELLBORDER=\\\"0\\\" CELLSPACING=\\\"0\\\" CELLPADDING=\\\"0\\\" >\n<tr>",
+            (foldl (lam str. lam x. concat str (makeTDElem x width height))) "" ["black","black","black","black","black"],
+        " </tr>\n<tr>",
+           makeTDElem "none" width (muli 2 height),
+       "</tr>\n<tr>",
+            (foldl (lam str. lam x. concat str (makeTDElem x width height))) "" ["none","black","black","black","none"],
+        "</tr>\n<tr>",
+            makeTDElem "none" width (muli 2 height),
+        "</tr>\n<tr>",
+            (foldl (lam str. lam x. concat str (makeTDElem x width height))) "" ["none","none","black","none","none"],
+        "</tr>\n</table>> "]
 
 -- returns the standard node setting
 let getResistorNodeSettings = lam _.
-    "style=filled fillcolor=gray shape=rect"
+    "style=filled color=black fillcolor=none shape=rect height=0.1 width=0.3 label=\\\"\\\""
 
 -- returns a graph in dot.
 let circGetDot = lam circ. lam comp2str. lam id. lam vSettings.
-    let delimiter = "->" in
-    let dotVertices = map (lam c. 
+    let delimiter = "--" in
+    let components = circGetAllComponents circ in 
+    let dotVertices = join (map (lam c. 
         match c with Component (comp_type,name,value) then
             -- round to two decimals
             let value_str = head (strSplit "." (float2string value)) in
             if (setEqual eqchar comp_type "resistor") then
-                initDotVertex (comp2str name) (foldl concat [] ["label=\\\"",(comp2str name)," = " ,value_str," &Omega;\\\""]) (getResistorNodeSettings ())
-            else initDotVertex (comp2str name) "" (getBatteryNodeSettings ())
-        else ""
-    ) (circGetAllComponents circ) in
-    let dotEdges = map (lam e. initDotEdge (comp2str e.0) (comp2str e.1) "" delimiter "") (circGetAllEdges circ) in
-    utest dotEdges with [] in
-    getDot "digraph" "LR" dotVertices dotEdges id "splines=ortho;"
+                [initDotVertex (comp2str name) (foldl concat [] ["xlabel=\\\"" ,value_str," &Omega;\\\""]) (getResistorNodeSettings ())]
+            else if (setEqual eqchar comp_type "battery") then
+                [initDotVertex (comp2str name) (foldl concat [] ["xlabel=\\\"",value_str," V\\\""]) (getBatteryNodeSettings ())]
+            else [initDotVertex (comp2str name) "" "shape=point height=0 width=0",
+                initDotVertex (concat (comp2str name) "fig") "" (getGroundNodeSettings ())]
+        else []
+    ) components) in
+    let groundComp = (filter (lam x. match x with Component("ground",name,value) then true else false) components) in
+    let groundEdges = map (lam x. 
+        match x with Component("ground",name,val) then 
+            (x,Component("ground",(concat name "fig"),val))
+        else ()
+    ) groundComp in
+    let edges = concat (circGetAllEdges circ) groundEdges in
+    let dotEdges = map (lam e.
+            let from = circGetComponentName e.0 in
+            let to = circGetComponentName e.1 in
+            initDotEdge from to "" delimiter "constraint=true"
+            ) edges in
+    let dotSubgraphs = map (lam x. 
+        let name = comp2str (circGetComponentName x) in
+        (initDotVertex name "" "shape=point height=0 width=0",
+        initDotVertex (concat name "fig") "" (getGroundNodeSettings ()))
+    ) groundComp in
+    getDot "graph" "LR" dotVertices dotEdges id "graph [ nodesep=\\\"1.1\\\" ranksep=\\\"0.5\\\"];\nsplines=ortho; " dotSubgraphs
 
 -- converts the given model in dot. vSettings is a seqence of 
 -- two element tuples, the first element refers to the name of the vertex, 
