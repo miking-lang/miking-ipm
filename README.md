@@ -190,6 +190,46 @@ To get a `model` containing this digraph, use the model constructor. Ex:
 
     BTree(tree, int2string,"TB",[(2,"root")])
 
+## Circuit
+The constructor for the circuit takes two arguments:
+
+A circuit is constructed of three types:
+
+- `Component  : (circ_type,name,value)`, 
+	
+	**Circ_type:** A component can be of type _"battery"_, _"resistor"_ or _"ground"_. 
+	
+	**name:** The name of the component. Of type String.
+
+	**value:** The value of the componant. Of type float.
+
+-  `Series  : [Component]`,
+	
+	A list of components which are connected in a series connection. 
+	
+-  `Parallel   : [Component]`,
+
+	A list of components which are connected in a parallel connection. 
+
+- `Close : ()`,
+
+	Makes the last component connect to the first and closes the circuit.
+
+Ex:
+	
+	let circuit = Series [
+		Component("battery","V",11.0),
+		Parallel [
+			Component("resistor","R1",4.0),
+			Component("resistor","R2",3.0)
+		],
+		Close ()
+	]
+
+To get a `model` containing this circuit, use the model constructor. Ex:
+
+    Circuit(circuit)
+
 # Usage
 The IPM framework can be used to visualize any data of type _model_. Make sure you source `modelVisualizer.mc` in your file:
 

@@ -171,7 +171,8 @@ let circGetDot = lam circ. lam id. lam vSettings.
         match c with Component (comp_type,name,maybe_value) then
             -- round to two decimals
             let value = match maybe_value with None () then 0.0 else maybe_value in
-            let value_str = head (strSplit "." (float2string value)) in
+            let value_str = int2string (roundfi value) in
+            --utest value_str with "" in
             if (setEqual eqchar comp_type "resistor") then
                 [initDotVertex name (foldl concat [] ["xlabel=\\\"" ,value_str," &Omega;\\\""]) (getResistorNodeSettings ())]
             else if (setEqual eqchar comp_type "battery") then
