@@ -34,7 +34,8 @@ let graph = foldr (lam e. lam g. graphAddEdge e.0 e.1 e.2 g)
 let nfaStates = ["a","b","c","d","e","f"] in
 let nfaTransitions = [("a","b",'1'),("b","c",'0'),("c","d",'2'),("c","e",'2'),("d","a",'1'),("e","f",'1')] in
 let nfaStartState = "a" in
-let nfaAcceptStates = ["a"] in	
+let nfaAcceptStates = ["a"] in
+	
 
 -- create your NFA
 let nfa = nfaConstr nfaStates nfaTransitions nfaStartState nfaAcceptStates eqString eqchar in
@@ -42,18 +43,43 @@ let nfa = nfaConstr nfaStates nfaTransitions nfaStartState nfaAcceptStates eqStr
 -- create your BTree
 let btree = btreeConstr (Node(2, Node(3, Nil (), Leaf 4), Leaf 5)) eqi in
 
+let circuit = Circuit (
+            
+            Series [
+            
+            Series [
+            Component ("battery","V1",11.0),
+            Component ("resistor","R3",1.4),
+            Component ("resistor","R1",1.4),
+            Component ("battery","V2",11.0),
+            Component ("resistor","R2",1.4)
+            ],
+            
+            Parallel [
+            Component ("battery","V3",0.0),
+            Component ("resistor", "R4",0.0)
+            ],
+            
+            Component("battery","V6",0.0),
+            Component("ground","g",0.0),
+            Close ()
+        ]
+         ,(lam x. x)) in
+
 visualize [
 	-- accepted by the DFA
-	DFA(dfa,"1001010",string2string, char2string,"LR",[("s0","start state"),("s3","accept state")]),
+    circuit
+	--DFA(dfa,"1001010",string2string, char2string,"LR",[("s0","start state"),("s3","accept state")]),
 	-- DFA without simulation
-	DFA(dfa,"",string2string, char2string,"LR",[]),
-	-- -- not accepted by the DFA
-	-- DFA(dfa,"101110",string2string, char2string,"LR",[]),
-	-- -- not accepted by the DFA
-	-- DFA(dfa,"1010001",string2string, char2string,"LR",[]),
-	Digraph(digraph, char2string,int2string,"LR",[])
-	-- Graph(graph,int2string,string2string,"LR",[]),
-	-- BTree(btree, int2string,"TB",[(2,"Two"),(3,"Three"),(4,"Four"),(5,"Five")]),
-	-- NFA(nfa, "1021", string2string, char2string,"LR",[]),
-	-- NFA(nfa, "1011", string2string, char2string,"LR",[])
+	--DFA(dfa,"",string2string, char2string,"LR",[]),
+	-- not accepted by the DFA
+	--DFA(dfa,"101110",string2string, char2string,"LR",[]),
+	-- not accepted by the DFA
+	--DFA(dfa,"1010001",string2string, char2string,"LR",[]),
+	--Digraph(digraph, char2string,int2string,"LR",[]),
+	--Graph(graph,int2string,string2string,"LR",[]),
+	--BTree(btree, int2string,"TB",[(2,"Two"),(3,"Three"),(4,"Four"),(5,"Five")]),
+	--NFA(nfa, "1021", string2string, char2string,"LR",[]),
+	--NFA(nfa, "1011", string2string, char2string,"LR",[])
+	
 ]

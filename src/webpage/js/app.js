@@ -17,7 +17,9 @@ function render() {
 					? model.simulation 
 						? new NFAController(model,modelRoot) 
 						: new ModelController(model,modelRoot)
-					: modelRoot.innerHTML = `<div class="warning">Unsopported model type</div>`;
+					: model.type === "circuit"
+						? new CircuitController(model,modelRoot)
+						: modelRoot.innerHTML = `<div class="warning">Unsopported model type</div>`;
 				}
 			)
 		} else {
