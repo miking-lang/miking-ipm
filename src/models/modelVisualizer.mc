@@ -1,7 +1,6 @@
 -- This file provides functions that generates a JSON object of models defined in model.mc
 
 include "string.mc"
-include "map.mc"
 include "model.mc"
 include "modelDot.mc"
 
