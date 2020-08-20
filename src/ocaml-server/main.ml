@@ -89,11 +89,6 @@ let handler ~docroot ~index (_ch ,_conn) req _body =
                   end
                 else
                   begin
-                    modified := false;
-                    let msg = !message in 
-                    Lwt.wrap1 send_func @@
-                      Some (Frame.create ~content:msg ());
-                    >>= fun () ->
                     Lwt_unix.sleep 0. >>=
                       refresh
                   end
