@@ -1,70 +1,12 @@
 -- This file provides functions that generates a JSON object of models defined in model.mc
 
 include "string.mc"
-include "map.mc"
 include "model.mc"
 include "modelDot.mc"
 
-let getDisplayName = lam name. lam displayNames. lam v2s.
-    let vertex_display = (find (lam v. 
-            match v with (a,b) then 
-                setEqual eqchar (v2s a) name
-            else false
-	    ) displayNames) in
-    match vertex_display with Some (a,b) then b else name
+let displayNamesToOptions = lam displayNames. 
+    map (lam x. match x with (x1,x2) then (x1, foldl concat [] ["label=\\\"",x2, "\\\""]) else x) displayNames
 
--- format vertex
-let formatVertex = lam name. lam displayName.
-    foldl concat [] ["{\"name\":\"", name, "\", \"displayName\": \"",displayName,"\" }\n"]
-
--- format edge
-let formatEdge = lam from. lam to. lam label.
-    foldl concat [] ["{\"from\": \"", from, "\", \"to\": \"" , to, "\", \"label\": \"" , label , "\"}\n"]
-
--- format vertices
-let formatVertices = lam vertices.  lam vertex2str. lam eqv. lam displayNames.
-    concat
-       (let vertex_string = (vertex2str (head vertices)) in
-        let vertex_display = getDisplayName vertex_string displayNames vertex2str in
-       foldl concat [] ["{\"name\":\"", vertex_string, "\", \"displayName\": \"",vertex_display,"\" }\n"])
-       (foldl (lam output. lam vertex.
-        let vertex_string = (vertex2str vertex) in
-        let vertex_display = getDisplayName vertex_string displayNames vertex2str in
-       strJoin "" [output, ",", (formatVertex vertex_string vertex_display)]
-    ) "" (tail vertices))
- 
--- format edges and squash edges between the same nodes.
-recursive
-let formatAndSquashEdges = lam trans. lam v2s. lam eqv.
-    if (eqi (length trans) 0) then "" 
-    else
-    let first = head trans in
-    let formatedEdge = concat "," (formatEdge (v2s (first.0)) (v2s (first.1)) (first.2)) in
-    if(eqi (length trans) 1) then formatedEdge
-    else
-        let second = head (tail trans) in
-        if (and (eqv (first.0) (second.0)) (eqv (first.1) (second.1))) 
-        then formatAndSquashEdges (join [[(first.0,first.1,join [first.2,second.2])], (tail (tail trans))]) v2s eqv
-        else join [formatedEdge, formatAndSquashEdges (tail trans) v2s eqv]
-end
-
--- only for head
-let formatEdgeHead = lam from. lam to. lam label.
-    strJoin "" ["{\"from\": \"", from, "\", \"to\": \"" , to, "\", \"label\": \"" , label , "\"}\n"]
-
--- format all edges into printable string
-let formatEdges = lam edges. lam v2s. lam l2s. lam eqv.
-    let edges_string = map (lam x. (x.0,x.1,l2s x.2)) (tail edges) in
-    concat (formatEdgeHead (v2s (head edges).0) (v2s (head edges).1) (l2s (head edges).2)) (formatAndSquashEdges edges_string v2s eqv)
-
--- Formatting the states
-let formatStates = lam states. lam state2str. lam eqv. lam displayNames.
-    formatVertices states state2str eqv displayNames
-
--- format transitions into printable string
-let formatTransitions = lam trans. lam v2s. lam l2s. lam eqv.
-    formatEdges trans v2s l2s eqv
-    
 -- Getting the input path formated
 let formatInputPath = lam path. lam state2string.
     concat ((foldl (lam output. lam elem.
@@ -91,79 +33,70 @@ let formatInput = lam input. lam label2str.
 
 -- (any (lam x. or (eqchar x '{') (eqchar x '[')) first)
 -- format NFA to JS code for visualizing
-let nfaVisual = lam dot. lam nfa. lam input. lam s2s. lam l2s. lam nfaType. lam displayNames. lam id.
-    let simulation = match input with "" then "" else foldl concat [] 
+
+
+-- format nfa simulation to JS code
+let nfaFormatSimulation = lam nfa. lam input. lam s2s. lam l2s. 
+    match input with "" then "" else foldl concat [] 
         ["\"simulation\" : {\n",
             " \"input\" : [", (formatInput input l2s),"],\n",
             " \"configurations\" : [\n", 
             (formatInputPath (nfaMakeInputPath (negi 1) nfa.startState input nfa) s2s),
             "]\n",
-        "},\n "] in
-    foldl concat [] ["{\n ",
-        "\"type\" : \"", nfaType,"\",\n ",
-        "\"id\" : ",int2string id,",\n",
+        "},\n "]
+
+-- format a model to JS code
+let formatModel = lam dot. lam graphType. lam id. lam simulation.
+    foldl concat [] [
+        "{\n\"type\" : \"",graphType,
+        "\",\n \"id\" : ",int2string id,",\n",
         simulation,
-        "\"model\" :",
-            "\"",dot,"\"\n",
-    "}"]
-
-let dfaVisual = nfaVisual 
-
--- format a graph to JS code
-let formatGraph = lam dot. lam nodes. lam edges. lam graphType. lam id.
-    foldl concat [] ["{\n\"type\" : \"",
-        graphType,
-        "\",\n \"id\" : ",
-        int2string id,
-        ",\n",
         " \"model\" :",
             "\"",dot, "\"\n" ,
         "}\n"
 	]
 
+-- format a nfa to JS code for visualizing
+let nfaVisual = lam nfa. lam input. lam s2s. lam l2s. lam nfaType. lam displayNames. lam id. lam direction.
+    let simulation = nfaFormatSimulation nfa input s2s l2s in
+    let dot = nfaGetDot nfa s2s l2s direction id (displayNamesToOptions displayNames) in
+    formatModel dot nfaType id simulation
+
+let dfaVisual = nfaVisual 
+
 -- format a graph to JS code for visualizing
-let graphVisual = lam dot. lam model. lam displayNames. lam vertex2str. lam edge2str. lam graphType. lam id.
-    let nodes = formatVertices (graphVertices model) vertex2str model.eqv displayNames in
-    let edges = formatEdges (graphEdges model) vertex2str edge2str model.eqv in
-    formatGraph dot nodes edges graphType id
+let graphVisual = lam graph. lam v2str. lam l2str. lam graphType. lam id. lam displayNames. lam direction.
+    let dot = graphGetDot graph v2str l2str direction id graphType (displayNamesToOptions displayNames) in
+    formatModel dot graphType id ""
 
 -- format a tree to JS code for visualizing
-let treeVisual = lam dot. lam model. lam v2str. lam displayNames. lam id.
-    let eqv = model.eqv in
-    let vertices = formatVertices (treeVertices model) v2str eqv displayNames in
-    let edges = map (lam e. formatEdge (v2str e.0) (v2str e.1) e.2) (treeEdges model ()) in
-    let edges = foldl (lam edges. lam e. strJoin "," [edges, e]) (head edges) (tail edges) in
-    formatGraph dot vertices edges "tree" id
+let treeVisual = lam btree. lam v2str. lam displayNames. lam id. lam direction.
+    let dot = btreeGetDot btree v2str direction id (displayNamesToOptions displayNames) in
+    formatModel dot "tree" id ""
 
--- format a model into a string representation for visualization
-let formatModel = lam model. lam id.
-    let dot = modelGetDot model id [] in
+let circVisual = lam circuit. lam id.
+    let dot = circGetDot circuit id [] in
+    formatModel dot "circuit" id ""
+
+let formatWithId = lam model. lam id.
     match model with Digraph(digraph,vertex2str,edge2str,direction,displayNames) then
-        graphVisual dot digraph displayNames vertex2str edge2str "digraph" id
+        graphVisual digraph vertex2str edge2str "digraph" id displayNames direction
     else match model with DFA(dfa,input,state2str,label2str,direction,displayNames) then
-        dfaVisual dot dfa input state2str label2str "dfa" displayNames id
+        dfaVisual dfa input state2str label2str "dfa" displayNames id direction
     else match model with Graph(graph,vertex2str,edge2str,direction,displayNames) then
-        graphVisual dot graph displayNames vertex2str edge2str "graph" id
+        graphVisual graph vertex2str edge2str  "graph" id displayNames direction
     else match model with NFA(nfa,input,state2str,label2str,direction,displayNames) then
-        nfaVisual dot nfa input state2str label2str "nfa" displayNames id
-    else match model with BTree(btree,node2str,direction,displayName) then
-        treeVisual dot btree node2str displayName id
+        nfaVisual nfa input state2str label2str "nfa" displayNames id direction
+    else match model with BTree(btree, node2str,direction,displayName) then
+        treeVisual btree node2str displayName id direction
+    else match model with Circuit(circuit) then
+        circVisual circuit id
     else error "Unknown model type"
 
 -- format a list of models into a string representation for visualization
 let formatModels = lam models.
     let ids = mapi const models in
-    let formattedModels = zipWith formatModel models ids in
+    let formattedModels = zipWith formatWithId models ids in
     join ["{\"models\": [\n", strJoin ",\n" formattedModels, "]\n}\n"]
 
 let visualize = compose print formatModels
-
-mexpr
-let states = [1,2,3] in
-let transitions = [(1,2,'0'),(3,1,'0'),(1,2,'1'),(2,3,'1'),(1,2,'2'),(3,1,'1')] in
-let startState = 1 in
-let acceptStates = [1] in
-let input = "010" in
-let newDfa = dfaConstr states transitions startState acceptStates eqi eqchar in
-let model = DFA(newDfa, input, int2string, lam b. [b],"LR",[]) in
-visualize [model]

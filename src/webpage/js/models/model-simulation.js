@@ -72,6 +72,9 @@ class ModelSimulation {
         return this.currentConfigurationIndex >= this.configurations.length-1
     }
 
+    /**
+     * Gets the content of the control pandel.
+     */
     getControlPanel() {
         return `<span class="simulation-title">Change state:</span>
         <button class="previousButton std-btn" ${this.isAtStartState()?"disabled=true":""}>Previous</button>
@@ -80,7 +83,7 @@ class ModelSimulation {
 
     /**
      * Gets a configuration by index.
-     * @param {¨} index 
+     * @param {int} index 
      */
     getConfigurationBy(index) {
         return index < 0 ? null : this.configurations[index]

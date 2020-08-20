@@ -37,6 +37,24 @@ let nfaAcceptStates = ["a"] in
 let nfa = nfaConstr nfaStates nfaTransitions nfaStartState nfaAcceptStates (setEqual eqchar) eqchar in
 let myNfa = NFA(nfa, "102", string2string, char2string,"LR",[]) in
 
-let myGraph = Graph(graph,int2string,string2string,"LR") in
-let myDigraph = Digraph(digraph, char2string,int2string,"LR") in
-  modelPrintDot myDigraph []
+
+let circuit = Circuit (Series [
+            Series [
+            Component ("battery","V1",11.0),
+            Component ("resistor","R3",1.4),
+            Component ("resistor","R1",1.4),
+            Component ("battery","V2",11.0),
+            Component ("resistor","R2",1.4)
+            ],
+            Parallel [
+            Component ("battery","V3",0.0),
+            Component ("resistor", "R4",0.0)
+            ],
+            Series [
+                Component("resistor", "r5",0.0)
+            ]
+        ] ) in
+
+let myGraph = Graph(graph,int2string,string2string,"LR",[]) in
+let myDigraph = Digraph(digraph, char2string,int2string,"LR",[]) in
+  modelPrintDot circuit []
