@@ -54,17 +54,14 @@ let circuit = Circuit (
             Component ("battery","V2",11.0),
             Component ("resistor","R2",1.4)
             ],
-            
             Parallel [
             Component ("battery","V3",0.0),
             Component ("resistor", "R4",0.0)
             ],
-            
+            Component("ground","g",(None ())),
             Component("battery","V6",0.0),
-            Component("ground","g",0.0),
             Close ()
-        ]
-         ,(lam x. x)) in
+        ]) in
 
 visualize [
 	-- accepted by the DFA

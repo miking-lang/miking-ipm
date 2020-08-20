@@ -160,40 +160,46 @@ let getGroundNodeSettings = lam _.
 let getResistorNodeSettings = lam _.
     "style=filled color=black fillcolor=none shape=rect height=0.1 width=0.3 label=\\\"\\\""
 
+let getPointNodeSettings = lam _.
+    "shape=point style=filled color=black height=0.05 width=0.05"
+
 -- returns a graph in dot.
-let circGetDot = lam circ. lam comp2str. lam id. lam vSettings.
+let circGetDot = lam circ. lam id. lam vSettings.
     let delimiter = "--" in
     let components = circGetAllComponents circ in 
     let dotVertices = join (map (lam c. 
-        match c with Component (comp_type,name,value) then
+        match c with Component (comp_type,name,maybe_value) then
             -- round to two decimals
+            let value = match maybe_value with None () then 0.0 else maybe_value in
             let value_str = head (strSplit "." (float2string value)) in
             if (setEqual eqchar comp_type "resistor") then
-                [initDotVertex (comp2str name) (foldl concat [] ["xlabel=\\\"" ,value_str," &Omega;\\\""]) (getResistorNodeSettings ())]
+                [initDotVertex name (foldl concat [] ["xlabel=\\\"" ,value_str," &Omega;\\\""]) (getResistorNodeSettings ())]
             else if (setEqual eqchar comp_type "battery") then
-                [initDotVertex (comp2str name) (foldl concat [] ["xlabel=\\\"",value_str," V\\\""]) (getBatteryNodeSettings ())]
-            else [initDotVertex (comp2str name) "" "shape=point height=0 width=0",
-                initDotVertex (concat (comp2str name) "fig") "" (getGroundNodeSettings ())]
+                [initDotVertex name (foldl concat [] ["xlabel=\\\"",value_str," V\\\""]) (getBatteryNodeSettings ())]
+            else [initDotVertex name "" (getPointNodeSettings ()),
+                initDotVertex (concat name "fig") "" (getGroundNodeSettings ())]
         else []
     ) components) in
     let groundComp = (filter (lam x. match x with Component("ground",name,value) then true else false) components) in
     let groundEdges = map (lam x. 
-        match x with Component("ground",name,val) then 
-            (x,Component("ground",(concat name "fig"),val))
-        else ()
+        let name = circGetComponentName x in
+        let from = match (find (lam x. setEqual eqchar x.name name) dotVertices) with 
+            Some e then e else (None ()) in
+        let to = match (find (lam x. setEqual eqchar x.name (concat name "fig" )) dotVertices) with
+            Some e then e else (None ()) in
+        (from,to)
     ) groundComp in
-    let edges = concat (circGetAllEdges circ) groundEdges in
-    let dotEdges = map (lam e.
+    let edges = concat (circGetAllEdges circ) [] in
+    let dotEdges = concat (map (lam e.
             let from = circGetComponentName e.0 in
             let to = circGetComponentName e.1 in
-            initDotEdge from to "" delimiter "constraint=true"
-            ) edges in
-    let dotSubgraphs = map (lam x. 
-        let name = comp2str (circGetComponentName x) in
-        (initDotVertex name "" "shape=point height=0 width=0",
-        initDotVertex (concat name "fig") "" (getGroundNodeSettings ()))
-    ) groundComp in
-    getDot "graph" "LR" dotVertices dotEdges id "graph [ nodesep=\\\"1.1\\\" ranksep=\\\"0.5\\\"];\nsplines=ortho; " dotSubgraphs
+            initDotEdge from to "" delimiter ""
+            ) edges) (map (lam e.
+                initDotEdge (e.0).name (e.1).name "" delimiter ""
+            ) groundEdges
+            ) in
+    let dotSubgraphs = groundEdges in
+    getDot "graph" "LR" dotVertices dotEdges id "graph [ nodesep=\\\"0.8\\\" ];\nsplines=ortho; " dotSubgraphs
 
 -- converts the given model in dot. vSettings is a seqence of 
 -- two element tuples, the first element refers to the name of the vertex, 
@@ -209,8 +215,8 @@ let modelGetDot = lam model. lam id. lam vSettings.
         nfaGetDot dfa state2str label2str direction id vSettings
     else match model with BTree(tree, node2str,direction) then
         btreeGetDot tree node2str direction id vSettings
-    else match model with Circuit(circuit,comp2str) then
-        circGetDot circuit comp2str id vSettings
+    else match model with Circuit(circuit) then
+        circGetDot circuit id vSettings
     else ""
 
 let modelPrintDotSimulateTo = lam model. lam steps. lam vSettings.

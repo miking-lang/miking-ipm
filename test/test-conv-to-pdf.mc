@@ -53,7 +53,7 @@ let circuit = Circuit (Series [
             Series [
                 Component("resistor", "r5",0.0)
             ]
-        ] ,(lam x. x)) in
+        ] ) in
 
 let myGraph = Graph(graph,int2string,string2string,"LR",[]) in
 let myDigraph = Digraph(digraph, char2string,int2string,"LR",[]) in

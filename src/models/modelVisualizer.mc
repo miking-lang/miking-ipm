@@ -32,6 +32,9 @@ let formatInput = lam input. lam label2str.
         foldl concat [] [output,",\"" ,label2str elem, "\""]
     ) "" (tail input))
 
+-- (any (lam x. or (eqchar x '{') (eqchar x '[')) first)
+-- format NFA to JS code for visualizing
+
 
 -- format nfa simulation to JS code
 let nfaFormatSimulation = lam nfa. lam input. lam s2s. lam l2s. 
@@ -72,40 +75,30 @@ let treeVisual = lam btree. lam v2str. lam displayNames. lam id. lam direction.
     let dot = btreeGetDot btree v2str direction id (displayNamesToOptions displayNames) in
     formatModel dot "tree" id ""
 
-let circVisual = lam circuit. lam comp2str. lam id.
-    let dot = circGetDot circuit comp2str id [] in
+let circVisual = lam circuit. lam id.
+    let dot = circGetDot circuit id [] in
     formatModel dot "circuit" id ""
 
--- format a model into a string representation for visualization
-let formatModel = lam model. lam id.
-    match model with Digraph(digraph,vertex2str,edge2str,direction,displayNames) then
-        graphVisual digraph vertex2str edge2str "digraph" id displayNames direction
-    else match model with DFA(dfa,input,state2str,label2str,direction,displayNames) then
-        dfaVisual dfa input state2str label2str "dfa" displayNames id direction 
-    else match model with Graph(graph,vertex2str,edge2str,direction,displayNames) then
-        graphVisual graph vertex2str edge2str  "graph" id displayNames direction
-    else match model with NFA(nfa,input,state2str,label2str,direction,displayNames) then
-        nfaVisual nfa input state2str label2str "nfa" displayNames id direction
-    else match model with BTree(btree, node2str,direction,displayName) then
-        treeVisual btree node2str displayName id direction
-    else match model with Circuit(circuit, comp2str) then
-        circVisual circuit comp2str id
-    else error "unknown model type"
-
--- format a list of models into a string representation for visualization
-let formatModels = lam models.
-    let ids = mapi const models in
-    let formattedModels = zipWith formatModel models ids in
-    join ["{\"models\": [\n", strJoin ",\n" formattedModels, "]\n}\n"]
-
-let visualize = compose print formatModels
-
-mexpr
-let states = [1,2,3] in
-let transitions = [(1,2,'0'),(3,1,'0'),(1,2,'1'),(2,3,'1'),(1,2,'2'),(3,1,'1')] in
-let startState = 1 in
-let acceptStates = [1] in
-let input = "010" in
-let newDfa = dfaConstr states transitions startState acceptStates eqi eqchar in
-let model = DFA(newDfa, input, int2string, lam b. [b],"LR",[]) in
-visualize [model]
+-- make all models into string object
+let visualize = lam models.
+    let ids = mapi (lam i. lam x. i) models in
+    let models = zipWith (lam x. lam y. (x,y)) models ids in
+    let models = strJoin ",\n" (
+        map (lam model_tup.
+	    let model = model_tup.0 in
+	    let id = model_tup.1 in
+	    match model with Digraph(digraph,vertex2str,edge2str,direction,displayNames) then
+            graphVisual digraph vertex2str edge2str "digraph" id displayNames direction
+        else match model with DFA(dfa,input,state2str,label2str,direction,displayNames) then
+            dfaVisual dfa input state2str label2str "dfa" displayNames id direction 
+        else match model with Graph(graph,vertex2str,edge2str,direction,displayNames) then
+            graphVisual graph vertex2str edge2str  "graph" id displayNames direction
+        else match model with NFA(nfa,input,state2str,label2str,direction,displayNames) then
+            nfaVisual nfa input state2str label2str "nfa" displayNames id direction
+        else match model with BTree(btree, node2str,direction,displayName) then
+            treeVisual btree node2str displayName id direction
+        else match model with Circuit(circuit) then
+            circVisual circuit id
+        else error "unknown type") models
+    ) in
+    print (foldl concat [] ["{\"models\": [\n", models, "]\n}\n"])

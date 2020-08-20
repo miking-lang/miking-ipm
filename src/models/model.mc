@@ -9,7 +9,7 @@ type Model
     con Graph   : (Graph,  vertex2str, edge2str,     direction, displayNames) -> Model
     con NFA     : (NFA, input, state2str, label2str, direction, displayNames) -> Model
     con BTree   : (BTree,node2str,                   direction, displayNames) -> Model
-    con Circuit : (Circuit,comp2str                                         ) -> Model
+    con Circuit : (Circuit                                         ) -> Model
 
 mexpr
 let states = ["a","b","c"] in
