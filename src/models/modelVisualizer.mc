@@ -79,8 +79,8 @@ let circVisual = lam circuit. lam id.
     let dot = circGetDot circuit id [] in
     formatModel dot "circuit" id ""
 
--- make all models into string object
-let visualize = lam models.
+-- format a model into a string representation for visualization
+let formatModels = lam models.
     let ids = mapi (lam i. lam x. i) models in
     let models = zipWith (lam x. lam y. (x,y)) models ids in
     let models = strJoin ",\n" (
@@ -101,4 +101,6 @@ let visualize = lam models.
             circVisual circuit id
         else error "unknown type") models
     ) in
-    print (foldl concat [] ["{\"models\": [\n", models, "]\n}\n"])
+    foldl concat [] ["{\"models\": [\n", models, "]\n}\n"]
+
+let visualize = compose print formatModels
