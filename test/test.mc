@@ -44,23 +44,29 @@ let nfa = nfaConstr nfaStates nfaTransitions nfaStartState nfaAcceptStates eqStr
 let btree = btreeConstr (Node(2, Node(3, Nil (), Leaf 4), Leaf 5)) eqi in
 
 let circuit = Circuit (
-            
-            Series [
-            
-            Series [
-            Component ("battery","V1",11.0,1),
-            Component ("resistor","R3",1.4,1),
-            Component ("resistor","R1",1.4,1),
-            Component ("battery","V2",11.0,1),
-            Component ("resistor","R2",1.4,1)
-            ],
-            Parallel [
-            Component ("battery","V3",0.0,1),
-            Component ("resistor", "R4",0.0,1)
-            ],
-            Component("ground","g",(None ()),0),
-            Component("battery","V6",0.0,1)
-        ]) in
+                Parallel [
+                    Component ("ground","g",None ()),
+                    Component ("battery","V3",0.0),
+                    Series [
+                        Component ("battery","V11",0.0),
+                        Parallel [
+                            Series [
+                                Component ("battery","V20",0.0),
+                                Parallel [
+                                    Component ("battery","V31",0.0),
+                                    Component ("battery","V32",0.0)
+                                ]
+                            ],
+                            Component ("battery","V12",0.0)
+                        ]
+                    ],
+                    Series [
+                        Component ("resistor", "R5",0.0),
+                        Component ("resistor", "R7",0.0)
+                    ],
+                    Component ("battery","V10",0.0)
+                ]
+            ) in
 
 visualize [
 	-- accepted by the DFA

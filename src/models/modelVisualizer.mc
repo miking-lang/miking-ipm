@@ -73,6 +73,7 @@ let treeVisual = lam btree. lam v2str. lam displayNames. lam id. lam direction.
     let dot = btreeGetDot btree v2str direction id (displayNamesToOptions displayNames) in
     formatModel dot "tree" id ""
 
+-- format a circuit to JS code for visualizing
 let circVisual = lam circuit. lam id.
     let dot = circGetDot circuit id [] in
     formatModel dot "circuit" id ""

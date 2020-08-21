@@ -30,15 +30,6 @@ let vertexToDot = lam v. lam modelID.
     let class = match modelID with () then "" else concatList ["class=model",(int2string modelID),"node"," "] in
     concatList [v.name,"[","id=",quote,v.name,quote," ",class,v.settings,"];"]
 
--- let edgeToSubgraph = lam lst. lam modelID.
---     let w = foldl (lam str. lam x. concat str (foldl concat [] [["subgraph {\n",
---     "rank=same;",
---     vertexToDot x.1 modelID,
---     vertexToDot x.0 modelID,
---     "\n};"
---     ]])) "" lst in
---     utest w with [] in w
-
 -- prints a given model in dot syntax
 let getDot = lam graphType. lam direction. lam vertices. lam edges. lam id. lam extra.
     let output = foldl concat [] [[graphType," {\n",extra,"\n","rankdir=",direction,";"],
@@ -115,6 +106,7 @@ let nfaGetDotSimulate = lam nfa. lam v2str. lam l2str. lam direction. lam id. la
 let nfaGetDot = lam nfa. lam v2str. lam l2str. lam direction. lam id. lam vSettings.
     nfaGetDotSimulate nfa v2str l2str direction id vSettings "" (negi 1)
 
+-- returns a table data element with the given characteristics
 let makeTDElem = lam color. lam elem_width. lam elem_height. lam quote.
     foldl concat [] ["<td ",
         "bgcolor=",quote,color,quote,
@@ -122,33 +114,45 @@ let makeTDElem = lam color. lam elem_width. lam elem_height. lam quote.
         " height=",quote,(int2string elem_height),quote,
         "></td>\n"]
 
--- returns the standard node setting
-let getBatteryNodeSettings = lam quote.
+-- gets the resistor component in dot
+let resistorToDot = lam quote. lam name. lam value.
+    concatList [name,"[id=",quote,name,quote," ",
+                "xlabel=",quote,value," &Omega;",quote," ",
+                "style=filled color=black fillcolor=none shape=rect height=0.1 width=0.3 ",
+                "label=",quote,quote,"];"]
+
+-- gets the battery component in dot
+let circBatteryToDot = lam quote. lam name. lam value.
     let side_width = 1 in
     let center_width = 10 in
     let side_height = 5 in
     let center_height = 10 in
-    foldl concat [] ["shape=none, color=none height=0 width=0 margin=0 label=<
-    <table BORDER=",quote,"0",quote," CELLBORDER=",quote,"0",quote," CELLSPACING=",quote,"0",quote," CELLPADDING=",quote,"0",quote,"> 
-        <tr>",
-            (foldl (lam str. lam x. concat str (makeTDElem x.0 x.1 x.2 quote))) "" 
-                [("black",side_width,side_height),("none",center_width,side_height),("none",side_width,side_height)],
-        "</tr> 
-        <tr>",
-            (foldl (lam str. lam x. concat str (makeTDElem x.0 x.1 x.2 quote))) "" 
-                [("black",side_width,side_height),("none",center_width,center_height),("black",side_width,side_height)],
-        "</tr>
-        <tr>",
-            (foldl (lam str. lam x. concat str (makeTDElem x.0 x.1 x.2 quote))) "" 
-                [("black",side_width,side_height), ("none",center_width,side_height),("none",side_width,side_height)],
-        "</tr>   
-     </table>>"]
+    let settings = foldl concat [] ["shape=none, color=none height=0 width=0 margin=0 label=<
+        <table BORDER=",quote,"0",quote," CELLBORDER=",quote,"0",quote," CELLSPACING=",quote,"0",quote," CELLPADDING=",quote,"0",quote,"> 
+            <tr>",
+                (foldl (lam str. lam x. concat str (makeTDElem x.0 x.1 x.2 quote))) "" 
+                    [("black",side_width,side_height),("none",center_width,side_height),("none",side_width,side_height)],
+            "</tr> 
+            <tr>",
+                (foldl (lam str. lam x. concat str (makeTDElem x.0 x.1 x.2 quote))) "" 
+                    [("black",side_width,side_height),("none",center_width,center_height),("black",side_width,side_height)],
+            "</tr>
+            <tr>",
+                (foldl (lam str. lam x. concat str (makeTDElem x.0 x.1 x.2 quote))) "" 
+                    [("black",side_width,side_height), ("none",center_width,side_height),("none",side_width,side_height)],
+            "</tr>   
+        </table>>"
+    ] in
+    concatList [name,"[id=",quote,name,quote," ",
+                        "xlabel=",quote,value," V",quote," ",
+                        settings,"];"]
 
--- returns the standard node setting
-let getGroundNodeSettings = lam quote.
+-- gets the ground component in dot
+let circGroundToDot = lam quote. lam name.
+    let figName = concat name "fig" in
     let width =5 in
     let height = 1 in
-    foldl concat [] ["shape=none, color=none height=0 width=0 margin=0 label=<
+    let settings = foldl concat [] ["shape=none, color=none height=0 width=0 margin=0 label=<
     <table CELLBORDER=",quote,"0",quote," CELLSPACING=",quote,"0",quote," CELLPADDING=",quote,"0",quote," >\n<tr>",
             (foldl (lam str. lam x. concat str (makeTDElem x width height quote))) "" ["black","black","black","black","black"],
         " </tr>\n<tr>",
@@ -159,36 +163,67 @@ let getGroundNodeSettings = lam quote.
             makeTDElem "none" width (muli 2 height) quote,
         "</tr>\n<tr>",
             (foldl (lam str. lam x. concat str (makeTDElem x width height quote))) "" ["none","none","black","none","none"],
-        "</tr>\n</table>> "]
+        "</tr>\n</table>> "] in
+    concatList [figName,"[id=",quote,figName,quote," ",settings,"];",
+                name,"[id=",quote,name,quote," shape=point style=filled color=black height=0.05 width=0.05];",
+                figName,"--",name,";"]
 
-
+<<<<<<< HEAD
 <<<<<<< HEAD
 let getPointNodeSettings = lam _.
     "shape=point style=filled color=black height=0.03 width=0.03"
 =======
+=======
+-- returns a component in dot.
+>>>>>>> 70c36c1... imporved automatic layout for electrical circuits
 let componentToDot = lam comp. lam quote.
     match comp with Component (comp_type,name,maybe_value) then
         -- round to two decimals
         let value = match maybe_value with None () then 0.0 else maybe_value in
         let value_str = int2string (roundfi value) in
         match comp_type with "resistor" then
-            concatList [name,"[id=",quote,name,quote," ",
-                        "xlabel=",quote,value_str," &Omega;",quote," ",
-                        "style=filled color=black fillcolor=none shape=rect height=0.1 width=0.3 ",
-                        "label=",quote,quote,"];"]
+            resistorToDot quote name value_str
         else match comp_type with "battery" then
-            concatList [name,"[id=",quote,name,quote," ",
-                        "xlabel=",quote,value_str," V",quote," ",
-                        getBatteryNodeSettings quote,"];"]
+            circBatteryToDot quote name value_str
         else match comp_type with "ground" then
-            let figName = concat name "fig" in
-            concatList [figName,"[id=",quote,figName,quote," ",getGroundNodeSettings quote,"];",
-                        name,"[id=",quote,name,quote," shape=point style=filled color=black height=0.05 width=0.05];",
-                        figName,"--",name,";"]
+            circGroundToDot quote name
         else ""
     else []
 
+<<<<<<< HEAD
 >>>>>>> 2e383d7... Refactored functions for component rendering
+=======
+-- goes through the circuit and returns the edges in dot.
+-- the order of the edges returned determines the layout of the circuit
+recursive
+let circGetDotEdges = lam circ. lam id. lam inClosure.
+    let cluStart = lam id. lam dir. concatList ["{rank=same; g",int2string id,dir] in
+    let cluEnd = lam id. lam dir. concatList [" -- g",int2string id,dir,";"] in
+    match circ with Component (_,name,_) then 
+        concat " -- " name
+    else match circ with Series circ_lst then
+        let content = foldl (lam output. lam elem. concat output (circGetDotEdges elem id true)) "" circ_lst in
+        if inClosure then content
+        else concatList [cluStart id "L",content,cluEnd id "R","}"]
+    else match circ with Parallel circ_lst then
+        let depth = mapi (lam i. lam elem. countInnerDepth elem) circ_lst in
+        let contentList = mapi (lam i. lam elem. 
+            let newId = addi i id in
+            let currId = foldl addi newId (slice depth 0 i) in
+            let nextId = foldl addi newId (slice depth 0 (addi i 1)) in
+            let minLen = if lti currId nextId 
+                         then concatList ["[minlen=",int2string (subi nextId currId),"]"] else "" in 
+            concatList [if eqi (length circ_lst) (addi i 1) then ""
+                        else concatList ["g",int2string currId,"L"," -- g",int2string (addi nextId 1),"L",minLen,
+                        " g",int2string currId,"R",cluEnd (addi nextId 1) "R"],
+                        cluStart currId "L",circGetDotEdges elem (addi 1 currId) true,cluEnd currId "R","}"]
+            ) circ_lst in
+        concatList [if inClosure then concatList [cluEnd id "L", "}"] else "",
+                    concatList contentList,
+                    if inClosure then concatList [cluStart id "R"] else ""]
+    else error "Unknown circuit type"
+end
+>>>>>>> 70c36c1... imporved automatic layout for electrical circuits
 
 -- returns a graph in dot.
 let circGetDot = lam circ. lam id. lam vSettings.
@@ -236,19 +271,11 @@ let circGetDot = lam circ. lam id. lam vSettings.
 =======
     let components = circGetAllComponents circ in
     let dotComponents = concatList (map (lam c. componentToDot c quote) components) in
-    -- let edges = concat (circGetAllEdges circ) [] in
-    -- let dotEdges = concat (map (lam e.
-    --         let from = circGetComponentName e.0 in
-    --         let to = circGetComponentName e.1 in
-    --         initDotEdge from to "" delimiter ""
-    --         ) edges) (map (lam e.
-    --             initDotEdge (e.0).name (e.1).name "" delimiter ""
-    --         ) groundEdges
-    --         ) in
-
-    concatList ["graph { concentrate=true; splines=ortho; ranksep=0.6; nodesep=0.6; rankdir=BT;",
+    let dotEdges = circGetDotEdges circ 0 false in
+    concatList ["graph { concentrate=true; splines=ortho; ranksep=0.7; nodesep=0.5; rankdir=BT;",
                 dotComponents,
-                "node[ shape = point height = 0 width = 0 margin = 0 padding=0];",
+                "node[shape=point height = 0 width = 0 margin = 0];",
+                dotEdges,
                 "}"]
 >>>>>>> 2e383d7... Refactored functions for component rendering
 

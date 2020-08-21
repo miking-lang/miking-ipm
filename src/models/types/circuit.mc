@@ -130,6 +130,20 @@ let circGetAllEdges = lam circ.
     else []
 end
 
+-- calculates the number of supporting nodes of a parallel connection
+recursive
+let countInnerDepth = lam circ.
+    match circ with Component (_,name,_) then 
+        0
+    else match circ with Series circ_lst then
+        let temp = (map (lam c. countInnerDepth c) circ_lst) in
+        max (lam l. lam r. subi l r) (map (lam c. countInnerDepth c) circ_lst)
+    else match circ with Parallel circ_lst then
+        let m = max (lam l. lam r. subi l r) (map (lam c. countInnerDepth c) circ_lst) in
+        addi (length circ_lst) m
+    else 0
+end
+
 mexpr
 let circ = Series [
             Series [
