@@ -27,13 +27,12 @@ let vertexToDot = lam v. lam modelID.
     concatList ["node[",v.settings,"];",v.name,"[","id=",quote,v.name,quote," ",class,v.extra,"];"]
 
 let edgeToSubgraph = lam lst. lam modelID.
-    let w = foldl (lam str. lam x. concat str (foldl concat [] [["subgraph {\n",
+    foldl (lam str. lam x. concat str (foldl concat [] [["subgraph {\n",
     "rank=same;",
     vertexToDot x.1 modelID,
     vertexToDot x.0 modelID,
     "\n};"
-    ]])) "" lst in
-    utest w with [] in w
+    ]])) "" lst
 
 -- prints a given model in dot syntax
 let getDot = lam graphType. lam direction. lam vertices. lam edges. lam id. lam extra. lam subgraphs.
@@ -161,14 +160,14 @@ let getResistorNodeSettings = lam _.
     "style=filled color=black fillcolor=none shape=rect height=0.1 width=0.3 label=\\\"\\\""
 
 let getPointNodeSettings = lam _.
-    "shape=point style=filled color=black height=0.05 width=0.05"
+    "shape=point style=filled color=black height=0.03 width=0.03"
 
 -- returns a graph in dot.
 let circGetDot = lam circ. lam id. lam vSettings.
     let delimiter = "--" in
     let components = circGetAllComponents circ in 
     let dotVertices = join (map (lam c. 
-        match c with Component (comp_type,name,maybe_value) then
+        match c with Component (comp_type,name,maybe_value,_) then
             -- round to two decimals
             let value = match maybe_value with None () then 0.0 else maybe_value in
             let value_str = int2string (roundfi value) in
@@ -177,30 +176,33 @@ let circGetDot = lam circ. lam id. lam vSettings.
                 [initDotVertex name (foldl concat [] ["xlabel=\\\"" ,value_str," &Omega;\\\""]) (getResistorNodeSettings ())]
             else if (setEqual eqchar comp_type "battery") then
                 [initDotVertex name (foldl concat [] ["xlabel=\\\"",value_str," V\\\""]) (getBatteryNodeSettings ())]
-            else [initDotVertex name "" (getPointNodeSettings ()),
-                initDotVertex (concat name "fig") "" (getGroundNodeSettings ())]
+            else if (setEqual eqchar comp_type "ground") then
+                [initDotVertex name "" (getGroundNodeSettings ())]
+            else [initDotVertex name "" (getPointNodeSettings ())]
         else []
     ) components) in
-    let groundComp = (filter (lam x. match x with Component("ground",name,value) then true else false) components) in
-    let groundEdges = map (lam x. 
-        let name = circGetComponentName x in
-        let from = match (find (lam x. setEqual eqchar x.name name) dotVertices) with 
-            Some e then e else (None ()) in
-        let to = match (find (lam x. setEqual eqchar x.name (concat name "fig" )) dotVertices) with
-            Some e then e else (None ()) in
-        (from,to)
-    ) groundComp in
+    --let groundComp = (filter (lam x. match x with Component("ground",name,value) then true else false) components) in
+    --let groundEdges = map (lam x. 
+    --    let name = circGetComponentName x in
+    --    let from = match (find (lam x. setEqual eqchar x.name name) dotVertices) with 
+    --        Some e then e else (None ()) in
+    --    let to = match (find (lam x. setEqual eqchar x.name (concat name "fig" )) dotVertices) with
+    --        Some e then e else (None ()) in
+    --    (from,to)
+    --) groundComp in
     let edges = concat (circGetAllEdges circ) [] in
     let dotEdges = concat (map (lam e.
+            utest e with [] in
             let from = circGetComponentName e.0 in
             let to = circGetComponentName e.1 in
             initDotEdge from to "" delimiter ""
-            ) edges) (map (lam e.
-                initDotEdge (e.0).name (e.1).name "" delimiter ""
-            ) groundEdges
-            ) in
-    let dotSubgraphs = groundEdges in
-    getDot "graph" "LR" dotVertices dotEdges id "graph [ nodesep=\\\"0.8\\\" ];\nsplines=ortho; " dotSubgraphs
+            ) edges) []--(map (lam e.
+                --initDotEdge (e.0).name (e.1).name "" delimiter ""
+            --) groundEdges
+            --)
+             in
+    --let dotSubgraphs = groundEdges in
+    getDot "graph" "LR" dotVertices dotEdges id "graph [ nodesep=\\\"0.8\\\" ];\nsplines=ortho; " []
 
 -- converts the given model in dot. vSettings is a seqence of 
 -- two element tuples, the first element refers to the name of the vertex, 

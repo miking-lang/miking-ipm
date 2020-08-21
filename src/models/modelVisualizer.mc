@@ -34,7 +34,6 @@ let formatInput = lam input. lam label2str.
 -- (any (lam x. or (eqchar x '{') (eqchar x '[')) first)
 -- format NFA to JS code for visualizing
 
-
 -- format nfa simulation to JS code
 let nfaFormatSimulation = lam nfa. lam input. lam s2s. lam l2s. 
     match input with "" then "" else foldl concat [] 

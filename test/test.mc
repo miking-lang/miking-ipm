@@ -48,19 +48,18 @@ let circuit = Circuit (
             Series [
             
             Series [
-            Component ("battery","V1",11.0),
-            Component ("resistor","R3",1.4),
-            Component ("resistor","R1",1.4),
-            Component ("battery","V2",11.0),
-            Component ("resistor","R2",1.4)
+            Component ("battery","V1",11.0,1),
+            Component ("resistor","R3",1.4,1),
+            Component ("resistor","R1",1.4,1),
+            Component ("battery","V2",11.0,1),
+            Component ("resistor","R2",1.4,1)
             ],
             Parallel [
-            Component ("battery","V3",0.0),
-            Component ("resistor", "R4",0.0)
+            Component ("battery","V3",0.0,1),
+            Component ("resistor", "R4",0.0,1)
             ],
-            Component("ground","g",(None ())),
-            Component("battery","V6",0.0),
-            Close ()
+            Component("ground","g",(None ()),0),
+            Component("battery","V6",0.0,1)
         ]) in
 
 visualize [

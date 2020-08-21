@@ -10,18 +10,14 @@ mexpr
 
 
 -- create your circuit
-let circuit = Series [
-    Series [
-    Component ("battery","V1",11.0),
-    Component ("resistor","R3",3.0)
-    ],
-    Parallel [
-    Component ("battery","V3",1.0),
-    Component ("resistor", "R4",7.0)
-    ],
-    Component("ground","g",(None ())),
-    Component("battery","V6",14.0),
-    Close ()
+let circuit = Parallel [
+    Component ("battery","V1",11.0,true),
+    Series[
+    Component ("battery","V3",1.0,true),
+    Component ("resistor", "R4",7.0,true),
+    Component("resistor","r1",0.0,true),
+    Component ("ground","gr",None(),false)
+    ]
 ] in
 
 -- call function 'visualize' to get visualization code for the circuit
