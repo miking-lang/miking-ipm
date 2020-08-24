@@ -53,5 +53,6 @@ let tree = btreeConstr treeModel eqi in
 utest match treeModel with Node t then t.0 else (negi 100) with 2 in
 utest match treeModel with Node t then t.1 else (negi 100) with Nil () in
 utest match treeModel with Node t then t.2 else (negi 100) with Leaf 3 in
+utest checkTreeStructure treeModel with () in
 utest treeEdges tree () with [(2,3,"")] in
 utest treeVertices tree with [2,3] in ()
