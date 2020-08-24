@@ -40,26 +40,26 @@ let myNfa = NFA(nfa, "102", string2string, char2string,"LR",[]) in
 
 let circuit = Circuit (
                 Parallel [
-                    Component ("ground","g",None ()),
-                    Component ("battery","V3",0.0),
+                    Component ("ground","g",None (),false),
+                    Component ("battery","V3",0.0,true),
                     Series [
-                        Component ("battery","V11",0.0),
+                        Component ("battery","V11",0.0,true),
                         Parallel [
                             Series [
-                                Component ("battery","V20",0.0),
+                                Component ("battery","V20",0.0,true),
                                 Parallel [
-                                    Component ("battery","V31",0.0),
-                                    Component ("battery","V32",0.0)
+                                    Component ("battery","V31",0.0,true),
+                                    Component ("battery","V32",0.0,true)
                                 ]
                             ],
-                            Component ("battery","V12",0.0)
+                            Component ("battery","V12",0.0,true)
                         ]
                     ],
                     Series [
-                        Component ("resistor", "R5",0.0),
-                        Component ("resistor", "R7",0.0)
+                        Component ("resistor", "R5",0.0,true),
+                        Component ("resistor", "R7",0.0,true)
                     ],
-                    Component ("battery","V10",0.0)
+                    Component ("battery","V10",0.0,true)
                 ]
             ) in
 
