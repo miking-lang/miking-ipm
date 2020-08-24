@@ -22,11 +22,6 @@ let nfa = nfaConstr nfaStates nfaTransitions nfaStartState nfaAcceptStates eqStr
 
 -- The input for simulation is given here as the second argument
 -- in the constructor.
--- Last argument is a list that maps states to displayNames.
--- The purpose is to visualize a state's name differently if
--- needed. This examples maps the state "s0" to the output name
--- of "start state".
--- Leave it empty for printing the actual names of the states.
 visualize [
 	NFA(nfa, "1021", string2string, char2string,"LR",[]),
 	NFA(nfa, "102", string2string, char2string,"LR",[])

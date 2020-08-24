@@ -63,6 +63,6 @@ let circuit = Circuit (
                 ]
             ) in
 
-let myGraph = Graph(graph,int2string,string2string,"LR",[]) in
+let myGraph = Graph(graph,int2string,string2string,"LR",[(1, [("label","hej")])]) in
 let myDigraph = Digraph(digraph, char2string,int2string,"LR",[]) in
-  modelPrintDot circuit []
+  modelPrintDot btree

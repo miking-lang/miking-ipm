@@ -30,13 +30,14 @@ let dfa = dfaConstr states transitions startState acceptStates eqString eqchar i
 
 -- The input for simulation is given here as the second argument
 -- in the constructor.
--- Last argument is a list that maps states to displayNames.
+-- Last argument is a list that maps states to extra settings.
 -- The purpose is to visualize a state's name differently if
 -- needed. This examples maps the state "s0" to the output name
 -- of "start state".
 visualize [
 	-- accepted by the DFA
-	DFA(dfa,"10010100",string2string, char2string, "LR",[("s0","start state"),("s3","accept state")]),
+	DFA(dfa,"100100",string2string, char2string, "LR",[("s0",[("label","start state")]),
+                                                         ("s3",[("label","accept state")])]),
 	-- not accepted by the DFA
 	DFA(dfa,"101110",string2string, char2string, "LR", []),
 	-- not accepted by the DFA

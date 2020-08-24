@@ -64,23 +64,23 @@ This environment supports the datatypes of type _model_. The model type extends 
 This includes:
 * Deterministic finite automaton (DFA)
 
-    `DFA (Data, input, node2str, label2str, direction, displayNames)`
+    `DFA (Data, input, node2str, label2str, direction, vSettings)`
 
 * Nondeterministic finite automaton (NFA)
 
-    `NFA (Data, input, node2str, label2str, direction, displayNames)`
+    `NFA (Data, input, node2str, label2str, direction, vSettings)`
 
 * Directed graph (Digraph)
 
-    `Digraph (Data, node2str, label2str,    direction, displayNames)`
+    `Digraph (Data, node2str, label2str,    direction, vSettings)`
     
 * Graph
 
-    `Graph (Data,  node2str, label2str,     direction, displayNames)`
+    `Graph (Data,  node2str, label2str,     direction, vSettings)`
     
 * Binary tree (BTree)
 
-    `BTree (Data,node2str,                  direction, displayNames)`
+    `BTree (Data,node2str,                  direction, vSettings)`
 
 The arguments for the constructors are:
 
@@ -92,7 +92,7 @@ The arguments for the constructors are:
 
 - **direction:** Defines the render direction. Takes one of the following values: "TB", "RL", "BT", "LR".
 
-- **displayNames:** There is a option to define a display name for any of the nodes when visualizing any of the datatypes. These values must be strings, and have no affect on the model other than that when visualized the labels for the nodes/states will not be the names used in the model, but the display names. All names used in the model must be unique, but display names do not. The display names are defined by a list of tuples `(a,b)`, where `a` is the name of the node that is used in the model and `b` is the string that will be shown as the label instead.
+- **vSettings:** There is an option to customize the nodes when visualizing any of the datatypes (not circuits atm). The extra settings names are defined by a sequence of tuples `(a,b)`, where `a` is the name of the node that is used in the model and `b` itself is a sequence of tuples with graphviz settings. `b = [("setting","value"),...]` The different settings could be found in the documentation at <a href="https://graphviz.org/documentation/">graphviz.org</a>. Examples for custom labels could be found below or in the examples directory. If you're not interested in adding any customizes settings, just pass an empty sequence `[]`.
 
     **Note:** this does not work with file conversion at the moment. 
 
@@ -124,13 +124,15 @@ The constructor for the DFA takes in seven arguments:
 
 	`let eql = eqchar`
 
+	`let settings = [("s0",[("label","start state")]),("s3",[("label","accept state")])]`
+
 The construct function is then called by:
 
     dfaConstr states transitions startState acceptStates eqv eql
 
 To get a `model` containing this DFA, use the model constructor. Ex:
 
-    DFA (my_dfa, "01010", string2string, char2string, "LR", [("s0","start")])
+    DFA (my_dfa, "01010", string2string, char2string, "LR", settings)
 
 ## NFA
 A NFA works the same as a DFA, except for the requirement for all transitions from a state to have unique labels. Just replace "dfa" with "nfa" in the above instructions.
@@ -188,7 +190,7 @@ The constructor is then called by:
 
 To get a `model` containing this digraph, use the model constructor. Ex:
 
-    BTree(tree, int2string,"TB",[(2,"root")])
+    BTree(tree, int2string,"TB",[(2,[("label","root")])])
 
 ## Circuit
 The constructor for the circuit takes two arguments:
@@ -257,11 +259,11 @@ Make sure that you include the model.mc file.
 
 To write the dot code for some data of type `model`, use one of these commands:
 
--	`modelPrintDot "YOUR-DATA" ["OPTIONS"]`
+-	`modelPrintDot "YOUR-DATA"`
 
-	Where _"YOUR-DATA"_ data of type `model` as defined above. _`["OPTIONS"]`_ is a seqence of two element tuples, the first element refers to the name of the vertex, the second should be a string with space separated custom graphviz settings. The different settings could be found in the documentation at <a href="https://graphviz.org/documentation/">graphviz.org</a>. If you're not interested in adding any customizes settings, just pass an empty sequence `[]`.
+	Where _"YOUR-DATA"_ data of type `model` as defined above.
 
-- `modelPrintDotSimulateTo "YOUR-DATA" "STEPS" ["OPTIONS"]`
+- `modelPrintDotSimulateTo "YOUR-DATA" "STEPS"`
 	
 	Which simulates going through _"STEPS"_ steps of the input (only available for NFA/DFA).
 
@@ -321,7 +323,8 @@ There is a **examples** folder in the root of the project which contains some fi
 
 	visualize [
 		-- accepted by the DFA
-		DFA(dfa,"10010100",string2string, char2string,"LR",[("s0","start state"),("s3","accept state")]),
+		DFA(dfa,"100100",string2string, char2string, "LR",[("s0",[("label","start state")]),
+														   ("s3",[("label","accept state")])]),
 		-- not accepted by the DFA
 		DFA(dfa,"101110",string2string, char2string,"LR",[]),
 		-- not accepted by the DFA
@@ -382,9 +385,10 @@ This program creates both a NFA and a Binary tree and displays them.
 
 	-- create your Binary Tree
 	let btree = BTree (Node(2, Node(3, Nil (), Leaf 4), Leaf 5)) in
+	let btreeSettings = [(2,[("label","Two")]),(3,[("label","Three")]),(4,[("label","Four")]),(5,[("label","Five")])] in
 
 	visualize [
-		BTree(btree, int2string,[(2,"Two"),(3,"Three"),(4,"Four"),(5,"Five")],"TB",[]),
+		BTree(btree, int2string,"TB",btreeSettings),
 		NFA(nfa, "1021", string2string, char2string,"LR",[]),
 		NFA(nfa, "102", string2string, char2string,"LR",[])
 	]
@@ -404,7 +408,7 @@ The following code creates a directed graph and prints it as dot code. To do the
   
 	let digraphModel = Digraph(digraph, char2string,int2string,"LR",[]) in
 
-	modelPrintDot digraphModel []
+	modelPrintDot digraphModel
 
 The following command runs the code, which is located in the file "test.mc", and creates a pdf file called "myDigraph.pdf" from the output:
 

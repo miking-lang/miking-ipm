@@ -14,13 +14,13 @@ let btreeModel2 = Node(23, Node (29, Node(7,( Leaf 5), Node (10, (Leaf 12), Nil(
 let btree = btreeConstr btreeModel eqi in
 let btree2 = btreeConstr btreeModel2 eqi in
 
--- Last argument is a list that maps nodes to displayNames.
+-- Last argument is a list that maps nodes to extra settings.
 -- The purpose is to visualize a node's name differently if
--- needed. This examples maps node 10 to the output name
+-- needed. This examples maps node 10 to the output name (label)
 -- of "root".
 visualize [
 	BTree(btree, int2string,"TB",[]),
     -- with the display names
-	BTree(btree, int2string,"TB",[(2,"Two"),(3,"Three"),(4,"Four"),(5,"Five")]),
+	BTree(btree, int2string,"TB",[(2,[("label","Two")]),(3,[("label","Three")]),(4,[("label","Four")]),(5,[("label","Five")])]),
 	BTree(btree2, int2string,"TB",[])
 ]

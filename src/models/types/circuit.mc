@@ -146,19 +146,19 @@ end
 
 mexpr
 let circ = Series [
-            Series [
-            Component ("battery","V1",11.0,1),
-            Component ("resistor","R3",1.4,1),
-            Component ("resistor","R1",1.4,1),
-            Component ("battery","V2",11.0,1),
-            Component ("resistor","R2",1.4,1)
-            ],
-            Parallel [
-            Component ("battery","V3",0.0,1),
-            Component ("resistor", "R4",0.0,1)
-            ],
-            Series [
-                Component("resistor", "r5",0.0,1)
-            ],
-            Component("ground","g",0.0,1,0)
+                Series [
+                    Component ("battery","V1",11.0),
+                    Component ("resistor","R3",1.4),
+                    Component ("resistor","R1",1.4),
+                    Component ("battery","V2",11.0),
+                    Component ("resistor","R2",1.4)
+                ],
+                Parallel [
+                    Component ("battery","V3",0.0),
+                    Component ("resistor", "R4",0.0)
+                ],
+                Series [
+                    Component("resistor", "r5",0.0)
+                ],
+                Component("ground","g",0.0)
         ] in ()
