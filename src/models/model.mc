@@ -4,12 +4,12 @@ include "dfa.mc"
 
 -- Represents models that can be visualized and its associated data.
 type Model
-    con Digraph : (Digraph, vertex2str, edge2str,    direction, displayNames) -> Model
-    con DFA     : (DFA, input, state2str, label2str, direction, displayNames) -> Model
-    con Graph   : (Graph,  vertex2str, edge2str,     direction, displayNames) -> Model
-    con NFA     : (NFA, input, state2str, label2str, direction, displayNames) -> Model
-    con BTree   : (BTree,node2str,                   direction, displayNames) -> Model
-    con Circuit : (Circuit                                         ) -> Model
+    con Digraph : (Digraph, vertex2str, edge2str,    direction, vSettings) -> Model
+    con DFA     : (DFA, input, state2str, label2str, direction, vSettings) -> Model
+    con Graph   : (Graph,  vertex2str, edge2str,     direction, vSettings) -> Model
+    con NFA     : (NFA, input, state2str, label2str, direction, vSettings) -> Model
+    con BTree   : (BTree,node2str,                   direction, vSettings) -> Model
+    con Circuit : (Circuit                                                  ) -> Model
 
 mexpr
 let states = ["a","b","c"] in

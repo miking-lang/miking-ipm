@@ -3,19 +3,25 @@ include "model.mc"
 
 -- constructor for dotEdge
 let initDotEdge = lam from. lam to. lam label. lam delimiter. lam eSettings.
-    {from = from, to = to, label = label, delimiter = delimiter, eSettings = eSettings}
+    {from=from, to=to, label=label, delimiter=delimiter, eSettings=eSettings}
 
 -- constructor for dotVertex
 let initDotVertex = lam name. lam settings.
-    {name = name,settings=settings}
+    {name=name, settings=settings}
 
 -- concatenates a list of strings
 let concatList = lam list.
     foldl concat [] list
 
+utest concatList [] with ""
+utest concatList ["a","b","c"] with "abc"
+
 -- gets the quote
 let getQuote = lam id.
     match id with () then "\"" else "\\\""
+
+utest getQuote () with "\""
+utest getQuote 1 with "\\\""
 
 -- formats a dotEdge to dot
 let edgeToDot = lam e. lam modelID.
@@ -24,18 +30,27 @@ let edgeToDot = lam e. lam modelID.
                                                               "id=",quote,e.from,e.label,e.to,quote," "] in
     concatList [e.from," ",e.delimiter," ",e.to," [label=",quote,e.label,quote," ",class,e.eSettings,"];"]
 
+utest edgeToDot (initDotEdge "a" "b" "c" "--" "") () with "a -- b [label=\"c\" ];"
+utest edgeToDot (initDotEdge "a" "b" "c" "--" "") 1  with "a -- b [label=\\\"c\\\" class=\\\"model1edge\\\" id=\\\"acb\\\" ];"
+utest edgeToDot (initDotEdge "a" "b" "c" "--" "color=\"green\"") () with "a -- b [label=\"c\" color=\"green\"];"
+
 -- formats a dotVertex to dot
 let vertexToDot = lam v. lam modelID.
     let quote = getQuote modelID in
-    let class = match modelID with () then "" else concatList ["class=model",(int2string modelID),"node"," "] in
+    let class = match modelID with () then "" else concatList ["class=",quote,"model",(int2string modelID),"node",quote," "] in
     concatList [v.name,"[","id=",quote,v.name,quote," ",class,v.settings,"];"]
+
+utest vertexToDot (initDotVertex "a" "") () with "a[id=\"a\" ];"
+utest vertexToDot (initDotVertex "a" "") 1  with "a[id=\\\"a\\\" class=\\\"model1node\\\" ];"
+utest vertexToDot (initDotVertex "a" "color=\"green\"") () with "a[id=\"a\" color=\"green\"];"
 
 let settingsToDot = lam settings. lam modelID.
     let quote = getQuote modelID in
     foldl (lam output. lam t. concatList [output, t.0,"=",quote,t.1,quote," "]) "" settings
 
--- utest (settingsToDot [("a")])
-
+utest settingsToDot [] () with ""
+utest settingsToDot [("label","start"),("color","green")] () with "label=\"start\" color=\"green\" "
+utest settingsToDot [("label","start"),("color","green")] 1  with "label=\\\"start\\\" color=\\\"green\\\" "
 
 -- prints a given model in dot syntax
 let getDot = lam graphType. lam direction. lam vertices. lam edges. lam id. lam extra.
@@ -120,12 +135,7 @@ let makeTDElem = lam color. lam elem_width. lam elem_height. lam quote.
         " height=",quote,(int2string elem_height),quote,
         "></td>\n"]
 
-let circUnconnectedToDot = lam name. lam quote. lam settings. lam value_str.
-    let figName = concat name "fig" in
-    foldl concat [] [concatList [figName,"[id=",quote,figName,quote," ","label=",quote,quote,settings.0,"xlabel=",quote,value_str,quote," ","];",
-                name,"[id=",quote,name,quote," shape=point style=filled color=black height=0.05 width=0.05",
-                "];",
-                figName,"--",name,";"]]
+utest makeTDElem "green" 1 2 "\"" with "<td bgcolor=\"green\" width=\"1\" height=\"2\"></td>\n"
 
 -- gets the resistor component in dot
 let resistorToDot = lam quote. lam name. lam value. lam custom_settings.
