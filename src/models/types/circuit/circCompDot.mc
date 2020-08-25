@@ -12,6 +12,13 @@ let makeTDElem = lam color. lam elem_width. lam elem_height. lam quote.
 
 utest makeTDElem "green" 1 2 "\"" with "<td bgcolor=\"green\" width=\"1\" height=\"2\"></td>\n"
 
+let circUnconnectedToDot = lam name. lam quote. lam settings. lam value_str.
+    let figName = concat name "fig" in
+    concatList [figName,"[id=",quote,figName,quote," ","label=",quote,quote,settings.0," xlabel=",quote,value_str,quote," ","];",
+                name,"[id=",quote,name,quote," shape=point style=filled color=black height=0.05 width=0.05",
+                "];",
+                figName,"--",name,";"]
+
 -- gets the resistor component in dot
 let resistorToDot = lam quote. lam name. lam value. lam custom_settings.
     let settings = match custom_settings with Some (setting,unit) then (setting,unit) else
