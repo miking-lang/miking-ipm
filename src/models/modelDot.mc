@@ -17,14 +17,15 @@ let concatList = lam list.
 utest concatList [] with ""
 utest concatList ["a","b","c"] with "abc"
 
--- gets the quote
+-- returns the correct formatted quote. If an id is passed, 
+-- the quote is returned in JSON format, and in dot otherwise. 
 let getQuote = lam id.
     match id with () then "\"" else "\\\""
 
 utest getQuote () with "\""
 utest getQuote 1 with "\\\""
 
--- formats a dotEdge to dot
+-- formats a dotEdge to dot.
 let edgeToDot = lam e. lam modelID.
     let quote = getQuote modelID in
     let class = match modelID with () then "" else concatList ["class=",quote,"model",(int2string modelID),"edge",quote," ",
@@ -35,7 +36,7 @@ utest edgeToDot (initDotEdge "a" "b" "c" "--" "") () with "a -- b [label=\"c\" ]
 utest edgeToDot (initDotEdge "a" "b" "c" "--" "") 1  with "a -- b [label=\\\"c\\\" class=\\\"model1edge\\\" id=\\\"acb\\\" ];"
 utest edgeToDot (initDotEdge "a" "b" "c" "--" "color=\"green\"") () with "a -- b [label=\"c\" color=\"green\"];"
 
--- formats a dotVertex to dot
+-- formats a dotVertex to dot.
 let vertexToDot = lam v. lam modelID.
     let quote = getQuote modelID in
     let class = match modelID with () then "" else concatList ["class=",quote,"model",(int2string modelID),"node",quote," "] in
@@ -45,6 +46,7 @@ utest vertexToDot (initDotVertex "a" "") () with "a[id=\"a\" ];"
 utest vertexToDot (initDotVertex "a" "") 1  with "a[id=\\\"a\\\" class=\\\"model1node\\\" ];"
 utest vertexToDot (initDotVertex "a" "color=\"green\"") () with "a[id=\"a\" color=\"green\"];"
 
+-- formats vSettings to dot.
 let settingsToDot = lam settings. lam modelID.
     let quote = getQuote modelID in
     foldl (lam output. lam t. concatList [output, t.0,"=",quote,t.1,quote," "]) "" settings
@@ -92,7 +94,7 @@ let graphGetDot = lam graph. lam v2str. lam l2str. lam id. lam direction. lam gr
     let dotEdges = map (lam e. initDotEdge (v2str e.0) (v2str e.1) (l2str e.2) delimiter "") (graphEdges graph) in
     getDot graphType direction dotVertices dotEdges id (getStdNodeSettings ())
 
--- Gets a NFA in dot simulated "steps" steps av the "input" input.
+-- returns a NFA in dot simulated "steps" steps av the "input" input.
 let nfaGetDotSimulate = lam nfa. lam v2str. lam l2str. lam id. lam direction. lam vSettings. lam input. lam steps.
     let eqv = nfaGetEqv nfa in
     let path = (if (lti (negi 0) steps) then slice (nfaMakeEdgeInputPath nfa.startState input nfa) 0 steps
@@ -124,7 +126,7 @@ let nfaGetDotSimulate = lam nfa. lam v2str. lam l2str. lam id. lam direction. la
         (nfaTransitions nfa)] in
     getDot "digraph" direction dotVertices dotEdges id (getStdNodeSettings ())
 
--- Gets a NFA in dot.
+-- returns a NFA in dot.
 let nfaGetDot = lam nfa. lam v2str. lam l2str. lam id. lam direction. lam vSettings.
     nfaGetDotSimulate nfa v2str l2str id direction vSettings "" (negi 1)
 
@@ -287,12 +289,15 @@ let modelGetDot = lam model. lam id.
         circGetDot circuit id
     else ""
 
+-- prints a model in dot simulated "steps" steps av the "input" input. 
 let modelPrintDotSimulateTo = lam model. lam steps.
-    match model with NFA(nfa,input,state2str,label2str,direction,vSettings) then
-        nfaGetDotSimulate nfa state2str label2str () direction vSettings input steps
-    else match model with DFA(dfa,input,state2str,label2str,direction,vSettings) then
-        nfaGetDotSimulate dfa state2str label2str () direction vSettings input steps
-    else ""
+    print (
+        match model with NFA(nfa,input,state2str,label2str,direction,vSettings) then
+            nfaGetDotSimulate nfa state2str label2str () direction vSettings input steps
+        else match model with DFA(dfa,input,state2str,label2str,direction,vSettings) then
+            nfaGetDotSimulate dfa state2str label2str () direction vSettings input steps
+        else ""
+    )
 
 -- converts and prints the given model in dot.
 let modelPrintDot = lam model.
