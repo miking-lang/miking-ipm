@@ -9,24 +9,12 @@ mexpr
 
 -- create your circuit
 let circuit = Parallel [
-<<<<<<< HEAD
-<<<<<<< HEAD
-    Component ("resistor","V1",0.0,true),
-    Component ("ground","g",0.0,false)
-=======
     Component ("r","V1",11.0,false),
-    Component ("ground","g",0.0,true)
->>>>>>> bcc8452... other component types can be defined
-=======
+    Component ("ground","g",0.0,true),
     Series[
-<<<<<<< HEAD
-    Component ("ammeter","Afff",None(),true),
-    Component ("ground","g",0.0,false)
-=======
         Component ("ammeter","amp",None(),true),
         Component ("capacitator","c",Some 8.0,true),
         Component ("ground","g",Some 0.0,false)
->>>>>>> 2e34a7d... added utests
     ],
     Series [
         Component ("battery","V",Some 11.0,true),
@@ -36,7 +24,6 @@ let circuit = Parallel [
         ],
         Component ("lamp","lamp1",None(),true)
     ]
->>>>>>> 18e9642... added an example
 ] in
 
 let center_width = 2 in
@@ -84,21 +71,11 @@ let capacitatorSettings = foldl concat [] ["shape=none, color=none height=0 widt
 
 -- call function 'visualize' to get visualization code for the circuit
 visualize [
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-	Circuit(circuit)
-=======
-	Circuit(circuit,[("r","shape=rect","k")])
->>>>>>> 8b44f22... other component types can be defined
-=======
-	Circuit(circuit,[("r","shape=rect label=\\\"yey\\\"","k")])
->>>>>>> bcc8452... other component types can be defined
-=======
-	Circuit(circuit,[("ammeter","shape=circle style=filled fillcolor=lightgreen label=\\\"A\\\"","&Omega; ")])
->>>>>>> 18e9642... added an example
-=======
+    -- simple circuit
+    Circuit(
+        circuit,[]
+    ),
+    -- customized circuit
 	Circuit(
         circuit,[
             ("ammeter","shape=circle style=filled fillcolor=lightgreen height=0.2 width=0.2 label=\\\"A\\\"",""),
@@ -106,5 +83,4 @@ visualize [
             ("capacitator",capacitatorSettings,"pF")
         ]
     )
->>>>>>> 2e34a7d... added utests
 ]

@@ -62,6 +62,10 @@ Note: you need to source **src/models/modelVisualizer.mc** in your source file.
 This environment supports the datatypes of type _model_. The model type extends the functions already available in the datatypes to be able to visualize them.
 
 This includes:
+* Circuit
+
+	`Circuit (Data, fig_settings)`
+
 * Deterministic finite automaton (DFA)
 
     `DFA (Data, input, node2str, label2str, direction, vSettings)`
@@ -86,15 +90,15 @@ The arguments for the constructors are:
 
 - **Data:** data of type (DFA/NFA/Digraph/Graph/BTree).
 
+- **fig_settings:** custom drawing settings for a specific component type. The fig_settings are defined by a sequence of tuples `(a,b,c)`, where `a` is the component type that is used in the model, `b` is a string of space separated graphviz settings (ex: `b = "label="battery" color=green"`) and `c` is the unit for the component value (ex: `c = "V"`). 
+
 - **(input):** a input list containing input.
 
 - **node2str** and **label2str:**  **toString** functions that return a string that represents the type you are modelling. 
 
 - **direction:** Defines the render direction. Takes one of the following values: "TB", "RL", "BT", "LR".
 
-- **vSettings:** There is an option to customize the nodes when visualizing any of the datatypes (not circuits atm). The extra settings names are defined by a sequence of tuples `(a,b)`, where `a` is the name of the node that is used in the model and `b` itself is a sequence of tuples with graphviz settings. `b = [("setting","value"),...]` The different settings could be found in the documentation at <a href="https://graphviz.org/documentation/">graphviz.org</a>. Examples for custom labels could be found below or in the examples directory. If you're not interested in adding any customizes settings, just pass an empty sequence `[]`.
-
-    **Note:** this does not work with file conversion at the moment. 
+- **vSettings:** There is an option to customize the nodes when visualizing any of the datatypes (not circuits atm). The extra settings names are defined by a sequence of tuples `(a,b)`, where `a` is the name of the node that is used in the model and `b` itself is a sequence of tuples with graphviz settings. Ex `b = [("setting","value"),...]`. The different settings could be found in the documentation at <a href="https://graphviz.org/documentation/">graphviz.org</a>. Examples for custom labels could be found below or in the examples directory. If you're not interested in adding any customizes settings, just pass an empty sequence `[]`.
 
 See the datatypes below for examples.
 ## DFA
@@ -197,13 +201,15 @@ The constructor for the circuit takes two arguments:
 
 A circuit is constructed of three types:
 
-- `Component  : (circ_type,name,value)`, 
+- `Component  : (circ_type,name,value,isConnected)`, 
 	
-	**Circ_type:** A component can be of type _"battery"_, _"resistor"_ or _"ground"_. 
+	**Circ_type:** A string describing the component type. 
 	
 	**name:** The name of the component. Of type String.
 
-	**value:** The value of the componant. Of type float.
+	**value:** The value of the componant. Of type optional float.
+
+	**isConnected:** False if there is only one wire connected to the component and true if there is two.
 
 -  `Series  : [Component]`,
 	
@@ -213,24 +219,33 @@ A circuit is constructed of three types:
 
 	A list of components which are connected in a parallel connection. 
 
-- `Close : ()`,
-
-	Makes the last component connect to the first and closes the circuit.
-
 Ex:
 	
-	let circuit = Series [
-		Component("battery","V",11.0),
-		Parallel [
-			Component("resistor","R1",4.0),
-			Component("resistor","R2",3.0)
+	let circuit = Parallel [
+		Series[
+			Component ("ammeter","amp",None(),true),
+			Component ("capacitator","c",Some 8.0,true),
+			Component ("ground","g",Some 0.0,false)
 		],
-		Close ()
+		Series [
+			Component ("battery","V",Some 11.0,true),
+			Parallel [
+				Component ("resistor","R1",Some 4.0,true),
+				Component ("resistor","R2",Some 1.0,true)
+			],
+			Component ("lamp","lamp1",None(),true)
+		]
 	]
 
 To get a `model` containing this circuit, use the model constructor. Ex:
 
+<<<<<<< HEAD
     Circuit(circuit)
+=======
+    Circuit(circuit,[])
+
+If no settings are defined for a component, the default figure settings will be used. There exist predefined default figure settings for _`battery`_, _`ground`_ and _`resistor`_. The remaing types will be visualized as a circle if no settings are defined.
+>>>>>>> ef454ed... updated readme and examples
 
 # Usage
 The IPM framework can be used to visualize any data of type _model_. Make sure you source `modelVisualizer.mc` in your file:
@@ -296,6 +311,32 @@ To create a figure which can be included in a latex document, --figonly can be a
 There is a **examples** folder in the root of the project which contains some files as a starting point. If you want to write your own, make sure to source the **modelVisualizer.mc** properly:
 
 	include "path/to/modelVisualizer.mc"
+
+### Circuit with customized components.
+
+	-- create your circuit
+	let circuit = Parallel [
+		Series[
+			Component ("insulator","ins1",Some 8.0,true),
+			Component ("defaultSettings","ins2",Some 4.0,false)
+		],
+		Series [
+			Component ("battery","V",Some 11.0,true),
+			Component ("resistor","R1",Some 4.0,true),
+			Component ("assembly","assembly1",None(),true)
+		]
+	] in
+
+	-- call function 'visualize' to get visualization code for the circuit
+	visualize [
+		-- customized circuit
+		Circuit(
+			circuit,[
+				("assembly","shape=assembly label=\\\"\\\"",""),
+				("insulator","shape=insulator label=\\\"\\\"","pF")
+			]
+		)
+	]
 
 
 ### DFA with display names.
