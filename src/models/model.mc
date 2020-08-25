@@ -1,5 +1,5 @@
 include "types/btree.mc"
-include "types/circuit.mc"
+include "types/circuit/circuit.mc"
 include "dfa.mc"
 
 -- Represents models that can be visualized and its associated data.

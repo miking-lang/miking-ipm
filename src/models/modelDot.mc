@@ -1,6 +1,6 @@
 -- This file provides toDot functions for all models defined in model.mc.
 include "model.mc"
-include "circCompDot.mc"
+include "types/circuit/circCompDot.mc"
 
 -- constructor for dotEdge
 let initDotEdge = lam from. lam to. lam label. lam delimiter. lam eSettings.
