@@ -121,10 +121,8 @@ The constructor for the DFA takes in seven arguments:
     `let acceptStates = ["s1"]`
 
 6. **eqv** and 7. **eql** There are no data type requirements, thus you would need to write equality functions for the states (eqv) and the labels (eql). The equality functions take two inputs and returns either **true** if they are equal or **false** if they are not. Ex :
-  
-    `let eqString = setEqual eqchar in`
 
-    `let eqv = eqString`
+    `let eqv = eqstr`
 
 	`let eql = eqchar`
 
@@ -343,7 +341,6 @@ There is a **examples** folder in the root of the project which contains some fi
 
 	mexpr
 	let string2string = (lam b. b) in
-	let eqString = setEqual eqchar in
 	let char2string = (lam b. [b]) in
 
 	-- create your DFA
@@ -360,7 +357,7 @@ There is a **examples** folder in the root of the project which contains some fi
 	let startState = "s0" in
 	let acceptStates = ["s3"] in
 
-	let dfa = dfaConstr states transitions startState acceptStates eqString eqchar in
+	let dfa = dfaConstr states transitions startState acceptStates eqstr eqchar in
 
 	visualize [
 		-- accepted by the DFA
@@ -387,7 +384,6 @@ This program displays a digraph and a graph on the same page.
 
 	mexpr
 	let string2string = (lam b. b) in
-	let eqString = setEqual eqchar in
 	let char2string = (lam b. [b]) in
 
 	-- create your directed graph
@@ -398,7 +394,7 @@ This program displays a digraph and a graph on the same page.
 
 	-- create your graph
 	let graph = foldr (lam e. lam g. graphAddEdge e.0 e.1 e.2 g) 
-	(foldr graphAddVertex (graphEmpty eqi eqString) [1,2,3,4]) [(1,2,""),(3,2,""),(1,3,""),(3,4,"")] in
+	(foldr graphAddVertex (graphEmpty eqi eqstr) [1,2,3,4]) [(1,2,""),(3,2,""),(1,3,""),(3,4,"")] in
 
 	visualize [
 		Digraph(digraph, char2string,int2string,"LR",[]),
@@ -413,7 +409,6 @@ This program creates both a NFA and a Binary tree and displays them.
 	mexpr 
 	let string2string = (lam x. x) in
   	let char2string = (lam x. [x]) in
-	let eqString = setEqual eqchar in
 	
 	let nfaStates = ["a","b","c","d","e","f"] in
 	let nfaTransitions = [("a","b",'1'),("b","c",'0'),("c","d",'2'),("c","e",'2'),("d","a",'1'),("e","f",'1')] in
@@ -421,7 +416,7 @@ This program creates both a NFA and a Binary tree and displays them.
 	let nfaAcceptStates = ["a"] in
 	
 	-- create your NFA
-	let nfa = nfaConstr nfaStates nfaTransitions nfaStartState nfaAcceptStates eqString eqchar in
+	let nfa = nfaConstr nfaStates nfaTransitions nfaStartState nfaAcceptStates eqstr eqchar in
 
 
 	-- create your Binary Tree

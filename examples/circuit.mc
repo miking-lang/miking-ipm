@@ -32,7 +32,7 @@ let side_height = 8 in
 let center_height = 2 in
 
 let quote = "\\\"" in
-let lampSettings = foldl concat [] ["shape=circle color=black style=filled fillcolor=lightyellow height=0 width=0 margin=0 label=<
+let lampSettings = join ["shape=circle color=black style=filled fillcolor=lightyellow height=0 width=0 margin=0 label=<
         <table BORDER=",quote,"0",quote," CELLBORDER=",quote,"0",quote," CELLSPACING=",quote,"0",quote," CELLPADDING=",quote,"0",quote,"> 
             <tr>",
                 (foldl (lam str. lam x. concat str (makeTDElem x.0 x.1 x.2 quote))) "" 
@@ -53,21 +53,7 @@ let center_width = 10 in
 let side_height = 5 in
 let center_height = 10 in
 
-let capacitatorSettings = foldl concat [] ["shape=none, color=none height=0 width=0 margin=0 label=<
-        <table BORDER=",quote,"0",quote," CELLBORDER=",quote,"0",quote," CELLSPACING=",quote,"0",quote," CELLPADDING=",quote,"0",quote,"> 
-            <tr>",
-                (foldl (lam str. lam x. concat str (makeTDElem x.0 x.1 x.2 quote))) "" 
-                    [("black",side_width,side_height),("none",center_width,side_height),("black",side_width,side_height)],
-            "</tr> 
-            <tr>",
-                (foldl (lam str. lam x. concat str (makeTDElem x.0 x.1 x.2 quote))) "" 
-                    [("black",side_width,side_height),("none",center_width,center_height),("black",side_width,side_height)],
-            "</tr>
-            <tr>",
-                (foldl (lam str. lam x. concat str (makeTDElem x.0 x.1 x.2 quote))) "" 
-                    [("black",side_width,side_height), ("none",center_width,side_height),("black",side_width,side_height)],
-            "</tr>   
-        </table>>"] in
+let capacitatorSettings =  "<canvas id=myCanvas width=300 height=200></canvas>" in
 
 -- call function 'visualize' to get visualization code for the circuit
 visualize [

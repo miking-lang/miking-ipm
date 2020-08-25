@@ -7,14 +7,14 @@ include "modelDot.mc"
 -- Getting the input path formated
 let formatInputPath = lam path. lam state2string.
     concat ((foldl (lam output. lam elem.
-            foldl concat [] [output,
+            join [output,
             "{\"state\": \"",state2string elem.state,
             "\",\"status\": \"", elem.status, "\"",
             ",\"index\": ",int2string elem.index,"}\n"
     	    ]
 	    ) "" [(head path)]))
 	    (foldl (lam output. lam elem.
-	    foldl concat [] [output,
+	    join [output,
             ",{\"state\": \"",state2string elem.state,
             "\",\"status\": \"", elem.status, "\"",
             ",\"index\": ",int2string elem.index,"}\n"
@@ -25,12 +25,12 @@ let formatInputPath = lam path. lam state2string.
 let formatInput = lam input. lam label2str.
     concat (strJoin "" ["\"", (label2str (head input)), "\""])
     (foldl (lam output. lam elem.
-        foldl concat [] [output,",\"" ,label2str elem, "\""]
+        join [output,",\"" ,label2str elem, "\""]
     ) "" (tail input))
 
 -- format nfa simulation to JS code
 let nfaFormatSimulation = lam nfa. lam input. lam s2s. lam l2s. 
-    match input with "" then "" else foldl concat [] 
+    match input with "" then "" else join 
         ["\"simulation\" : {\n",
             " \"input\" : [", (formatInput input l2s),"],\n",
             " \"configurations\" : [\n", 
@@ -40,7 +40,7 @@ let nfaFormatSimulation = lam nfa. lam input. lam s2s. lam l2s.
 
 -- format a model to JS code
 let formatModel = lam dot. lam graphType. lam id. lam simulation.
-    foldl concat [] [
+    join [
         "{\n\"type\" : \"",graphType,
         "\",\n \"id\" : ",int2string id,",\n",
         simulation,

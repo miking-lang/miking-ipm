@@ -1,10 +1,10 @@
 -- concatenates a list of strings
 let concatList = lam list. 
-    foldl concat [] list
+    join list
 
 -- returns a table data element with the given characteristics
 let makeTDElem = lam color. lam elem_width. lam elem_height. lam quote.
-    foldl concat [] ["<td ",
+    join ["<td ",
         "bgcolor=",quote,color,quote,
         " width=",quote,(int2string elem_width),quote,
         " height=",quote,(int2string elem_height),quote,
@@ -40,7 +40,7 @@ let circBatteryToDot = lam quote. lam name. lam value. lam custom_settings. lam 
     let center_height = 10 in
     
     let settings = match custom_settings with Some (setting,unit) then (setting,unit) else
-        let setting = foldl concat [] ["shape=none, color=none height=0 width=0 margin=0 label=<
+        let setting = join ["shape=none, color=none height=0 width=0 margin=0 label=<
         <table BORDER=",quote,"0",quote," CELLBORDER=",quote,"0",quote," CELLSPACING=",quote,"0",quote," CELLPADDING=",quote,"0",quote,"> 
             <tr>",
                 (foldl (lam str. lam x. concat str (makeTDElem x.0 x.1 x.2 quote))) "" 
@@ -66,7 +66,11 @@ let circGroundToDot = lam quote. lam name. lam custom_settings. lam isConnected.
     let width =5 in
     let height = 1 in
     let settings = match custom_settings with Some (setting,unit) then (setting,unit) else
+<<<<<<< HEAD
         let w = foldl concat [] ["shape=none, color=none height=0 width=0 margin=0 label=<
+=======
+        (join ["shape=none, color=none height=0 width=0 margin=0 label=<
+>>>>>>> 343c358... added issues folder
     <table CELLBORDER=",quote,"0",quote," CELLSPACING=",quote,"0",quote," CELLPADDING=",quote,"0",quote," >\n<tr>",
             (foldl (lam str. lam x. concat str (makeTDElem x width height quote))) "" ["black","black","black","black","black"],
         " </tr>\n<tr>",
@@ -84,15 +88,15 @@ let circGroundToDot = lam quote. lam name. lam custom_settings. lam isConnected.
 -- returns a custom component in dot.
 let circOtherToDot = lam quote. lam name. lam value. lam _. lam custom_settings. lam isConnected.
     let settings = match custom_settings with Some (setting,unit) then (setting,unit) else
-        (foldl concat [] ["style=filled fillcolor=white shape=circle label=",quote,quote, " xlabel=",quote,value,quote]," ") in
-    let value_str = match value with "" then "" else (foldl concat [] [value," ",settings.1," "]) in
+        (join ["style=filled fillcolor=white shape=circle label=",quote,quote, " xlabel=",quote,value,quote]," ") in
+    let value_str = match value with "" then "" else (join [value," ",settings.1," "]) in
     formatComponentToDot name quote (concatList ["xlabel=",quote,value_str,quote," ",settings.0]) isConnected
 
 -- returns a component in dot.
 let componentToDot = lam comp. lam quote. lam fig_settings.
     match comp with Component (comp_type,name,maybe_value,isConnected) then
         let figure_setting = 
-            let fig = find (lam x. setEqual eqchar x.0 comp_type) fig_settings in
+            let fig = find (lam x. eqstr x.0 comp_type) fig_settings in
             match fig with Some (_,setting,unit) then Some (setting,unit) else None() in
 
         -- round to integer

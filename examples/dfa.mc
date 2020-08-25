@@ -8,7 +8,6 @@ include "../src/models/modelVisualizer.mc"
 mexpr
 -- Define functions to display your States and Labels and equality checks for States and Labels
 let string2string = (lam b. b) in
-let eqString = setEqual eqchar in
 let char2string = (lam b. [b]) in
 
 -- Defining the components of a DFA
@@ -25,7 +24,7 @@ let startState = "s0" in
 let acceptStates = ["s3"] in
 
 -- constructing the DFA
-let dfa = dfaConstr states transitions startState acceptStates eqString eqchar in
+let dfa = dfaConstr states transitions startState acceptStates eqStr eqchar in
 
 
 -- The input for simulation is given here as the second argument
