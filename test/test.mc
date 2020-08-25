@@ -42,32 +42,6 @@ let nfa = nfaConstr nfaStates nfaTransitions nfaStartState nfaAcceptStates eqstr
 -- create your BTree
 let btree = btreeConstr (Node(2, Node(3, Nil (), Leaf 4), Leaf 5)) eqi in
 
-<<<<<<< HEAD
-let circuit = Circuit (
-                Parallel [
-                    Component ("ground","g",None (),false),
-                    Component ("battery","V3",0.0,true),
-                    Series [
-                        Component ("battery","V11",0.0,true),
-                        Parallel [
-                            Series [
-                                Component ("battery","V20",0.0,true),
-                                Parallel [
-                                    Component ("battery","V31",0.0,true),
-                                    Component ("battery","V32",0.0,true)
-                                ]
-                            ],
-                            Component ("battery","V12",0.0,true)
-                        ]
-                    ],
-                    Series [
-                        Component ("resistor", "R5",0.0,true),
-                        Component ("resistor", "R7",0.0,true)
-                    ],
-                    Component ("battery","V10",0.0,true)
-                ]
-            ) in
-=======
 -- create your circuit
 let circuit = Parallel [
     Series[
@@ -128,7 +102,6 @@ let capacitatorSettings = join ["shape=none, color=none height=0 width=0 margin=
             "</tr>   
         </table>>"] in
 
->>>>>>> 2e34a7d... added utests
 
 visualize [
     Circuit(

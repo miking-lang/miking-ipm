@@ -15,22 +15,14 @@ let transitions = [
 let startState = "s0" in
 let acceptStates = ["s2"] in
 
-<<<<<<< HEAD
-let dfa = dfaConstr states transitions startState acceptStates eqStr eqchar in
-=======
 let dfa = dfaConstr states transitions startState acceptStates eqstr eqchar in
->>>>>>> 737cd46... anders comments resolved and code clean up
 let myDfa = DFA(dfa, "101", string2string, char2string,"LR",[]) in
 
 let digraph = foldr (lam e. lam g. digraphAddEdge e.0 e.1 e.2 g) 
                 (foldr digraphAddVertex (digraphEmpty eqchar eqi) ['A','B','C','D','E','F']) 
                 [('A','B',2),('A','C',5),('B','C',2),('B','D',4),('C','D',5),('C','E',5)] in
 let graph = foldr (lam e. lam g. graphAddEdge e.0 e.1 e.2 g) 
-<<<<<<< HEAD
-              (foldr graphAddVertex (graphEmpty eqi eqStr) [1,2,3,4]) 
-=======
               (foldr graphAddVertex (graphEmpty eqi eqstr) [1,2,3,4]) 
->>>>>>> 737cd46... anders comments resolved and code clean up
               [(1,2,"g"),(3,2,"a"),(1,3,""),(3,4,"")] in
 
 let treeModel = Node(2, Node(3, Nil (), Leaf 4), Leaf 5) in
@@ -72,12 +64,4 @@ let circuit = Circuit (
 
 let myGraph = Graph(graph,int2string,string2string,"LR",[(1, [("label","hej")])]) in
 let myDigraph = Digraph(digraph, char2string,int2string,"LR",[]) in
-<<<<<<< HEAD
-<<<<<<< HEAD
-  modelPrintDot circuit []
-=======
-  modelPrintDotSimulateTo myNfa 0
->>>>>>> 2e34a7d... added utests
-=======
     modelPrintDot circuit
->>>>>>> 737cd46... anders comments resolved and code clean up

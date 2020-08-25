@@ -237,13 +237,9 @@ Ex:
 
 To get a `model` containing this circuit, use the model constructor. Ex:
 
-<<<<<<< HEAD
-    Circuit(circuit)
-=======
     Circuit(circuit,[])
 
 If no settings are defined for a component, the default figure settings will be used. There exist predefined default figure settings for _`battery`_, _`ground`_ and _`resistor`_. The remaing types will be visualized as a circle if no settings are defined.
->>>>>>> ef454ed... updated readme and examples
 
 # Usage
 The IPM framework can be used to visualize any data of type _model_. Make sure you source `modelVisualizer.mc` in your file:

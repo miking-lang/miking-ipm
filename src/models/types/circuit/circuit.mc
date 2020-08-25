@@ -12,7 +12,6 @@ type Circuit
     con Component : (circ_type,name,value,isConnected) -> Circuit
     con Series : [Component] -> Circuit 
     con Parallel : [Component] -> Circuit
-    con Close : () -> Circuit -- closes the circuit by connecting to the first component
 
 -- returns all components in circuit circ
 recursive
@@ -52,9 +51,7 @@ utest makeEdges [Component ("ground","g",None (), false),Component("capacitator"
 -- gets the first component (or components in case of a parallel connection) in the circuit
 recursive
 let circHead = lam circ. 
-    match circ with Component (_,name,_,true) then [circ]
-    else match circ with Component (_,name,_,false) then 
-        [Component("point",concat name "_point",None (),true)]
+    match circ with Component (_,name,_,_) then [circ]
     else match circ with Series lst then circHead (head lst)
     else match circ with Parallel lst then 
         foldl (lam res. lam elem. concat res (circHead elem)) [] lst
@@ -66,9 +63,7 @@ utest circHead (Series [Component ("ground","g",None (), false),Component ("resi
 -- gets the last component (or components in case of a parallel connection) in the circuit
 recursive
 let circLast = lam circ.
-   match circ with Component (_,name,_,true) then [circ] 
-    else match circ with Component (_,name,_,false) then 
-        [Component("point",concat name "_point",None (),1)]
+   match circ with Component (_,name,_,_) then [circ] 
     else match circ with Series lst then circLast (last lst)
     else match circ with Parallel lst then 
         foldl (lam res. lam elem. concat res (circLast elem)) [] lst
@@ -82,31 +77,17 @@ utest circLast (Series [Component ("ground","g",None (), false),Component ("resi
 -- where (a,b) means that there is a wire from a to b
 recursive
 let circGetAllEdges = lam circ.
-    utest circ with [] in
-    match circ with Component (_,name,_,false) then 
-        let a = makeEdges [Component("point",concat name "_point",None(),true)] [circ] in
-        utest a with [] in
-        a
-    else match circ with Component (_,name,false) then []
+    match circ with Component (_,name,_,_) then []
     else match circ with Series circ_lst then
-        utest circ_lst with [] in 
         if (eqi (length circ_lst) 0) then []
         else
-            let edges = (zipWith (lam a. lam b.
+            join (zipWith (lam a. lam b.
                 let from = circLast a in
                 let maybe_to = circHead b in
                 let to = maybe_to in
                 let a_edges = circGetAllEdges a in
                 concat (a_edges) (makeEdges from to)
-            )(init circ_lst) (tail circ_lst)) in
-            
-            let point_edges = match last circ_lst with Component (_,name,_,false) then
-                                let from_edge = Component("point",concat name "_point",None(),1) in
-                                makeEdges [from_edge] [(last circ_lst)]
-                            else [] in
-            utest point_edges with [] in
-            utest edges with [] in
-            concat (join edges) point_edges
+            )(init circ_lst) (tail circ_lst))
     else match circ with Parallel circ_lst then
         if (eqi (length circ_lst) 0) then []
         else

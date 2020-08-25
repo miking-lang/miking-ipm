@@ -58,8 +58,8 @@ let treeVisual = lam btree. lam v2str. lam id. lam direction. lam vSettings.
     formatModel dot "tree" id ""
 
 -- format a circuit to JS code for visualizing
-let circVisual = lam circuit. lam id.
-    let dot = circGetDot circuit id in
+let circVisual = lam circuit. lam id. lam fig_settings.
+    let dot = circGetDot circuit id fig_settings in
     formatModel dot "circuit" id ""
 
 let formatWithId = lam model. lam id.
@@ -73,8 +73,8 @@ let formatWithId = lam model. lam id.
         nfaVisual nfa input state2str label2str "nfa" id direction vSettings
     else match model with BTree(btree, node2str,direction,vSettings) then
         treeVisual btree node2str id direction vSettings
-    else match model with Circuit(circuit) then
-        circVisual circuit id
+    else match model with Circuit(circuit,fig_settings) then
+        circVisual circuit id fig_settings
     else error "Unknown model type"
 
 -- format a list of models into a string representation for visualization
