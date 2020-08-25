@@ -25,6 +25,19 @@ let circuit = Parallel [
         Component ("lamp","lamp1",None(),true)
     ]
 ] in
+let simpleCircuit = Parallel [
+    Series[
+        Component ("ground","g",Some 0.0,false)
+    ],
+    Series [
+        Component ("battery","V",Some 11.0,true),
+        Parallel [
+            Component ("resistor","R1",Some 4.0,true),
+            Component ("resistor","R2",Some 1.0,true)
+            
+        ]
+    ]
+] in
 
 let center_width = 2 in
 let side_width = 8 in
@@ -58,9 +71,7 @@ let capacitatorSettings =  "<canvas id=myCanvas width=300 height=200></canvas>" 
 -- call function 'visualize' to get visualization code for the circuit
 visualize [
     -- simple circuit
-    Circuit(
-        circuit,[]
-    ),
+    Circuit(simpleCircuit,[]),
     -- customized circuit
 	Circuit(
         circuit,[

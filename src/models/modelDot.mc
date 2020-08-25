@@ -10,9 +10,6 @@ let initDotEdge = lam from. lam to. lam label. lam delimiter. lam eSettings.
 let initDotVertex = lam name. lam settings.
     {name=name, settings=settings}
 
-utest join [] with ""
-utest join ["a","b","c"] with "abc"
-
 -- returns the correct formatted quote. If an id is passed, 
 -- the quote is returned in JSON format, and in dot otherwise. 
 let getQuote = lam id.
@@ -45,7 +42,7 @@ utest vertexToDot (initDotVertex "a" "color=\"green\"") () with "a[id=\"a\" colo
 -- formats vSettings to dot.
 let settingsToDot = lam settings. lam modelID.
     let quote = getQuote modelID in
-    foldl (lam output. lam t. join [output, t.0,"=",quote,t.1,quote," "]) "" settings
+    strJoin " " (map (lam t. join [t.0,"=",quote,t.1,quote]) settings)
 
 utest settingsToDot [] () with ""
 utest settingsToDot [("label","start"),("color","green")] () with "label=\"start\" color=\"green\" "
@@ -53,12 +50,12 @@ utest settingsToDot [("label","start"),("color","green")] 1  with "label=\\\"sta
 
 -- prints a given model in dot syntax
 let getDot = lam graphType. lam direction. lam vertices. lam edges. lam id. lam extra.
-    let output = join [[graphType," {\n",extra,"\n","rankdir=",direction,";"],
-        (map (lam v. vertexToDot v id) vertices),
-        (map (lam e. edgeToDot e id) edges),
-        ["}"]
-    ] in
-    output
+    join [
+        graphType," {\n",extra,"\n","rankdir=",direction,";",
+        join (map (lam v. vertexToDot v id) vertices),
+        join (map (lam e. edgeToDot e id) edges),
+        "}"
+    ]
 
 -- returns the standard active node setting
 let getActiveNodeSetting = lam _.
@@ -286,13 +283,11 @@ let modelGetDot = lam model. lam id.
 
 -- prints a model in dot simulated "steps" steps av the "input" input. 
 let modelPrintDotSimulateTo = lam model. lam steps.
-    print (
-        match model with NFA(nfa,input,state2str,label2str,direction,vSettings) then
-            nfaGetDotSimulate nfa state2str label2str () direction vSettings input steps
-        else match model with DFA(dfa,input,state2str,label2str,direction,vSettings) then
-            nfaGetDotSimulate dfa state2str label2str () direction vSettings input steps
-        else ""
-    )
+    match model with NFA(nfa,input,state2str,label2str,direction,vSettings) then
+        print nfaGetDotSimulate nfa state2str label2str () direction vSettings input steps
+    else match model with DFA(dfa,input,state2str,label2str,direction,vSettings) then
+        print nfaGetDotSimulate dfa state2str label2str () direction vSettings input steps
+    else error "unsupported model type"
 
 -- converts and prints the given model in dot.
 let modelPrintDot = lam model.

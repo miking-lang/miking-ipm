@@ -6,37 +6,27 @@ include "modelDot.mc"
 
 -- Getting the input path formated
 let formatInputPath = lam path. lam state2string.
-    concat ((foldl (lam output. lam elem.
-            join [output,
-            "{\"state\": \"",state2string elem.state,
-            "\",\"status\": \"", elem.status, "\"",
-            ",\"index\": ",int2string elem.index,"}\n"
-    	    ]
-	    ) "" [(head path)]))
-	    (foldl (lam output. lam elem.
-	    join [output,
-            ",{\"state\": \"",state2string elem.state,
-            "\",\"status\": \"", elem.status, "\"",
-            ",\"index\": ",int2string elem.index,"}\n"
-	    ]
-	    ) "" (tail path))
+    strJoin "," (map (lam elem. join [
+        "{\"state\": \"",state2string elem.state,
+        "\",\"status\": \"", elem.status, "\"",
+        ",\"index\": ",int2string elem.index,"}\n"]
+    ) path)
 
 -- format input-line
 let formatInput = lam input. lam label2str.
-    concat (strJoin "" ["\"", (label2str (head input)), "\""])
-    (foldl (lam output. lam elem.
-        join [output,",\"" ,label2str elem, "\""]
-    ) "" (tail input))
+    strJoin "," (map (lam elem. join ["\"" ,label2str elem, "\""]) input)
 
 -- format nfa simulation to JS code
 let nfaFormatSimulation = lam nfa. lam input. lam s2s. lam l2s. 
-    match input with "" then "" else join 
-        ["\"simulation\" : {\n",
-            " \"input\" : [", (formatInput input l2s),"],\n",
-            " \"configurations\" : [\n", 
-            (formatInputPath (nfaMakeInputPath (negi 1) nfa.startState input nfa) s2s),
-            "]\n",
-        "},\n "]
+    match input with "" then "" else 
+        join [
+            "\"simulation\" : {\n",
+                " \"input\" : [", (formatInput input l2s),"],\n",
+                " \"configurations\" : [\n", 
+                (formatInputPath (nfaMakeInputPath (negi 1) nfa.startState input nfa) s2s),
+                "]\n",
+            "},\n "
+        ]
 
 -- format a model to JS code
 let formatModel = lam dot. lam graphType. lam id. lam simulation.

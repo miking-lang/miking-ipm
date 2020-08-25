@@ -24,8 +24,7 @@ let startState = "s0" in
 let acceptStates = ["s3"] in
 
 -- constructing the DFA
-let dfa = dfaConstr states transitions startState acceptStates eqStr eqchar in
-
+let dfa = dfaConstr states transitions startState acceptStates eqstr eqchar in
 
 -- The input for simulation is given here as the second argument
 -- in the constructor.

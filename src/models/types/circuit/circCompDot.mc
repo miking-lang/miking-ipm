@@ -1,6 +1,11 @@
+<<<<<<< HEAD
 -- concatenates a list of strings
 let concatList = lam list. 
     join list
+=======
+include "string.mc"
+include "set.mc"
+>>>>>>> 737cd46... anders comments resolved and code clean up
 
 -- returns a table data element with the given characteristics
 let makeTDElem = lam color. lam elem_width. lam elem_height. lam quote.
@@ -14,13 +19,13 @@ utest makeTDElem "green" 1 2 "\"" with "<td bgcolor=\"green\" width=\"1\" height
 
 -- returns a node in dot.
 let nodeToDot = lam name. lam quote. lam settings.
-    concatList [name,"[id=",quote,name,quote," ",settings,"];"]
+    join [name,"[id=",quote,name,quote," ",settings,"];"]
 
 -- formats a components to dot.
 let formatComponentToDot = lam name. lam quote. lam settings. lam isConnected.
     let figName = (concat name "fig") in
     if isConnected then nodeToDot name quote settings 
-    else concatList [nodeToDot figName quote settings,
+    else join [nodeToDot figName quote settings,
                     nodeToDot name quote "shape=point style=filled color=black height=0.05 width=0.05",
                     figName,"--",name,";"]
 
@@ -28,7 +33,7 @@ let formatComponentToDot = lam name. lam quote. lam settings. lam isConnected.
 let circResistorToDot = lam quote. lam name. lam value. lam custom_settings. lam isConnected.
     let settings = match custom_settings with Some (setting,unit) then (setting,unit) else
                 ("style=filled color=black fillcolor=none shape=rect height=0.1 width=0.3 "," &Omega;") in
-    let dotSettings = concatList [" xlabel=",quote,value,settings.1,quote," ",settings.0," label=",quote,quote] in
+    let dotSettings = join [" xlabel=",quote,value,settings.1,quote," ",settings.0," label=",quote,quote] in
     formatComponentToDot name quote dotSettings isConnected
 
 
@@ -59,7 +64,7 @@ let circBatteryToDot = lam quote. lam name. lam value. lam custom_settings. lam 
             "</tr>   
         </table>>"
     ] in (setting,"V") in
-    formatComponentToDot name quote (concatList ["xlabel=",quote,value,settings.1,quote," ",settings.0]) isConnected
+    formatComponentToDot name quote (join ["xlabel=",quote,value,settings.1,quote," ",settings.0]) isConnected
 
 -- returns the ground component in dot.
 let circGroundToDot = lam quote. lam name. lam custom_settings. lam isConnected.
@@ -83,14 +88,20 @@ let circGroundToDot = lam quote. lam name. lam custom_settings. lam isConnected.
             (foldl (lam str. lam x. concat str (makeTDElem x width height quote))) "" ["none","none","black","none","none"],
         "</tr>\n</table>> "]
         ,"") in
-    formatComponentToDot name quote (concatList ["label=",quote,quote,settings.0]) isConnected
+    formatComponentToDot name quote (join ["label=",quote,quote,settings.0]) isConnected
 
 -- returns a custom component in dot.
 let circOtherToDot = lam quote. lam name. lam value. lam _. lam custom_settings. lam isConnected.
     let settings = match custom_settings with Some (setting,unit) then (setting,unit) else
+<<<<<<< HEAD
         (join ["style=filled fillcolor=white shape=circle label=",quote,quote, " xlabel=",quote,value,quote]," ") in
     let value_str = match value with "" then "" else (join [value," ",settings.1," "]) in
     formatComponentToDot name quote (concatList ["xlabel=",quote,value_str,quote," ",settings.0]) isConnected
+=======
+        (foldl concat [] ["style=filled fillcolor=white shape=circle label=",quote,quote, " xlabel=",quote,value,quote]," ") in
+    let value_str = match value with "" then "" else (foldl concat [] [value," ",settings.1," "]) in
+    formatComponentToDot name quote (join ["xlabel=",quote,value_str,quote," ",settings.0]) isConnected
+>>>>>>> 737cd46... anders comments resolved and code clean up
 
 -- returns a component in dot.
 let componentToDot = lam comp. lam quote. lam fig_settings.
