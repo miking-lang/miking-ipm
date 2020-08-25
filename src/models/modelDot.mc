@@ -1,5 +1,6 @@
 -- This file provides toDot functions for all models defined in model.mc.
 include "model.mc"
+include "circCompDot.mc"
 
 -- constructor for dotEdge
 let initDotEdge = lam from. lam to. lam label. lam delimiter. lam eSettings.
@@ -209,16 +210,7 @@ let circOtherToDot = lam quote. lam name. lam value. lam unit. lam custom_settin
                 "xlabel=",quote,value," ",settings.1," ",quote," ",
                 settings.0,"];"]
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-let getPointNodeSettings = lam _.
-    "shape=point style=filled color=black height=0.03 width=0.03"
-=======
-=======
 -- returns a component in dot.
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> 70c36c1... imporved automatic layout for electrical circuits
 let componentToDot = lam comp. lam quote.
     match comp with Component (comp_type,name,maybe_value) then
         -- round to two decimals
@@ -231,41 +223,7 @@ let componentToDot = lam comp. lam quote.
         else match comp_type with "ground" then
             circGroundToDot quote name
         else ""
-=======
-=======
->>>>>>> bcc8452... other component types can be defined
-let componentToDot = lam comp. lam quote. lam fig_settings.
-    match comp with Component (comp_type,name,maybe_value,isConnected) then
-        let figure_setting = 
-            let fig = find (lam x. if (setEqual eqchar x.0 comp_type) then true else false) fig_settings in
-            match fig with Some (_,setting,unit) then Some (setting,unit) else None() in
-<<<<<<< HEAD
-=======
 
->>>>>>> bcc8452... other component types can be defined
-        -- round to integer
-        let value = match maybe_value with None () then 0.0 else maybe_value in
-        let value_str = int2string (roundfi value) in
-        match comp_type with "resistor" then
-            resistorToDot quote name value_str figure_setting isConnected
-        else match comp_type with "battery" then
-            circBatteryToDot quote name value_str figure_setting isConnected
-        else match comp_type with "ground" then
-<<<<<<< HEAD
-            circGroundToDot quote name figure_setting isConnected
-        else 
-            circOtherToDot quote name value_str "unit" figure_setting isConnected
->>>>>>> 8b44f22... other component types can be defined
-=======
-            circGroundToDot quote name figure_setting
-        else 
-            circOtherToDot quote name value_str "unit" figure_setting isConnected
->>>>>>> bcc8452... other component types can be defined
-    else []
-
-<<<<<<< HEAD
->>>>>>> 2e383d7... Refactored functions for component rendering
-=======
 -- goes through the circuit and returns the edges in dot.
 -- the order of the edges returned determines the layout of the circuit
 recursive
@@ -302,46 +260,6 @@ end
 let circGetDot = lam circ. lam id.
     let quote = getQuote id in
     let delimiter = "--" in
-<<<<<<< HEAD
-    let components = circGetAllComponents circ in 
-    let dotVertices = join (map (lam c. 
-        match c with Component (comp_type,name,maybe_value,_) then
-            -- round to two decimals
-            let value = match maybe_value with None () then 0.0 else maybe_value in
-            let value_str = int2string (roundfi value) in
-            --utest value_str with "" in
-            if (setEqual eqchar comp_type "resistor") then
-                [initDotVertex name (foldl concat [] ["xlabel=\\\"" ,value_str," &Omega;\\\""]) (getResistorNodeSettings ())]
-            else if (setEqual eqchar comp_type "battery") then
-                [initDotVertex name (foldl concat [] ["xlabel=\\\"",value_str," V\\\""]) (getBatteryNodeSettings ())]
-            else if (setEqual eqchar comp_type "ground") then
-                [initDotVertex name "" (getGroundNodeSettings ())]
-            else [initDotVertex name "" (getPointNodeSettings ())]
-        else []
-    ) components) in
-    --let groundComp = (filter (lam x. match x with Component("ground",name,value) then true else false) components) in
-    --let groundEdges = map (lam x. 
-    --    let name = circGetComponentName x in
-    --    let from = match (find (lam x. setEqual eqchar x.name name) dotVertices) with 
-    --        Some e then e else (None ()) in
-    --    let to = match (find (lam x. setEqual eqchar x.name (concat name "fig" )) dotVertices) with
-    --        Some e then e else (None ()) in
-    --    (from,to)
-    --) groundComp in
-    let edges = concat (circGetAllEdges circ) [] in
-    let dotEdges = concat (map (lam e.
-            utest e with [] in
-            let from = circGetComponentName e.0 in
-            let to = circGetComponentName e.1 in
-            initDotEdge from to "" delimiter ""
-            ) edges) []--(map (lam e.
-                --initDotEdge (e.0).name (e.1).name "" delimiter ""
-            --) groundEdges
-            --)
-             in
-    --let dotSubgraphs = groundEdges in
-    getDot "graph" "LR" dotVertices dotEdges id "graph [ nodesep=\\\"0.8\\\" ];\nsplines=ortho; " []
-=======
     let components = circGetAllComponents circ in
     let dotComponents = concatList (map (lam c. componentToDot c quote) components) in
     let dotEdges = circGetDotEdges circ 0 false in
@@ -350,7 +268,6 @@ let circGetDot = lam circ. lam id.
                 "node[shape=point height = 0 width = 0 margin = 0];",
                 dotEdges,
                 "}"]
->>>>>>> 2e383d7... Refactored functions for component rendering
 
 -- converts the given model in dot. vSettings is a seqence of 
 -- two element tuples, the first element refers to the name of the vertex, 
