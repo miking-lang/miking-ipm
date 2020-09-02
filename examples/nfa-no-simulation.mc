@@ -8,7 +8,6 @@ include "../src/models/modelVisualizer.mc"
 mexpr
 -- Define functions to display your States and Labels and equality checks for States and Labels
 let string2string = (lam b. b) in
-let eqString = setEqual eqchar in
 let char2string = (lam b. [b]) in
 
 -- Defining the components of a NFA
@@ -18,15 +17,10 @@ let nfaStartState = "a" in
 let nfaAcceptStates = ["a"] in
 
 -- constructing the NFA
-let nfa = nfaConstr nfaStates nfaTransitions nfaStartState nfaAcceptStates eqString eqchar in
+let nfa = nfaConstr nfaStates nfaTransitions nfaStartState nfaAcceptStates eqstr eqchar in
 
 -- The input for simulation is given here as the second argument
 -- in the constructor.
--- Last argument is a list that maps states to displayNames.
--- The purpose is to visualize a state's name differently if
--- needed. This examples maps the state "s0" to the output name
--- of "start state".
--- Leave it empty for printing the actual names of the states.
 visualize [
 	-- Prints a NFA without simulation. This happens when the input parameter is 
 	-- an empty sequence.

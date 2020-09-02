@@ -25,6 +25,9 @@ class ModelView {
         this.render()
     }
 
+    /**
+     * Renders the model at the last element in the doom tree.
+     */
     render() {
         d3.select(this.root.lastElementChild)
             .graphviz({zoom: false})

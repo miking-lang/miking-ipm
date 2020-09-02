@@ -10,8 +10,7 @@ mexpr
 let string2string = (lam b. b) in
 
 -- create an empty graph, specify the equality functions for both the vertices and the edge's labels
-let eqString = setEqual eqchar in
-let graph = graphEmpty eqi eqString in
+let graph = graphEmpty eqi eqstr in
 
 -- adding vertices to the graph
 let graph = foldr graphAddVertex graph [1,2,3,4] in

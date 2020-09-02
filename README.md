@@ -62,29 +62,35 @@ Note: you need to source **src/models/modelVisualizer.mc** in your source file.
 This environment supports the datatypes of type _model_. The model type extends the functions already available in the datatypes to be able to visualize them.
 
 This includes:
+* Circuit
+
+	`Circuit (Data, fig_settings)`
+
 * Deterministic finite automaton (DFA)
 
-    `DFA (Data, input, node2str, label2str, direction, displayNames)`
+    `DFA (Data, input, node2str, label2str, direction, vSettings)`
 
 * Nondeterministic finite automaton (NFA)
 
-    `NFA (Data, input, node2str, label2str, direction, displayNames)`
+    `NFA (Data, input, node2str, label2str, direction, vSettings)`
 
 * Directed graph (Digraph)
 
-    `Digraph (Data, node2str, label2str,    direction, displayNames)`
+    `Digraph (Data, node2str, label2str,    direction, vSettings)`
     
 * Graph
 
-    `Graph (Data,  node2str, label2str,     direction, displayNames)`
+    `Graph (Data,  node2str, label2str,     direction, vSettings)`
     
 * Binary tree (BTree)
 
-    `BTree (Data,node2str,                  direction, displayNames)`
+    `BTree (Data,node2str,                  direction, vSettings)`
 
 The arguments for the constructors are:
 
 - **Data:** data of type (DFA/NFA/Digraph/Graph/BTree).
+
+- **fig_settings:** custom drawing settings for a specific component type. The fig_settings are defined by a sequence of tuples `(a,b,c)`, where `a` is the component type that is used in the model, `b` is a string of space separated graphviz settings (ex: `b = "label="battery" color=green"`) and `c` is the unit for the component value (ex: `c = "V"`). 
 
 - **(input):** a input list containing input.
 
@@ -92,9 +98,7 @@ The arguments for the constructors are:
 
 - **direction:** Defines the render direction. Takes one of the following values: "TB", "RL", "BT", "LR".
 
-- **displayNames:** There is a option to define a display name for any of the nodes when visualizing any of the datatypes. These values must be strings, and have no affect on the model other than that when visualized the labels for the nodes/states will not be the names used in the model, but the display names. All names used in the model must be unique, but display names do not. The display names are defined by a list of tuples `(a,b)`, where `a` is the name of the node that is used in the model and `b` is the string that will be shown as the label instead.
-
-    **Note:** this does not work with file conversion at the moment. 
+- **vSettings:** There is an option to customize the nodes when visualizing any of the datatypes (not circuits atm). The extra settings names are defined by a sequence of tuples `(a,b)`, where `a` is the name of the node that is used in the model and `b` itself is a sequence of tuples with graphviz settings. Ex `b = [("setting","value"),...]`. The different settings could be found in the documentation at <a href="https://graphviz.org/documentation/">graphviz.org</a>. Examples for custom labels could be found below or in the examples directory. If you're not interested in adding any customizes settings, just pass an empty sequence `[]`.
 
 See the datatypes below for examples.
 ## DFA
@@ -117,12 +121,12 @@ The constructor for the DFA takes in seven arguments:
     `let acceptStates = ["s1"]`
 
 6. **eqv** and 7. **eql** There are no data type requirements, thus you would need to write equality functions for the states (eqv) and the labels (eql). The equality functions take two inputs and returns either **true** if they are equal or **false** if they are not. Ex :
-  
-    `let eqString = setEqual eqchar in`
 
-    `let eqv = eqString`
+    `let eqv = eqstr`
 
 	`let eql = eqchar`
+
+	`let settings = [("s0",[("label","start state")]),("s3",[("label","accept state")])]`
 
 The construct function is then called by:
 
@@ -130,7 +134,7 @@ The construct function is then called by:
 
 To get a `model` containing this DFA, use the model constructor. Ex:
 
-    DFA (my_dfa, "01010", string2string, char2string, "LR", [("s0","start")])
+    DFA (my_dfa, "01010", string2string, char2string, "LR", settings)
 
 ## NFA
 A NFA works the same as a DFA, except for the requirement for all transitions from a state to have unique labels. Just replace "dfa" with "nfa" in the above instructions.
@@ -188,20 +192,22 @@ The constructor is then called by:
 
 To get a `model` containing this digraph, use the model constructor. Ex:
 
-    BTree(tree, int2string,"TB",[(2,"root")])
+    BTree(tree, int2string,"TB",[(2,[("label","root")])])
 
 ## Circuit
 The constructor for the circuit takes two arguments:
 
 A circuit is constructed of three types:
 
-- `Component  : (circ_type,name,value)`, 
+- `Component  : (circ_type,name,value,isConnected)`, 
 	
-	**Circ_type:** A component can be of type _"battery"_, _"resistor"_ or _"ground"_. 
+	**Circ_type:** A string describing the component type. 
 	
 	**name:** The name of the component. Of type String.
 
-	**value:** The value of the componant. Of type float.
+	**value:** The value of the componant. Of type optional float.
+
+	**isConnected:** False if there is only one wire connected to the component and true if there is two.
 
 -  `Series  : [Component]`,
 	
@@ -211,24 +217,29 @@ A circuit is constructed of three types:
 
 	A list of components which are connected in a parallel connection. 
 
-- `Close : ()`,
-
-	Makes the last component connect to the first and closes the circuit.
-
 Ex:
 	
-	let circuit = Series [
-		Component("battery","V",11.0),
-		Parallel [
-			Component("resistor","R1",4.0),
-			Component("resistor","R2",3.0)
+	let circuit = Parallel [
+		Series[
+			Component ("ammeter","amp",None(),true),
+			Component ("capacitator","c",Some 8.0,true),
+			Component ("ground","g",Some 0.0,false)
 		],
-		Close ()
+		Series [
+			Component ("battery","V",Some 11.0,true),
+			Parallel [
+				Component ("resistor","R1",Some 4.0,true),
+				Component ("resistor","R2",Some 1.0,true)
+			],
+			Component ("lamp","lamp1",None(),true)
+		]
 	]
 
 To get a `model` containing this circuit, use the model constructor. Ex:
 
-    Circuit(circuit)
+    Circuit(circuit,[])
+
+If no settings are defined for a component, the default figure settings will be used. There exist predefined default figure settings for _`battery`_, _`ground`_ and _`resistor`_. The remaing types will be visualized as a circle if no settings are defined.
 
 # Usage
 The IPM framework can be used to visualize any data of type _model_. Make sure you source `modelVisualizer.mc` in your file:
@@ -257,11 +268,11 @@ Make sure that you include the model.mc file.
 
 To write the dot code for some data of type `model`, use one of these commands:
 
--	`modelPrintDot "YOUR-DATA" ["OPTIONS"]`
+-	`modelPrintDot "YOUR-DATA"`
 
-	Where _"YOUR-DATA"_ data of type `model` as defined above. _`["OPTIONS"]`_ is a seqence of two element tuples, the first element refers to the name of the vertex, the second should be a string with space separated custom graphviz settings. The different settings could be found in the documentation at <a href="https://graphviz.org/documentation/">graphviz.org</a>. If you're not interested in adding any customizes settings, just pass an empty sequence `[]`.
+	Where _"YOUR-DATA"_ data of type `model` as defined above.
 
-- `modelPrintDotSimulateTo "YOUR-DATA" "STEPS" ["OPTIONS"]`
+- `modelPrintDotSimulateTo "YOUR-DATA" "STEPS"`
 	
 	Which simulates going through _"STEPS"_ steps of the input (only available for NFA/DFA).
 
@@ -295,12 +306,37 @@ There is a **examples** folder in the root of the project which contains some fi
 
 	include "path/to/modelVisualizer.mc"
 
+### Circuit with customized components.
+
+	-- create your circuit
+	let circuit = Parallel [
+		Series[
+			Component ("insulator","ins1",Some 8.0,true),
+			Component ("defaultSettings","ins2",Some 4.0,false)
+		],
+		Series [
+			Component ("battery","V",Some 11.0,true),
+			Component ("resistor","R1",Some 4.0,true),
+			Component ("assembly","assembly1",None(),true)
+		]
+	] in
+
+	-- call function 'visualize' to get visualization code for the circuit
+	visualize [
+		-- customized circuit
+		Circuit(
+			circuit,[
+				("assembly","shape=assembly label=\\\"\\\"",""),
+				("insulator","shape=insulator label=\\\"\\\"","pF")
+			]
+		)
+	]
+
 
 ### DFA with display names.
 
 	mexpr
 	let string2string = (lam b. b) in
-	let eqString = setEqual eqchar in
 	let char2string = (lam b. [b]) in
 
 	-- create your DFA
@@ -317,11 +353,12 @@ There is a **examples** folder in the root of the project which contains some fi
 	let startState = "s0" in
 	let acceptStates = ["s3"] in
 
-	let dfa = dfaConstr states transitions startState acceptStates eqString eqchar in
+	let dfa = dfaConstr states transitions startState acceptStates eqstr eqchar in
 
 	visualize [
 		-- accepted by the DFA
-		DFA(dfa,"10010100",string2string, char2string,"LR",[("s0","start state"),("s3","accept state")]),
+		DFA(dfa,"100100",string2string, char2string, "LR",[("s0",[("label","start state")]),
+														   ("s3",[("label","accept state")])]),
 		-- not accepted by the DFA
 		DFA(dfa,"101110",string2string, char2string,"LR",[]),
 		-- not accepted by the DFA
@@ -343,7 +380,6 @@ This program displays a digraph and a graph on the same page.
 
 	mexpr
 	let string2string = (lam b. b) in
-	let eqString = setEqual eqchar in
 	let char2string = (lam b. [b]) in
 
 	-- create your directed graph
@@ -354,7 +390,7 @@ This program displays a digraph and a graph on the same page.
 
 	-- create your graph
 	let graph = foldr (lam e. lam g. graphAddEdge e.0 e.1 e.2 g) 
-	(foldr graphAddVertex (graphEmpty eqi eqString) [1,2,3,4]) [(1,2,""),(3,2,""),(1,3,""),(3,4,"")] in
+	(foldr graphAddVertex (graphEmpty eqi eqstr) [1,2,3,4]) [(1,2,""),(3,2,""),(1,3,""),(3,4,"")] in
 
 	visualize [
 		Digraph(digraph, char2string,int2string,"LR",[]),
@@ -369,7 +405,6 @@ This program creates both a NFA and a Binary tree and displays them.
 	mexpr 
 	let string2string = (lam x. x) in
   	let char2string = (lam x. [x]) in
-	let eqString = setEqual eqchar in
 	
 	let nfaStates = ["a","b","c","d","e","f"] in
 	let nfaTransitions = [("a","b",'1'),("b","c",'0'),("c","d",'2'),("c","e",'2'),("d","a",'1'),("e","f",'1')] in
@@ -377,14 +412,15 @@ This program creates both a NFA and a Binary tree and displays them.
 	let nfaAcceptStates = ["a"] in
 	
 	-- create your NFA
-	let nfa = nfaConstr nfaStates nfaTransitions nfaStartState nfaAcceptStates eqString eqchar in
+	let nfa = nfaConstr nfaStates nfaTransitions nfaStartState nfaAcceptStates eqstr eqchar in
 
 
 	-- create your Binary Tree
 	let btree = BTree (Node(2, Node(3, Nil (), Leaf 4), Leaf 5)) in
+	let btreeSettings = [(2,[("label","Two")]),(3,[("label","Three")]),(4,[("label","Four")]),(5,[("label","Five")])] in
 
 	visualize [
-		BTree(btree, int2string,[(2,"Two"),(3,"Three"),(4,"Four"),(5,"Five")],"TB",[]),
+		BTree(btree, int2string,"TB",btreeSettings),
 		NFA(nfa, "1021", string2string, char2string,"LR",[]),
 		NFA(nfa, "102", string2string, char2string,"LR",[])
 	]
@@ -404,7 +440,7 @@ The following code creates a directed graph and prints it as dot code. To do the
   
 	let digraphModel = Digraph(digraph, char2string,int2string,"LR",[]) in
 
-	modelPrintDot digraphModel []
+	modelPrintDot digraphModel
 
 The following command runs the code, which is located in the file "test.mc", and creates a pdf file called "myDigraph.pdf" from the output:
 
