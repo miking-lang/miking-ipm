@@ -91,7 +91,7 @@ let circOtherToDot = lam quote. lam name. lam value. lam _. lam custom_settings.
 let componentToDot = lam comp. lam quote. lam fig_settings.
     match comp with Component (comp_type,name,maybe_value,isConnected) then
         let figure_setting = 
-            let fig = find (lam x. eqstr x.0 comp_type) fig_settings in
+            let fig = find (lam x. eqString x.0 comp_type) fig_settings in
             match fig with Some (_,setting,unit) then Some (setting,unit) else None() in
         -- round to integer
         let value_str = match maybe_value with Some v then int2string (roundfi v) else "" in
