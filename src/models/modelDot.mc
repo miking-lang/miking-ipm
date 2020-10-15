@@ -78,7 +78,7 @@ let btreeGetDot = lam tree. lam node2str. lam id. lam direction. lam vSettings.
 
 -- returns a graph in dot.
 let graphGetDot = lam graph. lam v2str. lam l2str. lam id. lam direction. lam graphType. lam vSettings.
-    let delimiter = if (eqstr graphType "graph") then "--" else "->" in
+    let delimiter = if (eqString graphType "graph") then "--" else "->" in
     let dotVertices = map (lam v. 
         let extra = find (lam x. graph.eqv x.0 v) vSettings in
         let settings = concat (match extra with Some e then (settingsToDot e.1 id) else "") "" in

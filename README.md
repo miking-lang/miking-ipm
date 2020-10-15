@@ -122,9 +122,9 @@ The constructor for the DFA takes in seven arguments:
 
 6. **eqv** and 7. **eql** There are no data type requirements, thus you would need to write equality functions for the states (eqv) and the labels (eql). The equality functions take two inputs and returns either **true** if they are equal or **false** if they are not. Ex :
 
-    `let eqv = eqstr`
+    `let eqv = eqString`
 
-	`let eql = eqchar`
+	`let eql = eqChar`
 
 	`let settings = [("s0",[("label","start state")]),("s3",[("label","accept state")])]`
 
@@ -153,7 +153,7 @@ A directed graph contains three different variables:
 
 2. **eqv** and 3. **eql:** There are no data type requirements, thus you would need to write equality functions for the nodes (eqv) and the labels (eql). The equality functions take two inputs and returns either **true** if they are equal or **false** if they are not. Ex:
 
-    `let eqv = eqchar`
+    `let eqv = eqChar`
 
     `let eql = eqi`
 
@@ -353,7 +353,7 @@ There is a **examples** folder in the root of the project which contains some fi
 	let startState = "s0" in
 	let acceptStates = ["s3"] in
 
-	let dfa = dfaConstr states transitions startState acceptStates eqstr eqchar in
+	let dfa = dfaConstr states transitions startState acceptStates eqString eqChar in
 
 	visualize [
 		-- accepted by the DFA
@@ -384,13 +384,13 @@ This program displays a digraph and a graph on the same page.
 
 	-- create your directed graph
 	let digraph = foldr (lam e. lam g. digraphAddEdge e.0 e.1 e.2 g) 
-	(foldr digraphAddVertex (digraphEmpty eqchar eqi) ['A','B','C','D','E']) 
+	(foldr digraphAddVertex (digraphEmpty eqChar eqi) ['A','B','C','D','E']) 
                 [('A','B',2),('A','C',5),('B','C',2),('B','D',4),('C','D',5),('C','E',5),('E','D',2)] in
 
 
 	-- create your graph
 	let graph = foldr (lam e. lam g. graphAddEdge e.0 e.1 e.2 g) 
-	(foldr graphAddVertex (graphEmpty eqi eqstr) [1,2,3,4]) [(1,2,""),(3,2,""),(1,3,""),(3,4,"")] in
+	(foldr graphAddVertex (graphEmpty eqi eqString) [1,2,3,4]) [(1,2,""),(3,2,""),(1,3,""),(3,4,"")] in
 
 	visualize [
 		Digraph(digraph, char2string,int2string,"LR",[]),
@@ -412,7 +412,7 @@ This program creates both a NFA and a Binary tree and displays them.
 	let nfaAcceptStates = ["a"] in
 	
 	-- create your NFA
-	let nfa = nfaConstr nfaStates nfaTransitions nfaStartState nfaAcceptStates eqstr eqchar in
+	let nfa = nfaConstr nfaStates nfaTransitions nfaStartState nfaAcceptStates eqString eqChar in
 
 
 	-- create your Binary Tree
@@ -435,7 +435,7 @@ The following code creates a directed graph and prints it as dot code. To do the
 
 	-- create your directed graph
 	let digraph = foldr (lam e. lam g. digraphAddEdge e.0 e.1 e.2 g) 
-	(foldr digraphAddVertex (digraphEmpty eqchar eqi) ['A','B','C','D','E']) 
+	(foldr digraphAddVertex (digraphEmpty eqChar eqi) ['A','B','C','D','E']) 
                 [('A','B',2),('A','C',5),('B','C',2),('B','D',4),('C','D',5),('C','E',5),('E','D',2)] in
   
 	let digraphModel = Digraph(digraph, char2string,int2string,"LR",[]) in

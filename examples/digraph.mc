@@ -10,7 +10,7 @@ mexpr
 let char2string = (lam b. [b]) in
 
 -- create an empty digraph
-let digraph = digraphEmpty eqchar eqi in
+let digraph = digraphEmpty eqChar eqi in
 
 -- adding vertices to the digraph
 let digraph = foldr digraphAddVertex digraph ['A','B','C','D','E'] in

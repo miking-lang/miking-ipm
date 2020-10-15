@@ -19,16 +19,16 @@ let transitions = [
 let startState = "s0" in
 let acceptStates = ["s3"] in
 
-let dfa = dfaConstr states transitions startState acceptStates eqstr eqchar in
+let dfa = dfaConstr states transitions startState acceptStates eqString eqChar in
 
 -- create your directed graph
 let digraph = foldr (lam e. lam g. digraphAddEdge e.0 e.1 e.2 g) 
-(foldr digraphAddVertex (digraphEmpty eqchar eqi) ['A','B','C','D','E']) 
+(foldr digraphAddVertex (digraphEmpty eqChar eqi) ['A','B','C','D','E']) 
             [('A','B',2),('A','C',5),('B','C',2),('B','D',4),('C','D',5),('C','E',5),('E','D',2)] in
 
 -- create your graph
 let graph = foldr (lam e. lam g. graphAddEdge e.0 e.1 e.2 g) 
-(foldr graphAddVertex (graphEmpty eqi eqstr) [1,2,3,4]) [(1,2,""),(3,2,""),(1,3,""),(3,4,"")] in
+(foldr graphAddVertex (graphEmpty eqi eqString) [1,2,3,4]) [(1,2,""),(3,2,""),(1,3,""),(3,4,"")] in
 
 let nfaStates = ["a","b","c","d","e","f"] in
 let nfaTransitions = [("a","b",'1'),("b","c",'0'),("c","d",'2'),("c","e",'2'),("d","a",'1'),("e","f",'1')] in
@@ -37,7 +37,7 @@ let nfaAcceptStates = ["a"] in
 	
 
 -- create your NFA
-let nfa = nfaConstr nfaStates nfaTransitions nfaStartState nfaAcceptStates eqstr eqchar in
+let nfa = nfaConstr nfaStates nfaTransitions nfaStartState nfaAcceptStates eqString eqChar in
 
 -- create your BTree
 let btree = btreeConstr (Node(2, Node(3, Nil (), Leaf 4), Leaf 5)) eqi in
